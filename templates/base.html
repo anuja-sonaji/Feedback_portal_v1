@@ -149,12 +149,25 @@
         }
 
         .logo-container {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            text-align: right;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .logo-container .text-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.5px;
+        }
+
+        .logo-container .text-secondary {
+            color: #6c757d !important;
+            font-size: 0.875rem;
         }
 
         @media (max-width: 768px) {
@@ -284,7 +297,10 @@
             </h4>
             <div class="d-flex align-items-center">
                 <div class="logo-container">
-                    <span class="fw-bold text-primary fs-5">Bmp Australia 2025</span>
+                    <div class="d-flex flex-column align-items-end">
+                        <span class="fw-bold text-primary fs-5 mb-0">Bmp Australia</span>
+                        <span class="fw-semibold text-secondary fs-6">Allianz Technology 2025</span>
+                    </div>
                 </div>
             </div>
         </div>
