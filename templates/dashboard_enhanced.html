@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Employee Feedback Portal{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-bold text-dark">
+            <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard Overview
+        </h1>
+        <p class="text-muted mb-0">Real-time insights into your team's performance and feedback</p>
+    </div>
+    <div class="d-flex align-items-center">
+        <div class="dropdown me-3">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-calendar-alt me-2"></i>This Month
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">This Week</a></li>
+                <li><a class="dropdown-item" href="#">This Month</a></li>
+                <li><a class="dropdown-item" href="#">This Quarter</a></li>
+                <li><a class="dropdown-item" href="#">This Year</a></li>
+            </ul>
+        </div>
+        <div class="user-welcome">
+            <span class="text-muted">Welcome back,</span>
+            <strong class="text-dark">{{ current_user.full_name or current_user.name }}</strong>
+            {% if current_user.is_manager %}
+            <span class="badge bg-primary ms-2">
+                <i class="fas fa-crown me-1"></i>Manager
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card metric-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="metric-icon bg-primary bg-opacity-10 text-primary mb-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h6 class="text-muted mb-1 fw-normal">Total Employees</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ analytics.total_employees }}</h2>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>+2.5% from last month
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.is_manager %}
+    <div class="col-xl-3 col-md-6">
+        <div class="card metric-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="metric-icon bg-success bg-opacity-10 text-success mb-3">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h6 class="text-muted mb-1 fw-normal">Direct Reports</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ current_user.direct_reports|length }}</h2>
+                        <small class="text-info">
+                            <i class="fas fa-users me-1"></i>Active team members
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card metric-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="metric-icon bg-info bg-opacity-10 text-info mb-3">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h6 class="text-muted mb-1 fw-normal">Feedback Given</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ recent_feedback|length }}</h2>
+                        <small class="text-warning">
+                            <i class="fas fa-clock me-1"></i>This month
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card metric-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="metric-icon bg-warning bg-opacity-10 text-warning mb-3">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h6 class="text-muted mb-1 fw-normal">Active Teams</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ analytics.team.keys()|length }}</h2>
+                        <small class="text-primary">
+                            <i class="fas fa-chart-line me-1"></i>Cross-functional
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Analytics Section -->
+<div class="row g-4 mb-4">
+    <!-- Employment Distribution -->
+    <div class="col-xl-4 col-lg-6">
+        <div class="card chart-card border-0 h-100">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-chart-pie me-2 text-primary"></i>Employment Type
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-expand me-2"></i>Full Screen</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="employmentTypeChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Billable Status -->
+    <div class="col-xl-4 col-lg-6">
+        <div class="card chart-card border-0 h-100">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-chart-donut me-2 text-success"></i>Billable Status
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-expand me-2"></i>Full Screen</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="billableStatusChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Distribution -->
+    <div class="col-xl-4 col-lg-12">
+        <div class="card chart-card border-0 h-100">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-users me-2 text-info"></i>Team Distribution
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-expand me-2"></i>Full Screen</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="teamChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Analytics -->
+<div class="row g-4 mb-4">
+    <!-- Skills Analysis -->
+    <div class="col-xl-8">
+        <div class="card chart-card border-0 h-100">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-chart-bar me-2 text-warning"></i>Top Skills Distribution
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="skillsView" id="skillsBar" checked>
+                        <label class="btn btn-outline-primary" for="skillsBar">Bar</label>
+                        <input type="radio" class="btn-check" name="skillsView" id="skillsHorizontal">
+                        <label class="btn btn-outline-primary" for="skillsHorizontal">Horizontal</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="skillsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Location Distribution -->
+    <div class="col-xl-4">
+        <div class="card chart-card border-0 h-100">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <h5 class="card-title mb-0 fw-semibold">
+                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>Location Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="locationChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+{% if current_user.is_manager %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0">
+            <div class="card-header bg-transparent border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 fw-semibold">
+                        <i class="fas fa-clock me-2 text-primary"></i>Recent Activity
+                    </h5>
+                    <a href="{{ url_for('feedback') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add Feedback
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if recent_feedback %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Employee</th>
+                                <th>Type</th>
+                                <th>Period</th>
+                                <th>Rating</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feedback in recent_feedback[:5] %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            {{ feedback.received_by.full_name[0] if feedback.received_by.full_name else 'U' }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">{{ feedback.received_by.full_name or feedback.received_by.name }}</div>
+                                            <small class="text-muted">{{ feedback.received_by.role }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {% if feedback.feedback_type == 'Monthly' %}bg-primary{% else %}bg-success{% endif %}">
+                                        {{ feedback.feedback_type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if feedback.feedback_type == 'Monthly' %}
+                                    {{ feedback.period_month }}/{{ feedback.period_year }}
+                                    {% else %}
+                                    Q{{ feedback.period_quarter }} {{ feedback.period_year }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if feedback.performance_rating %}
+                                    <div class="d-flex align-items-center">
+                                        {% for i in range(1, 6) %}
+                                        <i class="fas fa-star {% if i <= feedback.performance_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                        {% endfor %}
+                                        <span class="ms-2 small text-muted">({{ feedback.performance_rating }}/5)</span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">Not rated</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ feedback.created_at.strftime('%b %d, %Y') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('edit_feedback', id=feedback.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No recent feedback</h6>
+                    <p class="text-muted mb-3">Start providing feedback to your team members</p>
+                    <a href="{{ url_for('add_feedback') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add First Feedback
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts with enhanced styling
+    const analyticsData = {{ analytics | tojsonfilter | safe }};
+    
+    if (analyticsData) {
+        initializeDashboardCharts(analyticsData);
+    }
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}
