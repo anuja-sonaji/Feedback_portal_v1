@@ -150,6 +150,15 @@
             margin: 0;
         }
 
+        .logo-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -276,7 +285,9 @@
                 {% endif %}
             </h4>
             <div class="d-flex align-items-center">
-                <small class="text-muted">Welcome back, {{ current_user.name }}</small>
+                <div class="logo-container">
+                    <span class="fw-bold text-primary fs-5">Bmp Australia 2025</span>
+                </div>
             </div>
         </div>
 

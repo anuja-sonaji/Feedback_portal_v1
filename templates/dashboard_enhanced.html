@@ -25,7 +25,6 @@
         </div>
         <div class="user-welcome">
             <div>
-                <span class="text-muted">Welcome back,</span>
                 <strong class="text-dark">{{ current_user.full_name or current_user.name }}</strong>
                 {% if current_user.is_manager %}
                 <span class="badge bg-primary ms-2">
