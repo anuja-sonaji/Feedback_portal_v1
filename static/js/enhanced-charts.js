@@ -1,4 +1,3 @@
-
 /**
  * Enhanced Charts Configuration for Professional Dashboard
  */
