@@ -85,6 +85,27 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
+                        <div class="metric-icon bg-warning bg-opacity-10 text-warning mb-3">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h6 class="text-muted mb-1 fw-normal">Current Period</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ "Q%d"|format((((now.month - 1) // 3) + 1)) if now else "Q1" }}</h2>
+                        <small class="text-primary">
+                            <i class="fas fa-calendar me-1"></i>{{ now.strftime('%B %Y') if now else 'January 2024' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if current_user.is_manager %}
+    <div class="col-xl-3 col-md-6">
+        <div class="card metric-card border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
                         <div class="metric-icon bg-info bg-opacity-10 text-info mb-3">
                             <i class="fas fa-search"></i>
                         </div>
@@ -97,26 +118,6 @@
                         </div>
                         <small class="text-info">
                             <i class="fas fa-users me-1"></i>{{ current_user.direct_reports|length }} team members
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="card metric-card border-0 h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="flex-grow-1">
-                        <div class="metric-icon bg-warning bg-opacity-10 text-warning mb-3">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <h6 class="text-muted mb-1 fw-normal">Current Period</h6>
-                        <h2 class="fw-bold mb-0 text-dark">{{ "Q%d"|format((((now.month - 1) // 3) + 1)) if now else "Q1" }}</h2>
-                        <small class="text-primary">
-                            <i class="fas fa-calendar me-1"></i>{{ now.strftime('%B %Y') if now else 'January 2024' }}
                         </small>
                     </div>
                 </div>

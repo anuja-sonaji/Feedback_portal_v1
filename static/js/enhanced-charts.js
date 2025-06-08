@@ -131,9 +131,13 @@ function initEnhancedEmploymentTypeChart(data) {
                                 const empType = context.label;
                                 const employees = window.employeesByType[empType] || [];
                                 if (employees.length > 0) {
-                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
-                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
-                                    return `Employees: ${names}${extra}`;
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown');
+                                    const result = ['Employees:'];
+                                    names.forEach(name => result.push(`• ${name}`));
+                                    if (employees.length > 5) {
+                                        result.push(`• and ${employees.length - 5} more...`);
+                                    }
+                                    return result;
                                 }
                                 return '';
                             }
@@ -221,9 +225,13 @@ function initEnhancedBillableStatusChart(data) {
                                 const billableStatus = context.label;
                                 const employees = window.employeesByBillable[billableStatus] || [];
                                 if (employees.length > 0) {
-                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
-                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
-                                    return `Employees: ${names}${extra}`;
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown');
+                                    const result = ['Employees:'];
+                                    names.forEach(name => result.push(`• ${name}`));
+                                    if (employees.length > 5) {
+                                        result.push(`• and ${employees.length - 5} more...`);
+                                    }
+                                    return result;
                                 }
                                 return '';
                             }
@@ -307,9 +315,13 @@ function initEnhancedTeamChart(data) {
                                 const team = context.label;
                                 const employees = window.employeesByTeam[team] || [];
                                 if (employees.length > 0) {
-                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
-                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
-                                    return `Members: ${names}${extra}`;
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown');
+                                    const result = ['Members:'];
+                                    names.forEach(name => result.push(`• ${name}`));
+                                    if (employees.length > 5) {
+                                        result.push(`• and ${employees.length - 5} more...`);
+                                    }
+                                    return result;
                                 }
                                 return '';
                             }
@@ -500,9 +512,13 @@ function initEnhancedLocationChart(data) {
                                 const location = context.label;
                                 const employees = window.employeesByLocation[location] || [];
                                 if (employees.length > 0) {
-                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
-                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
-                                    return `Employees: ${names}${extra}`;
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown');
+                                    const result = ['Employees:'];
+                                    names.forEach(name => result.push(`• ${name}`));
+                                    if (employees.length > 5) {
+                                        result.push(`• and ${employees.length - 5} more...`);
+                                    }
+                                    return result;
                                 }
                                 return '';
                             }
