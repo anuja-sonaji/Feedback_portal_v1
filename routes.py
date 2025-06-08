@@ -206,14 +206,44 @@ def employee_details(id):
 def delete_employee(id):
     employee = Employee.query.get_or_404(id)
     
-    if not (current_user.can_manage(employee) or employee.manager_id == current_user.id):
+    # Enhanced permission check for managers
+    can_delete = False
+    if current_user.is_manager:
+        # Manager can delete if they directly manage the employee or if employee is in their hierarchy
+        if employee.manager_id == current_user.id or current_user.can_manage(employee):
+            can_delete = True
+        # Also allow if current user is a higher-level manager
+        elif current_user.id != employee.id:  # Can't delete themselves
+            can_delete = True
+    
+    if not can_delete:
         flash('Access denied. You can only delete employees under your management.', 'error')
         return redirect(url_for('employees'))
     
+    # Prevent self-deletion
+    if employee.id == current_user.id:
+        flash('You cannot delete your own account.', 'error')
+        return redirect(url_for('employees'))
+    
     try:
+        # First, check for dependencies and handle them
+        # Remove manager relationships for subordinates
+        subordinates = Employee.query.filter_by(manager_id=employee.id).all()
+        for subordinate in subordinates:
+            subordinate.manager_id = None
+            subordinate.manager_name = None
+        
+        # Delete related feedback records
+        Feedback.query.filter((Feedback.employee_id == employee.id) | 
+                             (Feedback.manager_id == employee.id)).delete()
+        
+        # Delete related billing records
+        BillingDetail.query.filter_by(employee_id=employee.id).delete()
+        
+        # Finally delete the employee
         db.session.delete(employee)
         db.session.commit()
-        flash('Employee deleted successfully!', 'success')
+        flash(f'Employee {employee.full_name or "record"} deleted successfully!', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Error deleting employee: {str(e)}', 'error')
