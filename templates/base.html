@@ -116,17 +116,24 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            padding-top: 80px;
         }
 
         .top-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px 30px;
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 15px 30px;
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            z-index: 999;
+            height: 80px;
         }
 
         .main-content {
@@ -146,16 +153,49 @@
             color: #2c3e50;
             font-weight: 600;
             margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-title i {
+            margin-right: 12px;
+            color: #667eea;
         }
 
         .logo-container {
             font-family: 'Inter', sans-serif;
             letter-spacing: 0.5px;
             text-align: right;
-            padding: 10px 15px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border: 1px solid rgba(102, 126, 234, 0.2);
+            padding: 12px 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .logo-container:hover::before {
+            left: 100%;
+        }
+
+        .logo-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
 
         .logo-container .text-primary {
@@ -163,11 +203,16 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.2;
         }
 
         .logo-container .text-secondary {
-            color: #6c757d !important;
-            font-size: 0.875rem;
+            color: #64748b !important;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.8;
         }
 
         @media (max-width: 768px) {
@@ -181,10 +226,28 @@
 
             .main-wrapper {
                 margin-left: 0;
+                padding-top: 80px;
+            }
+
+            .top-header {
+                left: 0;
+                padding: 15px 20px;
             }
 
             .mobile-toggle {
                 display: block;
+            }
+
+            .logo-container {
+                padding: 8px 12px;
+            }
+
+            .logo-container .text-primary {
+                font-size: 1rem;
+            }
+
+            .logo-container .text-secondary {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -282,25 +345,33 @@
     <div class="main-wrapper">
         <!-- Top Header -->
         <div class="top-header">
-            <button class="mobile-toggle" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h4 class="page-title">
-                {% if request.endpoint == 'dashboard' %}Dashboard
-                {% elif request.endpoint == 'employees' %}Employee Details
-                {% elif request.endpoint == 'feedback' %}Feedback Management
-                {% elif request.endpoint == 'billing' %}Billing Details
-                {% elif request.endpoint == 'hierarchy' %}Organization Hierarchy
-                {% elif request.endpoint == 'import_excel' %}Import Excel Data
-                {% else %}Employee Portal
-                {% endif %}
-            </h4>
             <div class="d-flex align-items-center">
-                <div class="logo-container">
-                    <div class="d-flex flex-column align-items-end">
-                        <span class="fw-bold text-primary fs-5 mb-0">Bmp Australia</span>
-                        <span class="fw-semibold text-secondary fs-6">Allianz Technology 2025</span>
-                    </div>
+                <button class="mobile-toggle me-3" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h4 class="page-title">
+                    {% if request.endpoint == 'dashboard' %}
+                        <i class="fas fa-tachometer-alt"></i>Dashboard
+                    {% elif request.endpoint == 'employees' %}
+                        <i class="fas fa-users"></i>Employee Details
+                    {% elif request.endpoint == 'feedback' %}
+                        <i class="fas fa-comments"></i>Feedback Management
+                    {% elif request.endpoint == 'billing' %}
+                        <i class="fas fa-file-invoice-dollar"></i>Billing Details
+                    {% elif request.endpoint == 'hierarchy' %}
+                        <i class="fas fa-sitemap"></i>Organization Hierarchy
+                    {% elif request.endpoint == 'import_excel' %}
+                        <i class="fas fa-file-excel"></i>Import Excel Data
+                    {% else %}
+                        <i class="fas fa-home"></i>Employee Portal
+                    {% endif %}
+                </h4>
+            </div>
+            
+            <div class="logo-container">
+                <div class="d-flex flex-column align-items-end">
+                    <span class="text-primary mb-0">Bmp Australia</span>
+                    <span class="text-secondary">Allianz Technology 2025</span>
                 </div>
             </div>
         </div>
@@ -354,6 +425,27 @@
 
     <!-- Charts JS -->
     <script src="{{ url_for('static', filename='js/enhanced-charts.js') }}"></script>
+
+    <script>
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileToggle = document.querySelector('.mobile-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !mobileToggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

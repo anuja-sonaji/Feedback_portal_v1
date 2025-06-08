@@ -31,12 +31,12 @@ function initializeDashboardCharts(analyticsData) {
             console.error('Chart.js not loaded or analytics data missing');
             return;
         }
-        
+
         // Set chart defaults
         Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         Chart.defaults.font.size = 10;
         Chart.defaults.color = '#64748b';
-        
+
         // Initialize each chart type safely
         if (analyticsData.employment_type) {
             initEnhancedEmploymentTypeChart(analyticsData);
@@ -53,7 +53,7 @@ function initializeDashboardCharts(analyticsData) {
         if (analyticsData.skills) {
             initEnhancedSkillsChart(analyticsData);
         }
-        
+
         console.log('Charts initialized successfully');
     } catch (error) {
         console.error('Error initializing charts:', error);
@@ -66,16 +66,16 @@ function initializeDashboardCharts(analyticsData) {
 function initEnhancedEmploymentTypeChart(data) {
     const ctx = document.getElementById('employmentTypeChart');
     if (!ctx || !data.employment_type) return;
-    
+
     try {
         // Destroy existing chart if it exists
         if (window.dashboardCharts.employmentType) {
             window.dashboardCharts.employmentType.destroy();
         }
-        
+
         const labels = Object.keys(data.employment_type);
         const values = Object.values(data.employment_type);
-        
+
         window.dashboardCharts.employmentType = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -162,16 +162,16 @@ function initEnhancedEmploymentTypeChart(data) {
 function initEnhancedBillableStatusChart(data) {
     const ctx = document.getElementById('billableStatusChart');
     if (!ctx || !data.billable_status) return;
-    
+
     try {
         // Destroy existing chart if it exists
         if (window.dashboardCharts.billableStatus) {
             window.dashboardCharts.billableStatus.destroy();
         }
-        
+
         const labels = Object.keys(data.billable_status);
         const values = Object.values(data.billable_status);
-        
+
         window.dashboardCharts.billableStatus = new Chart(ctx, {
             type: 'pie',
             data: {
@@ -254,16 +254,16 @@ function initEnhancedBillableStatusChart(data) {
 function initEnhancedTeamChart(data) {
     const ctx = document.getElementById('teamChart');
     if (!ctx || !data.team) return;
-    
+
     try {
         // Destroy existing chart if it exists
         if (window.dashboardCharts.team) {
             window.dashboardCharts.team.destroy();
         }
-        
+
         const labels = Object.keys(data.team);
         const values = Object.values(data.team);
-        
+
         window.dashboardCharts.team = new Chart(ctx, {
             type: 'polarArea',
             data: {
@@ -362,20 +362,20 @@ function initEnhancedTeamChart(data) {
 function initEnhancedSkillsChart(data) {
     const ctx = document.getElementById('skillsChart');
     if (!ctx || !data.skills) return;
-    
+
     try {
         // Destroy existing chart if it exists
         if (window.dashboardCharts.skills) {
             window.dashboardCharts.skills.destroy();
         }
-        
+
         const sortedSkills = Object.entries(data.skills)
             .sort(([,a], [,b]) => b - a)
             .slice(0, 10);
-        
+
         const labels = sortedSkills.map(([skill]) => skill);
         const values = sortedSkills.map(([,count]) => count);
-        
+
         window.dashboardCharts.skills = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -449,16 +449,16 @@ function initEnhancedSkillsChart(data) {
 function initEnhancedLocationChart(data) {
     const ctx = document.getElementById('locationChart');
     if (!ctx || !data.location) return;
-    
+
     try {
         // Destroy existing chart if it exists
         if (window.dashboardCharts.location) {
             window.dashboardCharts.location.destroy();
         }
-        
+
         const labels = Object.keys(data.location);
         const values = Object.values(data.location);
-        
+
         window.dashboardCharts.location = new Chart(ctx, {
             type: 'doughnut',
             data: {
