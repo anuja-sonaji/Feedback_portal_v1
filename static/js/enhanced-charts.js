@@ -2,7 +2,7 @@
  * Enhanced Charts Configuration for Professional Dashboard
  */
 
-// Enhanced color palettes
+// Color palettes for different chart types
 const colorPalettes = {
     primary: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
     gradient: [
