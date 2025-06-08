@@ -1,3 +1,4 @@
+
 /**
  * Enhanced Charts Configuration for Professional Dashboard
  */
@@ -6,12 +7,12 @@
 const colorPalettes = {
     primary: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
     gradient: [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+        'rgba(102, 126, 234, 0.8)',
+        'rgba(240, 147, 251, 0.8)', 
+        'rgba(79, 172, 254, 0.8)',
+        'rgba(67, 233, 123, 0.8)',
+        'rgba(250, 112, 154, 0.8)',
+        'rgba(168, 237, 234, 0.8)'
     ],
     professional: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
     success: ['#22c55e', '#16a34a', '#15803d', '#166534'],
@@ -19,23 +20,45 @@ const colorPalettes = {
     info: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af']
 };
 
-// Enhanced chart defaults
-Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#64748b';
+// Global chart storage for cleanup
+window.dashboardCharts = {};
 
 /**
  * Initialize all dashboard charts with enhanced styling
  */
 function initializeDashboardCharts(analyticsData) {
-    if (!analyticsData) return;
-    
-    // Initialize each chart type
-    initEnhancedEmploymentTypeChart(analyticsData);
-    initEnhancedBillableStatusChart(analyticsData);
-    initEnhancedTeamChart(analyticsData);
-    initEnhancedLocationChart(analyticsData);
-    initEnhancedSkillsChart(analyticsData);
+    try {
+        if (!analyticsData || typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded or analytics data missing');
+            return;
+        }
+        
+        // Set chart defaults
+        Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = '#64748b';
+        
+        // Initialize each chart type safely
+        if (analyticsData.employment_type) {
+            initEnhancedEmploymentTypeChart(analyticsData);
+        }
+        if (analyticsData.billable_status) {
+            initEnhancedBillableStatusChart(analyticsData);
+        }
+        if (analyticsData.team) {
+            initEnhancedTeamChart(analyticsData);
+        }
+        if (analyticsData.location) {
+            initEnhancedLocationChart(analyticsData);
+        }
+        if (analyticsData.skills) {
+            initEnhancedSkillsChart(analyticsData);
+        }
+        
+        console.log('Charts initialized successfully');
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
 }
 
 /**
@@ -45,85 +68,72 @@ function initEnhancedEmploymentTypeChart(data) {
     const ctx = document.getElementById('employmentTypeChart');
     if (!ctx || !data.employment_type) return;
     
-    const labels = Object.keys(data.employment_type);
-    const values = Object.values(data.employment_type);
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: colorPalettes.professional,
-                borderWidth: 2,
-                borderColor: '#fff',
-                hoverBorderWidth: 4,
-                hoverBorderColor: '#fff',
-                hoverBackgroundColor: colorPalettes.professional.map(color => color + 'DD')
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: {
-                            size: 11,
-                            weight: '500'
-                        },
-                        color: '#64748b'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    borderWidth: 1,
-                    cornerRadius: 12,
-                    padding: 12,
-                    titleFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 12
-                    },
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label + ' Employees';
-                        },
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `Count: ${context.parsed} employees (${percentage}%)`;
-                        },
-                        afterLabel: function(context) {
-                            // Show sample employee names for this category
-                            if (window.employeesByType && window.employeesByType[context.label]) {
-                                const employees = window.employeesByType[context.label].slice(0, 3);
-                                return employees.length > 0 ? 
-                                    'Examples: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
-                                    (window.employeesByType[context.label].length > 3 ? '...' : '') : '';
+    try {
+        // Destroy existing chart if it exists
+        if (window.dashboardCharts.employmentType) {
+            window.dashboardCharts.employmentType.destroy();
+        }
+        
+        const labels = Object.keys(data.employment_type);
+        const values = Object.values(data.employment_type);
+        
+        window.dashboardCharts.employmentType = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colorPalettes.professional,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverBorderWidth: 4,
+                    hoverBorderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 11,
+                                weight: '500'
                             }
-                            return '';
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
                         }
                     }
+                },
+                cutout: '55%',
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1000
                 }
-            },
-            cutout: '55%',
-            animation: {
-                animateScale: true,
-                animateRotate: true,
-                duration: 1000
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error creating employment type chart:', error);
+    }
 }
 
 /**
@@ -133,81 +143,68 @@ function initEnhancedBillableStatusChart(data) {
     const ctx = document.getElementById('billableStatusChart');
     if (!ctx || !data.billable_status) return;
     
-    const labels = Object.keys(data.billable_status);
-    const values = Object.values(data.billable_status);
-    
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: colorPalettes.success,
-                borderWidth: 2,
-                borderColor: '#fff',
-                hoverBorderWidth: 4,
-                hoverBackgroundColor: colorPalettes.success.map(color => color + 'DD')
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true,
-                        font: {
-                            size: 11,
-                            weight: '500'
-                        },
-                        color: '#64748b'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    borderWidth: 1,
-                    cornerRadius: 12,
-                    padding: 12,
-                    titleFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 12
-                    },
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label + ' Status';
-                        },
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `Count: ${context.parsed} employees (${percentage}%)`;
-                        },
-                        afterLabel: function(context) {
-                            // Show sample employee names for this billable status
-                            if (window.employeesByBillable && window.employeesByBillable[context.label]) {
-                                const employees = window.employeesByBillable[context.label].slice(0, 3);
-                                return employees.length > 0 ? 
-                                    'Examples: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
-                                    (window.employeesByBillable[context.label].length > 3 ? '...' : '') : '';
+    try {
+        // Destroy existing chart if it exists
+        if (window.dashboardCharts.billableStatus) {
+            window.dashboardCharts.billableStatus.destroy();
+        }
+        
+        const labels = Object.keys(data.billable_status);
+        const values = Object.values(data.billable_status);
+        
+        window.dashboardCharts.billableStatus = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colorPalettes.success,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverBorderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            font: {
+                                size: 11,
+                                weight: '500'
                             }
-                            return '';
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
                         }
                     }
+                },
+                animation: {
+                    animateScale: true,
+                    duration: 1000
                 }
-            },
-            animation: {
-                animateScale: true,
-                duration: 1000
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error creating billable status chart:', error);
+    }
 }
 
 /**
@@ -217,100 +214,84 @@ function initEnhancedTeamChart(data) {
     const ctx = document.getElementById('teamChart');
     if (!ctx || !data.team) return;
     
-    const labels = Object.keys(data.team);
-    const values = Object.values(data.team);
-    
-    new Chart(ctx, {
-        type: 'polarArea',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: colorPalettes.info.map(color => color + '60'),
-                borderColor: colorPalettes.info,
-                borderWidth: 2,
-                hoverBackgroundColor: colorPalettes.info.map(color => color + '80'),
-                hoverBorderWidth: 3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: {
-                            size: 11,
-                            weight: '500'
-                        },
-                        color: '#64748b'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    borderWidth: 1,
-                    cornerRadius: 12,
-                    padding: 12,
-                    titleFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 12
-                    },
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label + ' Team';
-                        },
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `Members: ${context.parsed} (${percentage}%)`;
-                        },
-                        afterLabel: function(context) {
-                            // Show sample employee names for this team
-                            if (window.employeesByTeam && window.employeesByTeam[context.label]) {
-                                const employees = window.employeesByTeam[context.label].slice(0, 3);
-                                return employees.length > 0 ? 
-                                    'Members: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
-                                    (window.employeesByTeam[context.label].length > 3 ? '...' : '') : '';
+    try {
+        // Destroy existing chart if it exists
+        if (window.dashboardCharts.team) {
+            window.dashboardCharts.team.destroy();
+        }
+        
+        const labels = Object.keys(data.team);
+        const values = Object.values(data.team);
+        
+        window.dashboardCharts.team = new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colorPalettes.info.map(color => color + '60'),
+                    borderColor: colorPalettes.info,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 11,
+                                weight: '500'
                             }
-                            return '';
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    pointLabels: {
-                        font: {
-                            size: 10,
-                            weight: '500'
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         },
-                        color: '#64748b'
-                    },
-                    ticks: {
-                        font: {
-                            size: 10
+                        pointLabels: {
+                            font: {
+                                size: 10,
+                                weight: '500'
+                            }
                         },
-                        color: '#94a3b8'
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
                     }
+                },
+                animation: {
+                    duration: 1200
                 }
-            },
-            animation: {
-                duration: 1200
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error creating team chart:', error);
+    }
 }
 
 /**
@@ -320,63 +301,72 @@ function initEnhancedSkillsChart(data) {
     const ctx = document.getElementById('skillsChart');
     if (!ctx || !data.skills) return;
     
-    const sortedSkills = Object.entries(data.skills)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 10);
-    
-    const labels = sortedSkills.map(([skill]) => skill);
-    const values = sortedSkills.map(([,count]) => count);
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Employee Count',
-                data: values,
-                backgroundColor: colorPalettes.warning.map(color => color + '80'),
-                borderColor: colorPalettes.warning[0],
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    cornerRadius: 8
-                }
+    try {
+        // Destroy existing chart if it exists
+        if (window.dashboardCharts.skills) {
+            window.dashboardCharts.skills.destroy();
+        }
+        
+        const sortedSkills = Object.entries(data.skills)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10);
+        
+        const labels = sortedSkills.map(([skill]) => skill);
+        const values = sortedSkills.map(([,count]) => count);
+        
+        window.dashboardCharts.skills = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Employee Count',
+                    data: values,
+                    backgroundColor: colorPalettes.warning.map(color => color + '80'),
+                    borderColor: colorPalettes.warning[0],
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    ticks: {
-                        stepSize: 1
-                    }
-                },
-                x: {
-                    grid: {
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
                         display: false
                     },
-                    ticks: {
-                        maxRotation: 45
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        cornerRadius: 8
                     }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45
+                        }
+                    }
+                },
+                animation: {
+                    delay: (context) => context.dataIndex * 100
                 }
-            },
-            animation: {
-                delay: (context) => context.dataIndex * 100
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error creating skills chart:', error);
+    }
 }
 
 /**
@@ -386,56 +376,95 @@ function initEnhancedLocationChart(data) {
     const ctx = document.getElementById('locationChart');
     if (!ctx || !data.location) return;
     
-    const labels = Object.keys(data.location);
-    const values = Object.values(data.location);
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: colorPalettes.gradient.slice(0, labels.length),
-                borderWidth: 0,
-                hoverBorderWidth: 3,
-                hoverBorderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true
-                    }
-                }
-            },
-            cutout: '50%'
+    try {
+        // Destroy existing chart if it exists
+        if (window.dashboardCharts.location) {
+            window.dashboardCharts.location.destroy();
         }
-    });
+        
+        const labels = Object.keys(data.location);
+        const values = Object.values(data.location);
+        
+        window.dashboardCharts.location = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colorPalettes.gradient.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverBorderWidth: 3,
+                    hoverBorderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '50%'
+            }
+        });
+    } catch (error) {
+        console.error('Error creating location chart:', error);
+    }
 }
 
 /**
  * Export chart as image
  */
 function exportChart(canvasId, filename = 'chart.png') {
-    const canvas = document.getElementById(canvasId);
-    if (canvas) {
-        const url = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = url;
-        link.click();
+    try {
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            link.click();
+        }
+    } catch (error) {
+        console.error('Error exporting chart:', error);
     }
 }
 
 /**
- * Toggle chart view (bar/horizontal for skills chart)
+ * Initialize when DOM is ready
  */
-function toggleSkillsChartView() {
-    // Implementation for chart view toggle
-    console.log('Toggle skills chart view');
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for Chart.js to be fully loaded
+    setTimeout(function() {
+        if (typeof Chart !== 'undefined' && window.analyticsData) {
+            initializeDashboardCharts(window.analyticsData);
+        } else {
+            console.warn('Chart.js or analytics data not available');
+        }
+    }, 100);
+});
+
+// Make functions globally available
+window.initializeDashboardCharts = initializeDashboardCharts;
+window.exportChart = exportChart;

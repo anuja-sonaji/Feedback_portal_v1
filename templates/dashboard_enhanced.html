@@ -355,10 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.employeesByTeam = {{ employees_by_team | tojson | safe }};
     window.employeesByLocation = {{ employees_by_location | tojson | safe }};
     
-    // Initialize enhanced charts
-    if (window.analyticsData && typeof initializeDashboardCharts === 'function') {
-        initializeDashboardCharts(window.analyticsData);
-    }
+    // Charts will be initialized by enhanced-charts.js
     
     // Initialize direct reports search
     initializeDirectReportsSearch();

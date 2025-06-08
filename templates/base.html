@@ -154,15 +154,15 @@
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .sidebar.show {
                 transform: translateX(0);
             }
-            
+
             .main-wrapper {
                 margin-left: 0;
             }
-            
+
             .mobile-toggle {
                 display: block;
             }
@@ -179,7 +179,7 @@
                 Employee Portal
             </a>
         </div>
-        
+
         <nav class="sidebar-nav">
             <div class="nav-item">
                 <a href="{{ url_for('dashboard') }}" 
@@ -188,7 +188,7 @@
                     Dashboard
                 </a>
             </div>
-            
+
             {% if current_user.is_manager %}
             <div class="nav-item">
                 <a href="{{ url_for('employees') }}" 
@@ -197,7 +197,7 @@
                     Employee Details
                 </a>
             </div>
-            
+
             <div class="nav-item">
                 <a href="{{ url_for('feedback') }}" 
                    class="nav-link {% if request.endpoint in ['feedback', 'add_feedback', 'edit_feedback'] %}active{% endif %}">
@@ -205,7 +205,7 @@
                     Feedback Management
                 </a>
             </div>
-            
+
             <div class="nav-item">
                 <a href="{{ url_for('billing') }}" 
                    class="nav-link {% if request.endpoint == 'billing' %}active{% endif %}">
@@ -214,7 +214,7 @@
                 </a>
             </div>
             {% endif %}
-            
+
             <div class="nav-item">
                 <a href="{{ url_for('hierarchy') }}" 
                    class="nav-link {% if request.endpoint == 'hierarchy' %}active{% endif %}">
@@ -222,7 +222,7 @@
                     Hierarchy
                 </a>
             </div>
-            
+
             {% if current_user.is_manager %}
             <div class="nav-item">
                 <a href="{{ url_for('import_excel') }}" 
@@ -233,7 +233,7 @@
             </div>
             {% endif %}
         </nav>
-        
+
         <div class="sidebar-footer">
             <div class="dropdown">
                 <div class="user-info dropdown-toggle" data-bs-toggle="dropdown" role="button">
@@ -257,7 +257,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Main Content Wrapper -->
     <div class="main-wrapper">
         <!-- Top Header -->
@@ -293,7 +293,7 @@
                 {% endif %}
             {% endwith %}
         </div>
-        
+
         <main class="main-content">
             {% block content %}{% endblock %}
         </main>
@@ -326,43 +326,10 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-    
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('show');
-        }
-        
-        // Global delete confirmation function
-        function confirmDelete(employeeId, employeeName) {
-            if (!employeeId || !employeeName) {
-                console.error('Employee ID or Name is missing');
-                return;
-            }
-            
-            // Set the employee name in the modal
-            const nameElement = document.getElementById('employeeName');
-            if (nameElement) {
-                nameElement.textContent = employeeName;
-            }
-            
-            // Set the form action
-            const deleteForm = document.getElementById('deleteForm');
-            if (deleteForm) {
-                deleteForm.action = `/employee/delete/${employeeId}`;
-            }
-            
-            // Show the modal
-            const deleteModal = document.getElementById('deleteModal');
-            if (deleteModal) {
-                const modal = new bootstrap.Modal(deleteModal);
-                modal.show();
-            } else {
-                console.error('Delete modal not found');
-            }
-        }
-    </script>
+
+    <!-- Charts JS -->
+    <script src="{{ url_for('static', filename='js/enhanced-charts.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>
