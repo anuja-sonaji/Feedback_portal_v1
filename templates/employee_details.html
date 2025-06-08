@@ -16,7 +16,9 @@
         </a>
         {% if current_user.is_manager and employee.id != current_user.id %}
         <button type="button" class="btn btn-danger ms-2" 
-                onclick="confirmDelete({{ employee.id }}, '{{ employee.full_name|replace("'", "\\'") if employee.full_name else "this employee" }}')">
+                data-employee-id="{{ employee.id }}" 
+                data-employee-name="{{ employee.full_name or 'this employee' }}"
+                onclick="confirmDelete(this.getAttribute('data-employee-id'), this.getAttribute('data-employee-name'))">
             <i class="fas fa-trash me-1"></i>Delete Employee
         </button>
         {% endif %}
