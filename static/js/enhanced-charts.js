@@ -55,9 +55,11 @@ function initEnhancedEmploymentTypeChart(data) {
             datasets: [{
                 data: values,
                 backgroundColor: colorPalettes.professional,
-                borderWidth: 0,
-                hoverBorderWidth: 3,
-                hoverBorderColor: '#fff'
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverBorderWidth: 4,
+                hoverBorderColor: '#fff',
+                hoverBackgroundColor: colorPalettes.professional.map(color => color + 'DD')
             }]
         },
         options: {
@@ -67,31 +69,58 @@ function initEnhancedEmploymentTypeChart(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 20,
+                        padding: 15,
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        color: '#64748b'
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
                     titleColor: '#fff',
                     bodyColor: '#fff',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
                     borderWidth: 1,
-                    cornerRadius: 8,
+                    cornerRadius: 12,
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
                     callbacks: {
+                        title: function(context) {
+                            return context[0].label + ' Employees';
+                        },
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            return `Count: ${context.parsed} employees (${percentage}%)`;
+                        },
+                        afterLabel: function(context) {
+                            // Show sample employee names for this category
+                            if (window.employeesByType && window.employeesByType[context.label]) {
+                                const employees = window.employeesByType[context.label].slice(0, 3);
+                                return employees.length > 0 ? 
+                                    'Examples: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
+                                    (window.employeesByType[context.label].length > 3 ? '...' : '') : '';
+                            }
+                            return '';
                         }
                     }
                 }
             },
-            cutout: '60%',
+            cutout: '55%',
             animation: {
                 animateScale: true,
-                animateRotate: true
+                animateRotate: true,
+                duration: 1000
             }
         }
     });
@@ -115,7 +144,9 @@ function initEnhancedBillableStatusChart(data) {
                 data: values,
                 backgroundColor: colorPalettes.success,
                 borderWidth: 2,
-                borderColor: '#fff'
+                borderColor: '#fff',
+                hoverBorderWidth: 4,
+                hoverBackgroundColor: colorPalettes.success.map(color => color + 'DD')
             }]
         },
         options: {
@@ -125,17 +156,55 @@ function initEnhancedBillableStatusChart(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 20,
-                        usePointStyle: true
+                        padding: 15,
+                        usePointStyle: true,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        color: '#64748b'
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    cornerRadius: 8
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 12,
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label + ' Status';
+                        },
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `Count: ${context.parsed} employees (${percentage}%)`;
+                        },
+                        afterLabel: function(context) {
+                            // Show sample employee names for this billable status
+                            if (window.employeesByBillable && window.employeesByBillable[context.label]) {
+                                const employees = window.employeesByBillable[context.label].slice(0, 3);
+                                return employees.length > 0 ? 
+                                    'Examples: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
+                                    (window.employeesByBillable[context.label].length > 3 ? '...' : '') : '';
+                            }
+                            return '';
+                        }
+                    }
                 }
             },
             animation: {
-                animateScale: true
+                animateScale: true,
+                duration: 1000
             }
         }
     });
@@ -157,9 +226,11 @@ function initEnhancedTeamChart(data) {
             labels: labels,
             datasets: [{
                 data: values,
-                backgroundColor: colorPalettes.info.map(color => color + '80'),
+                backgroundColor: colorPalettes.info.map(color => color + '60'),
                 borderColor: colorPalettes.info,
-                borderWidth: 2
+                borderWidth: 2,
+                hoverBackgroundColor: colorPalettes.info.map(color => color + '80'),
+                hoverBorderWidth: 3
             }]
         },
         options: {
@@ -169,7 +240,48 @@ function initEnhancedTeamChart(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 15
+                        padding: 15,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        color: '#64748b'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 12,
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label + ' Team';
+                        },
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `Members: ${context.parsed} (${percentage}%)`;
+                        },
+                        afterLabel: function(context) {
+                            // Show sample employee names for this team
+                            if (window.employeesByTeam && window.employeesByTeam[context.label]) {
+                                const employees = window.employeesByTeam[context.label].slice(0, 3);
+                                return employees.length > 0 ? 
+                                    'Members: ' + employees.map(emp => emp.full_name || emp.name).join(', ') +
+                                    (window.employeesByTeam[context.label].length > 3 ? '...' : '') : '';
+                            }
+                            return '';
+                        }
                     }
                 }
             },
@@ -177,14 +289,25 @@ function initEnhancedTeamChart(data) {
                 r: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
+                        color: 'rgba(0, 0, 0, 0.05)'
                     },
                     pointLabels: {
                         font: {
-                            size: 11
-                        }
+                            size: 10,
+                            weight: '500'
+                        },
+                        color: '#64748b'
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        },
+                        color: '#94a3b8'
                     }
                 }
+            },
+            animation: {
+                duration: 1200
             }
         }
     });

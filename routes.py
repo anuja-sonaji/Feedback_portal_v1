@@ -64,7 +64,11 @@ def dashboard():
     template_name = 'dashboard_enhanced.html' if enhanced else 'dashboard.html'
     return render_template(template_name, 
                          analytics=analytics, 
-                         recent_feedback=recent_feedback)
+                         recent_feedback=recent_feedback,
+                         employees_by_type=employees_by_type,
+                         employees_by_billable=employees_by_billable,
+                         employees_by_team=employees_by_team,
+                         employees_by_location=employees_by_location)
 
 @app.route('/employees')
 @login_required

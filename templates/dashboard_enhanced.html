@@ -24,12 +24,17 @@
             </ul>
         </div>
         <div class="user-welcome">
-            <span class="text-muted">Welcome back,</span>
-            <strong class="text-dark">{{ current_user.full_name or current_user.name }}</strong>
-            {% if current_user.is_manager %}
-            <span class="badge bg-primary ms-2">
-                <i class="fas fa-crown me-1"></i>Manager
-            </span>
+            <div>
+                <span class="text-muted">Welcome back,</span>
+                <strong class="text-dark">{{ current_user.full_name or current_user.name }}</strong>
+                {% if current_user.is_manager %}
+                <span class="badge bg-primary ms-2">
+                    <i class="fas fa-crown me-1"></i>Manager
+                </span>
+                {% endif %}
+            </div>
+            {% if current_user.manager %}
+            <small class="text-muted d-block">Reports to: {{ current_user.manager.full_name or current_user.manager.name }}</small>
             {% endif %}
         </div>
     </div>
@@ -82,12 +87,17 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
                         <div class="metric-icon bg-info bg-opacity-10 text-info mb-3">
-                            <i class="fas fa-comments"></i>
+                            <i class="fas fa-search"></i>
                         </div>
-                        <h6 class="text-muted mb-1 fw-normal">Feedback Given</h6>
-                        <h2 class="fw-bold mb-0 text-dark">{{ recent_feedback|length }}</h2>
-                        <small class="text-warning">
-                            <i class="fas fa-clock me-1"></i>This month
+                        <h6 class="text-muted mb-1 fw-normal">Direct Reports</h6>
+                        <div class="input-group input-group-sm mt-2">
+                            <input type="text" class="form-control" id="searchDirectReports" placeholder="Search team members...">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <small class="text-info">
+                            <i class="fas fa-users me-1"></i>{{ current_user.direct_reports|length }} team members
                         </small>
                     </div>
                 </div>
