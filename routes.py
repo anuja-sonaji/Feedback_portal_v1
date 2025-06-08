@@ -60,6 +60,37 @@ def dashboard():
                                       .order_by(Feedback.created_at.desc())\
                                       .limit(5).all()
     
+    # Group employees by categories for enhanced tooltips
+    employees_by_type = {}
+    employees_by_billable = {}
+    employees_by_team = {}
+    employees_by_location = {}
+    
+    for emp in employees_in_scope:
+        # Group by employment type
+        emp_type = emp.employment_type or 'Not Specified'
+        if emp_type not in employees_by_type:
+            employees_by_type[emp_type] = []
+        employees_by_type[emp_type].append(emp.to_dict())
+        
+        # Group by billable status
+        billable = emp.billable_status or 'Not Specified'
+        if billable not in employees_by_billable:
+            employees_by_billable[billable] = []
+        employees_by_billable[billable].append(emp.to_dict())
+        
+        # Group by team
+        team = emp.team or 'Not Assigned'
+        if team not in employees_by_team:
+            employees_by_team[team] = []
+        employees_by_team[team].append(emp.to_dict())
+        
+        # Group by location
+        location = emp.location or 'Not Specified'
+        if location not in employees_by_location:
+            employees_by_location[location] = []
+        employees_by_location[location].append(emp.to_dict())
+    
     # Render enhanced template by default
     template_name = 'dashboard_enhanced.html' if enhanced else 'dashboard.html'
     return render_template(template_name, 
