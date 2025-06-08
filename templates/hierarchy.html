@@ -1,0 +1,762 @@
+
+{% extends "base.html" %}
+
+{% block title %}Organization Hierarchy - Employee Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="fas fa-sitemap me-2"></i>Organization Hierarchy
+    </h2>
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" onclick="expandAll()">
+            <i class="fas fa-expand-arrows-alt me-1"></i>Expand All
+        </button>
+        <button type="button" class="btn btn-outline-secondary" onclick="collapseAll()">
+            <i class="fas fa-compress-arrows-alt me-1"></i>Collapse All
+        </button>
+    </div>
+</div>
+
+<!-- Hierarchy Overview Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-primary mb-1">{{ top_managers|length }}</h4>
+                <p class="mb-0 text-muted">Top Managers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-info mb-1" id="totalManagers">0</h4>
+                <p class="mb-0 text-muted">All Managers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-success mb-1" id="totalEmployees">0</h4>
+                <p class="mb-0 text-muted">Total Employees</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-warning mb-1" id="maxDepth">0</h4>
+                <p class="mb-0 text-muted">Max Depth</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-end">
+            <div class="col-md-4">
+                <label for="searchHierarchy" class="form-label">Search Employee</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchHierarchy" 
+                           placeholder="Search by name, designation, or employee ID...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label for="filterTeam" class="form-label">Team</label>
+                <select class="form-select" id="filterTeam">
+                    <option value="">All Teams</option>
+                    <option value="UFS">UFS</option>
+                    <option value="RG">RG</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterLocation" class="form-label">Location</label>
+                <select class="form-select" id="filterLocation">
+                    <option value="">All Locations</option>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Pune">Pune</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterManager" class="form-label">Manager</label>
+                <input type="text" class="form-control" id="filterManager" 
+                       placeholder="Manager name...">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-secondary w-100" onclick="clearHierarchyFilters()">
+                    <i class="fas fa-times me-1"></i>Clear
+                </button>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="highlightPath()">
+                    <i class="fas fa-route me-1"></i>Show Path
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hierarchy Tree -->
+{% if top_managers %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-tree me-2"></i>Organization Structure
+        </h5>
+    </div>
+    <div class="card-body">
+        <div id="hierarchyTree" class="hierarchy-container">
+            {% for manager in top_managers %}
+                {{ render_employee_tree(manager, 0, current_user) }}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Legend -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-info-circle me-2"></i>Legend
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box level-0 me-2"></div>
+                    <span>CEO/VP Level</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box level-1 me-2"></div>
+                    <span>Directors</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box level-2 me-2"></div>
+                    <span>Managers</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box level-3 me-2"></div>
+                    <span>Team Leads</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box level-4 me-2"></div>
+                    <span>Employees</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="org-box current-user me-2"></div>
+                    <span>You</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fas fa-sitemap fa-4x text-muted"></i>
+    </div>
+    <h4 class="text-muted">No Hierarchy Data</h4>
+    <p class="text-muted mb-4">No organizational hierarchy information is available.</p>
+    {% if current_user.is_manager %}
+    <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
+        <i class="fas fa-file-excel me-1"></i>Import Employee Data
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Employee Detail Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user me-2"></i>Employee Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="employeeDetails">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="editEmployeeBtn">
+                    <i class="fas fa-edit me-1"></i>Edit Employee
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Recursive macro for rendering hierarchy tree -->
+{% macro render_employee_tree(employee, depth, current_user) %}
+<div class="org-node" data-depth="{{ depth }}" 
+     data-employee-id="{{ employee.id }}"
+     data-name="{{ employee.full_name.lower() if employee.full_name else '' }}"
+     data-designation="{{ employee.designation.lower() if employee.designation else '' }}"
+     data-team="{{ employee.team if employee.team else '' }}"
+     data-location="{{ employee.location if employee.location else '' }}">
+    
+    <!-- Employee Box -->
+    <div class="org-box-container" style="margin-left: {{ depth * 50 }}px;">
+        <div class="org-box level-{{ min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
+             onclick="showEmployeeDetails({{ employee.id }})">
+            <div class="org-box-header">
+                <strong>{{ employee.full_name or 'N/A' }}</strong>
+                {% if current_user.can_manage(employee) or current_user.id == employee.id %}
+                <button type="button" class="btn btn-sm btn-outline-light ms-2" 
+                        onclick="event.stopPropagation(); editEmployee({{ employee.id }})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                {% endif %}
+            </div>
+            <div class="org-box-body">
+                <div class="org-box-title">{{ employee.designation or 'Employee' }}</div>
+                <div class="org-box-details">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-light text-dark">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
+                        {% if employee.team %}
+                        <span class="badge bg-secondary">{{ employee.team }}</span>
+                        {% endif %}
+                    </div>
+                    {% if employee.location %}
+                    <div class="mt-1">
+                        <i class="fas fa-map-marker-alt"></i> {{ employee.location }}
+                    </div>
+                    {% endif %}
+                    {% if employee.manager_name and employee.manager_id %}
+                    <div class="mt-1">
+                        <i class="fas fa-user-tie"></i> Reports to: {{ employee.manager_name }}
+                    </div>
+                    {% endif %}
+                    {% if employee.direct_reports %}
+                    <div class="mt-1">
+                        <i class="fas fa-users"></i> {{ employee.direct_reports|length }} direct report{{ 's' if employee.direct_reports|length != 1 else '' }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expand/Collapse Button -->
+        {% if employee.direct_reports %}
+        <div class="expand-control">
+            <button type="button" class="btn btn-sm btn-outline-primary expand-btn" 
+                    onclick="toggleSubtree(this)">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Connection Lines -->
+    {% if employee.direct_reports and depth > 0 %}
+    <div class="connection-line vertical" style="margin-left: {{ (depth * 50) + 100 }}px;"></div>
+    {% endif %}
+    
+    <!-- Direct Reports Container -->
+    {% if employee.direct_reports %}
+    <div class="subtree" data-employee-id="{{ employee.id }}">
+        {% if employee.direct_reports|length > 1 %}
+        <div class="connection-line horizontal" style="margin-left: {{ (depth + 1) * 50 + 100 }}px;"></div>
+        {% endif %}
+        
+        <div class="direct-reports">
+            {% for report in employee.direct_reports %}
+                {{ render_employee_tree(report, depth + 1, current_user) }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% block scripts %}
+<script>
+    let hierarchyData = {};
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateHierarchyStats();
+        initializeHierarchy();
+    });
+    
+    function updateHierarchyStats() {
+        const allNodes = document.querySelectorAll('.org-node');
+        const allBoxes = document.querySelectorAll('.org-box');
+        const managersCount = Array.from(allBoxes).filter(box => 
+            box.closest('.org-node').querySelector('.direct-reports')).length;
+        
+        const depths = Array.from(allNodes).map(node => parseInt(node.dataset.depth));
+        const maxDepth = depths.length > 0 ? Math.max(...depths) + 1 : 0;
+        
+        document.getElementById('totalManagers').textContent = managersCount;
+        document.getElementById('totalEmployees').textContent = allNodes.length;
+        document.getElementById('maxDepth').textContent = maxDepth;
+    }
+    
+    function initializeHierarchy() {
+        hierarchyData.expandedNodes = new Set();
+        
+        document.getElementById('searchHierarchy').addEventListener('input', filterHierarchy);
+        document.getElementById('filterTeam').addEventListener('change', filterHierarchy);
+        document.getElementById('filterLocation').addEventListener('change', filterHierarchy);
+        document.getElementById('filterManager').addEventListener('input', filterHierarchy);
+    }
+    
+    function toggleSubtree(button) {
+        const orgNode = button.closest('.org-node');
+        const subtree = orgNode.querySelector('.subtree');
+        const icon = button.querySelector('i');
+        
+        if (subtree.style.display === 'none') {
+            subtree.style.display = 'block';
+            icon.className = 'fas fa-minus';
+            hierarchyData.expandedNodes.add(orgNode.dataset.employeeId);
+        } else {
+            subtree.style.display = 'none';
+            icon.className = 'fas fa-plus';
+            hierarchyData.expandedNodes.delete(orgNode.dataset.employeeId);
+        }
+    }
+    
+    function expandAll() {
+        const subtrees = document.querySelectorAll('.subtree');
+        const buttons = document.querySelectorAll('.expand-btn i');
+        
+        subtrees.forEach(subtree => subtree.style.display = 'block');
+        buttons.forEach(icon => icon.className = 'fas fa-minus');
+        
+        document.querySelectorAll('.org-node').forEach(item => {
+            hierarchyData.expandedNodes.add(item.dataset.employeeId);
+        });
+    }
+    
+    function collapseAll() {
+        const subtrees = document.querySelectorAll('.subtree');
+        const buttons = document.querySelectorAll('.expand-btn i');
+        
+        subtrees.forEach(subtree => subtree.style.display = 'none');
+        buttons.forEach(icon => icon.className = 'fas fa-plus');
+        
+        hierarchyData.expandedNodes.clear();
+    }
+    
+    function filterHierarchy() {
+        const searchTerm = document.getElementById('searchHierarchy').value.toLowerCase();
+        const teamFilter = document.getElementById('filterTeam').value;
+        const locationFilter = document.getElementById('filterLocation').value;
+        const managerFilter = document.getElementById('filterManager').value.toLowerCase();
+        
+        const orgNodes = document.querySelectorAll('.org-node');
+        
+        orgNodes.forEach(node => {
+            const name = node.dataset.name;
+            const designation = node.dataset.designation;
+            const team = node.dataset.team;
+            const location = node.dataset.location;
+            
+            // Get manager name from the org-box content
+            const managerElement = node.querySelector('.org-box-details');
+            const managerText = managerElement ? managerElement.textContent.toLowerCase() : '';
+            
+            const matchesSearch = !searchTerm || 
+                                name.includes(searchTerm) || 
+                                designation.includes(searchTerm);
+            const matchesTeam = !teamFilter || team === teamFilter;
+            const matchesLocation = !locationFilter || location === locationFilter;
+            const matchesManager = !managerFilter || managerText.includes(managerFilter);
+            
+            const shouldShow = matchesSearch && matchesTeam && matchesLocation && matchesManager;
+            
+            if (shouldShow) {
+                node.style.display = 'block';
+                showParentPath(node);
+            } else {
+                node.style.display = 'none';
+            }
+        });
+    }
+    
+    function showParentPath(node) {
+        let parent = node.parentElement;
+        while (parent && !parent.classList.contains('hierarchy-container')) {
+            if (parent.classList.contains('org-node')) {
+                parent.style.display = 'block';
+            }
+            parent = parent.parentElement;
+        }
+    }
+    
+    function clearHierarchyFilters() {
+        document.getElementById('searchHierarchy').value = '';
+        document.getElementById('filterTeam').value = '';
+        document.getElementById('filterLocation').value = '';
+        document.getElementById('filterManager').value = '';
+        
+        document.querySelectorAll('.org-node').forEach(node => {
+            node.style.display = 'block';
+        });
+    }
+    
+    function highlightPath() {
+        const searchTerm = document.getElementById('searchHierarchy').value.toLowerCase();
+        if (!searchTerm) {
+            alert('Please enter a search term to highlight the path');
+            return;
+        }
+        
+        document.querySelectorAll('.highlighted-path').forEach(el => {
+            el.classList.remove('highlighted-path');
+        });
+        
+        const orgNodes = document.querySelectorAll('.org-node');
+        orgNodes.forEach(node => {
+            const name = node.dataset.name;
+            const designation = node.dataset.designation;
+            
+            if (name.includes(searchTerm) || designation.includes(searchTerm)) {
+                highlightEmployeePath(node);
+            }
+        });
+    }
+    
+    function highlightEmployeePath(node) {
+        node.classList.add('highlighted-path');
+        
+        let parent = node.parentElement;
+        while (parent && !parent.classList.contains('hierarchy-container')) {
+            if (parent.classList.contains('org-node')) {
+                parent.classList.add('highlighted-path');
+            }
+            parent = parent.parentElement;
+        }
+    }
+    
+    function showEmployeeDetails(employeeId) {
+        const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+        document.getElementById('employeeDetails').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading employee details...</p>
+            </div>
+        `;
+        
+        document.getElementById('editEmployeeBtn').onclick = () => editEmployee(employeeId);
+        modal.show();
+        
+        fetch(`/api/employee/${employeeId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                document.getElementById('employeeDetails').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Basic Information</h6>
+                            <p><strong>Name:</strong> ${data.full_name || 'N/A'}</p>
+                            <p><strong>System ID:</strong> ${data.system_id || 'N/A'}</p>
+                            <p><strong>Email:</strong> ${data.emailid || 'N/A'}</p>
+                            <p><strong>Gender:</strong> ${data.gender || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Work Details</h6>
+                            <p><strong>Designation:</strong> ${data.designation || 'N/A'}</p>
+                            <p><strong>Team:</strong> ${data.team || 'N/A'}</p>
+                            <p><strong>Location:</strong> ${data.location || 'N/A'}</p>
+                            <p><strong>Employment Type:</strong> ${data.employment_type || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6>Additional Information</h6>
+                    <p><strong>Manager:</strong> ${data.manager_name || 'N/A'}</p>
+                    <p><strong>Skills:</strong> ${data.skill || 'N/A'}</p>
+                    <p><strong>Billing Rate:</strong> ${data.billing_rate ? '$' + data.billing_rate : 'N/A'}</p>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('employeeDetails').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading employee details: ${error.message}
+                    </div>
+                `;
+            });
+    }
+    
+    function editEmployee(employeeId) {
+        window.location.href = `{{ url_for('edit_employee', id=0) }}`.replace('0', employeeId);
+    }
+</script>
+
+<style>
+    .hierarchy-container {
+        min-height: 500px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+    
+    .org-node {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .org-box-container {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .org-box {
+        width: 220px;
+        min-height: 120px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .org-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Level-based colors */
+    .org-box.level-0 {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        color: white;
+        border: 2px solid #2c5aa0;
+    }
+    
+    .org-box.level-1 {
+        background: linear-gradient(135deg, #5cb85c 0%, #449d44 100%);
+        color: white;
+        border: 2px solid #357a35;
+    }
+    
+    .org-box.level-2 {
+        background: linear-gradient(135deg, #f0ad4e 0%, #ec971f 100%);
+        color: white;
+        border: 2px solid #d58512;
+    }
+    
+    .org-box.level-3 {
+        background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
+        color: white;
+        border: 2px solid #ac2925;
+    }
+    
+    .org-box.level-4 {
+        background: linear-gradient(135deg, #c39bd3 0%, #a569bd 100%);
+        color: white;
+        border: 2px solid #8e44ad;
+    }
+    
+    .org-box.current-user {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+        border: 3px solid #ff6b6b !important;
+        animation: pulse-glow 2s infinite;
+    }
+    
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 0 0 0 rgba(255, 107, 107, 0.7); }
+        50% { box-shadow: 0 6px 12px rgba(0,0,0,0.15), 0 0 0 10px rgba(255, 107, 107, 0); }
+        100% { box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+    
+    .org-box-header {
+        padding: 10px 15px;
+        background: rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .org-box-body {
+        padding: 15px;
+    }
+    
+    .org-box-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+    
+    .org-box-details {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+    
+    .org-box-details .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+    
+    .expand-control {
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+    
+    .expand-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 2px solid #007bff;
+        color: #007bff;
+    }
+    
+    .expand-btn:hover {
+        background: #007bff;
+        color: white;
+    }
+    
+    .connection-line {
+        background-color: #ddd;
+        position: absolute;
+    }
+    
+    .connection-line.vertical {
+        width: 2px;
+        height: 30px;
+        top: -30px;
+    }
+    
+    .connection-line.horizontal {
+        height: 2px;
+        width: 100px;
+        top: 60px;
+    }
+    
+    .direct-reports {
+        margin-top: 40px;
+    }
+    
+    .subtree {
+        margin-left: 20px;
+        position: relative;
+    }
+    
+    .highlighted-path {
+        animation: highlight-pulse 2s infinite;
+    }
+    
+    @keyframes highlight-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Legend styles */
+    .org-box.level-0:not(.current-user) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+    }
+    
+    .org-box.level-1:not(.current-user) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+    }
+    
+    .org-box.level-2:not(.current-user) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+    }
+    
+    .org-box.level-3:not(.current-user) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+    }
+    
+    .org-box.level-4:not(.current-user) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+    }
+    
+    .org-box.current-user:not(.hierarchy-container .org-box) {
+        width: 40px;
+        height: 20px;
+        min-height: unset;
+        margin: 0;
+        cursor: default;
+        animation: none;
+    }
+    
+    @media (max-width: 768px) {
+        .org-box {
+            width: 180px;
+            min-height: 100px;
+        }
+        
+        .org-box-header {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .org-box-body {
+            padding: 12px;
+        }
+        
+        .org-box-title {
+            font-size: 11px;
+        }
+        
+        .org-box-details {
+            font-size: 10px;
+        }
+    }
+</style>
+{% endblock %}

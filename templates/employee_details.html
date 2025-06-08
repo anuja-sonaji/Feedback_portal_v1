@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Details - Employee Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="fas fa-user me-2"></i>Employee Details
+    </h2>
+    <div>
+        <a href="{{ url_for('employees') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to List
+        </a>
+        <a href="{{ url_for('edit_employee', id=employee.id) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i>Edit Employee
+        </a>
+        {% if current_user.is_manager and (current_user.can_manage(employee) or employee.manager_id == current_user.id) %}
+        <button type="button" class="btn btn-danger ms-2" 
+                onclick="confirmDelete({{ employee.id }}, '{{ employee.full_name or 'this employee' }}')">
+            <i class="fas fa-trash me-1"></i>Delete Employee
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Basic Information -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-id-card me-2"></i>Basic Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>System ID:</strong></div>
+                    <div class="col-sm-8">{{ employee.system_id or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Bensl ID:</strong></div>
+                    <div class="col-sm-8">{{ employee.bensl_id or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Full Name:</strong></div>
+                    <div class="col-sm-8">{{ employee.full_name or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Email ID:</strong></div>
+                    <div class="col-sm-8">{{ employee.emailid or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Gender:</strong></div>
+                    <div class="col-sm-8">{{ employee.gender or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Company:</strong></div>
+                    <div class="col-sm-8">{{ employee.company or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employment Details -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-briefcase me-2"></i>Employment Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Employment Type:</strong></div>
+                    <div class="col-sm-8">
+                        {% if employee.employment_type %}
+                            <span class="badge bg-{{ 'success' if employee.employment_type == 'Permanent' else 'warning' }}">
+                                {{ employee.employment_type }}
+                            </span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Employee Status:</strong></div>
+                    <div class="col-sm-8">
+                        {% if employee.employee_status %}
+                            <span class="badge bg-{{ 'success' if employee.employee_status == 'Active' else 'danger' }}">
+                                {{ employee.employee_status }}
+                            </span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Billable Status:</strong></div>
+                    <div class="col-sm-8">
+                        {% if employee.billable_status %}
+                            <span class="badge bg-{{ 'primary' if employee.billable_status == 'Billable' else 'secondary' }}">
+                                {{ employee.billable_status }}
+                            </span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Role:</strong></div>
+                    <div class="col-sm-8">{{ employee.role or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Designation:</strong></div>
+                    <div class="col-sm-8">{{ employee.designation or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Grade:</strong></div>
+                    <div class="col-sm-8">{{ employee.grade or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team & Management -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>Team & Management
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Team:</strong></div>
+                    <div class="col-sm-8">{{ employee.team or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Manager Name:</strong></div>
+                    <div class="col-sm-8">{{ employee.manager_name or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Manager ID:</strong></div>
+                    <div class="col-sm-8">{{ employee.manager_id or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Critical:</strong></div>
+                    <div class="col-sm-8">
+                        {% if employee.critical %}
+                            <span class="badge bg-{{ 'danger' if employee.critical == 'Yes' else 'success' }}">
+                                {{ employee.critical }}
+                            </span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Location:</strong></div>
+                    <div class="col-sm-8">{{ employee.location or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar me-2"></i>Important Dates
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>DOJ Allianz:</strong></div>
+                    <div class="col-sm-8">{{ employee.doj_allianz.strftime('%d %b %Y') if employee.doj_allianz else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>DOL Allianz:</strong></div>
+                    <div class="col-sm-8">{{ employee.dol_allianz.strftime('%d %b %Y') if employee.dol_allianz else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>DOJ Project:</strong></div>
+                    <div class="col-sm-8">{{ employee.doj_project.strftime('%d %b %Y') if employee.doj_project else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>DOL Project:</strong></div>
+                    <div class="col-sm-8">{{ employee.dol_project.strftime('%d %b %Y') if employee.dol_project else 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Details -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-dollar-sign me-2"></i>Financial Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Billing Rate:</strong></div>
+                    <div class="col-sm-8">{{ '${:,.2f}'.format(employee.billing_rate) if employee.billing_rate else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Rate Card:</strong></div>
+                    <div class="col-sm-8">{{ employee.rate_card or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills & Additional Info -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>Skills & Additional Info
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Skills:</strong></div>
+                    <div class="col-sm-8">
+                        {% if employee.skill %}
+                            {% for skill in employee.skill.split(',') %}
+                                <span class="badge bg-info me-1 mb-1">{{ skill.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Remarks:</strong></div>
+                    <div class="col-sm-8">{{ employee.remarks or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="employeeName"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Employee</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Delete confirmation
+    function confirmDelete(employeeId, employeeName) {
+        document.getElementById('employeeName').textContent = employeeName;
+        document.getElementById('deleteForm').action = `/employee/delete/${employeeId}`;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Employee Feedback Portal{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-right: 3px solid #3498db;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .main-wrapper {
+            margin-left: 280px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-wrapper {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+                <i class="fas fa-users me-2"></i>
+                Employee Portal
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="{{ url_for('dashboard') }}" 
+                   class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+            </div>
+            
+            {% if current_user.is_manager %}
+            <div class="nav-item">
+                <a href="{{ url_for('employees') }}" 
+                   class="nav-link {% if request.endpoint in ['employees', 'add_employee', 'edit_employee'] %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    Employee Details
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{{ url_for('feedback') }}" 
+                   class="nav-link {% if request.endpoint in ['feedback', 'add_feedback', 'edit_feedback'] %}active{% endif %}">
+                    <i class="fas fa-comments"></i>
+                    Feedback Management
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{{ url_for('billing') }}" 
+                   class="nav-link {% if request.endpoint == 'billing' %}active{% endif %}">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    Billing Details
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="{{ url_for('hierarchy') }}" 
+                   class="nav-link {% if request.endpoint == 'hierarchy' %}active{% endif %}">
+                    <i class="fas fa-sitemap"></i>
+                    Hierarchy
+                </a>
+            </div>
+            
+            {% if current_user.is_manager %}
+            <div class="nav-item">
+                <a href="{{ url_for('import_excel') }}" 
+                   class="nav-link {% if request.endpoint == 'import_excel' %}active{% endif %}">
+                    <i class="fas fa-file-excel"></i>
+                    Import Excel
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="dropdown">
+                <div class="user-info dropdown-toggle" data-bs-toggle="dropdown" role="button">
+                    <div class="user-avatar">
+                        {{ current_user.full_name[0].upper() if current_user.full_name else 'U' }}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600;">{{ current_user.full_name or 'User' }}</div>
+                        <small>{% if current_user.is_manager %}Manager{% else %}Employee{% endif %}</small>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-up">
+                    <li><a class="dropdown-item" href="{{ url_for('edit_employee', id=current_user.id) }}">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <div class="top-header">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h4 class="page-title">
+                {% if request.endpoint == 'dashboard' %}Dashboard
+                {% elif request.endpoint == 'employees' %}Employee Details
+                {% elif request.endpoint == 'feedback' %}Feedback Management
+                {% elif request.endpoint == 'billing' %}Billing Details
+                {% elif request.endpoint == 'hierarchy' %}Organization Hierarchy
+                {% elif request.endpoint == 'import_excel' %}Import Excel Data
+                {% else %}Employee Portal
+                {% endif %}
+            </h4>
+            <div class="d-flex align-items-center">
+                <small class="text-muted">Welcome back, {{ current_user.name }}</small>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div style="padding: 0 30px;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+    <!-- Login Layout -->
+    <main class="container-fluid vh-100">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert" style="margin: 20px;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block login_content %}{% endblock %}
+    </main>
+    {% endif %}
+
+    <!-- Footer -->
+    {% if current_user.is_authenticated %}
+    <footer class="bg-light text-dark py-3 mt-3 shadow-sm">
+        <div class="container text-center">
+            <p class="mb-0 small">&copy; 2024 Employee Feedback Portal. All rights reserved.</p>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

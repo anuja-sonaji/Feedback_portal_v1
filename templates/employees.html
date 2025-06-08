@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Employees - Employee Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="fas fa-users me-2"></i>Employee Management
+    </h2>
+    <div>
+        <a href="{{ url_for('add_employee') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add Employee
+        </a>
+        <a href="{{ url_for('import_excel') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-excel me-1"></i>Import Excel
+        </a>
+    </div>
+</div>
+
+{% if employees %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h5 class="card-title mb-0">Your Team ({{ employees|length }} employees)</h5>
+            </div>
+            <div class="col-auto">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search employees...">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="employeesTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>System ID</th>
+                        <th>Full Name</th>
+                        <th>Employment Type</th>
+                        <th>Billable Status</th>
+                        <th>Employee Status</th>
+                        <th>Role</th>
+                        <th>Team</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary">{{ employee.system_id or 'N/A' }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    {{ employee.full_name[0].upper() if employee.full_name else 'U' }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ employee.full_name or 'Unknown' }}</div>
+                                    <small class="text-muted">{{ employee.emailid or 'No email' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if employee.employment_type %}
+                                <span class="badge bg-{{ 'success' if employee.employment_type == 'Permanent' else 'warning' }}">
+                                    {{ employee.employment_type }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if employee.billable_status %}
+                                <span class="badge bg-{{ 'primary' if employee.billable_status == 'Billable' else 'secondary' }}">
+                                    {{ employee.billable_status }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if employee.employee_status %}
+                                <span class="badge bg-{{ 'success' if employee.employee_status == 'Active' else 'danger' }}">
+                                    {{ employee.employee_status }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ employee.role or 'N/A' }}</td>
+                        <td>{{ employee.team or 'N/A' }}</td>
+                        <td>{{ employee.location or 'N/A' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('edit_employee', id=employee.id) }}" 
+                                   class="btn btn-outline-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if current_user.is_manager and employee.id != current_user.id %}
+                                <button type="button" class="btn btn-outline-danger" 
+                                        onclick="confirmDelete({{ employee.id }}, '{{ employee.full_name or 'this employee' }}')" 
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <div class="empty-state">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h5>No Employees Found</h5>
+            <p class="text-muted mb-4">You don't have any employees in your team yet.</p>
+            <a href="{{ url_for('add_employee') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Add Your First Employee
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="employeeName"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Employee</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#employeesTable tbody tr');
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // Delete confirmation
+    function confirmDelete(employeeId, employeeName) {
+        document.getElementById('employeeName').textContent = employeeName;
+        document.getElementById('deleteForm').action = `/employee/delete/${employeeId}`;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+    
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            if (alert.classList.contains('alert-success') || alert.classList.contains('alert-info')) {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }
+        });
+    }, 5000);
+</script>
+
+<style>
+.avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.empty-state i {
+    opacity: 0.3;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+</style>
+{% endblock %}
