@@ -35,7 +35,7 @@ function initializeDashboardCharts(analyticsData) {
         
         // Set chart defaults
         Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        Chart.defaults.font.size = 12;
+        Chart.defaults.font.size = 10;
         Chart.defaults.color = '#64748b';
         
         // Initialize each chart type safely
@@ -62,7 +62,7 @@ function initializeDashboardCharts(analyticsData) {
 }
 
 /**
- * Enhanced Employment Type Pie Chart
+ * Enhanced Employment Type Pie Chart with employee names on hover
  */
 function initEnhancedEmploymentTypeChart(data) {
     const ctx = document.getElementById('employmentTypeChart');
@@ -97,11 +97,11 @@ function initEnhancedEmploymentTypeChart(data) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 15,
+                            padding: 12,
                             usePointStyle: true,
                             pointStyle: 'circle',
                             font: {
-                                size: 11,
+                                size: 9,
                                 weight: '500'
                             }
                         }
@@ -114,11 +114,28 @@ function initEnhancedEmploymentTypeChart(data) {
                         borderWidth: 1,
                         cornerRadius: 12,
                         padding: 12,
+                        titleFont: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 10
+                        },
                         callbacks: {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed / total) * 100).toFixed(1);
                                 return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            },
+                            afterLabel: function(context) {
+                                const empType = context.label;
+                                const employees = window.employeesByType[empType] || [];
+                                if (employees.length > 0) {
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
+                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
+                                    return `Employees: ${names}${extra}`;
+                                }
+                                return '';
                             }
                         }
                     }
@@ -137,7 +154,7 @@ function initEnhancedEmploymentTypeChart(data) {
 }
 
 /**
- * Enhanced Billable Status Chart
+ * Enhanced Billable Status Chart with employee names on hover
  */
 function initEnhancedBillableStatusChart(data) {
     const ctx = document.getElementById('billableStatusChart');
@@ -171,10 +188,10 @@ function initEnhancedBillableStatusChart(data) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 15,
+                            padding: 12,
                             usePointStyle: true,
                             font: {
-                                size: 11,
+                                size: 9,
                                 weight: '500'
                             }
                         }
@@ -187,11 +204,28 @@ function initEnhancedBillableStatusChart(data) {
                         borderWidth: 1,
                         cornerRadius: 12,
                         padding: 12,
+                        titleFont: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 10
+                        },
                         callbacks: {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed / total) * 100).toFixed(1);
                                 return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            },
+                            afterLabel: function(context) {
+                                const billableStatus = context.label;
+                                const employees = window.employeesByBillable[billableStatus] || [];
+                                if (employees.length > 0) {
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
+                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
+                                    return `Employees: ${names}${extra}`;
+                                }
+                                return '';
                             }
                         }
                     }
@@ -208,7 +242,7 @@ function initEnhancedBillableStatusChart(data) {
 }
 
 /**
- * Enhanced Team Distribution Chart
+ * Enhanced Team Distribution Chart with employee names on hover
  */
 function initEnhancedTeamChart(data) {
     const ctx = document.getElementById('teamChart');
@@ -241,9 +275,9 @@ function initEnhancedTeamChart(data) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 15,
+                            padding: 12,
                             font: {
-                                size: 11,
+                                size: 9,
                                 weight: '500'
                             }
                         }
@@ -256,11 +290,28 @@ function initEnhancedTeamChart(data) {
                         borderWidth: 1,
                         cornerRadius: 12,
                         padding: 12,
+                        titleFont: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 10
+                        },
                         callbacks: {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed / total) * 100).toFixed(1);
                                 return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            },
+                            afterLabel: function(context) {
+                                const team = context.label;
+                                const employees = window.employeesByTeam[team] || [];
+                                if (employees.length > 0) {
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
+                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
+                                    return `Members: ${names}${extra}`;
+                                }
+                                return '';
                             }
                         }
                     }
@@ -273,13 +324,13 @@ function initEnhancedTeamChart(data) {
                         },
                         pointLabels: {
                             font: {
-                                size: 10,
+                                size: 8,
                                 weight: '500'
                             }
                         },
                         ticks: {
                             font: {
-                                size: 10
+                                size: 8
                             }
                         }
                     }
@@ -337,7 +388,13 @@ function initEnhancedSkillsChart(data) {
                     },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        cornerRadius: 8
+                        cornerRadius: 8,
+                        titleFont: {
+                            size: 11
+                        },
+                        bodyFont: {
+                            size: 10
+                        }
                     }
                 },
                 scales: {
@@ -347,7 +404,10 @@ function initEnhancedSkillsChart(data) {
                             color: 'rgba(0, 0, 0, 0.05)'
                         },
                         ticks: {
-                            stepSize: 1
+                            stepSize: 1,
+                            font: {
+                                size: 9
+                            }
                         }
                     },
                     x: {
@@ -355,7 +415,10 @@ function initEnhancedSkillsChart(data) {
                             display: false
                         },
                         ticks: {
-                            maxRotation: 45
+                            maxRotation: 45,
+                            font: {
+                                size: 9
+                            }
                         }
                     }
                 },
@@ -370,7 +433,7 @@ function initEnhancedSkillsChart(data) {
 }
 
 /**
- * Enhanced Location Chart
+ * Enhanced Location Chart with employee names on hover
  */
 function initEnhancedLocationChart(data) {
     const ctx = document.getElementById('locationChart');
@@ -404,8 +467,12 @@ function initEnhancedLocationChart(data) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 15,
-                            usePointStyle: true
+                            padding: 12,
+                            usePointStyle: true,
+                            font: {
+                                size: 9,
+                                weight: '500'
+                            }
                         }
                     },
                     tooltip: {
@@ -416,11 +483,28 @@ function initEnhancedLocationChart(data) {
                         borderWidth: 1,
                         cornerRadius: 12,
                         padding: 12,
+                        titleFont: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 10
+                        },
                         callbacks: {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed / total) * 100).toFixed(1);
                                 return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            },
+                            afterLabel: function(context) {
+                                const location = context.label;
+                                const employees = window.employeesByLocation[location] || [];
+                                if (employees.length > 0) {
+                                    const names = employees.slice(0, 5).map(emp => emp.full_name || emp.name || 'Unknown').join(', ');
+                                    const extra = employees.length > 5 ? ` and ${employees.length - 5} more...` : '';
+                                    return `Employees: ${names}${extra}`;
+                                }
+                                return '';
                             }
                         }
                     }

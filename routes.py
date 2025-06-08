@@ -99,7 +99,8 @@ def dashboard():
                          employees_by_type=employees_by_type,
                          employees_by_billable=employees_by_billable,
                          employees_by_team=employees_by_team,
-                         employees_by_location=employees_by_location)
+                         employees_by_location=employees_by_location,
+                         now=datetime.now())
 
 @app.route('/employees')
 @login_required
