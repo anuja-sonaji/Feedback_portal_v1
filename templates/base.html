@@ -328,6 +328,35 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('show');
         }
+        
+        // Global delete confirmation function
+        function confirmDelete(employeeId, employeeName) {
+            if (!employeeId || !employeeName) {
+                console.error('Employee ID or Name is missing');
+                return;
+            }
+            
+            // Set the employee name in the modal
+            const nameElement = document.getElementById('employeeName');
+            if (nameElement) {
+                nameElement.textContent = employeeName;
+            }
+            
+            // Set the form action
+            const deleteForm = document.getElementById('deleteForm');
+            if (deleteForm) {
+                deleteForm.action = `/employee/delete/${employeeId}`;
+            }
+            
+            // Show the modal
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                const modal = new bootstrap.Modal(deleteModal);
+                modal.show();
+            } else {
+                console.error('Delete modal not found');
+            }
+        }
     </script>
 </body>
 </html>

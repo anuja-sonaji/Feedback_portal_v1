@@ -88,7 +88,7 @@
                     <div class="col-sm-4"><strong>Employee Status:</strong></div>
                     <div class="col-sm-8">
                         {% if employee.employee_status %}
-                            <span class="badge bg-{{ 'success' if employee.employee_status == 'Active' else 'danger' }}">
+                            <span class="badge bg-{{ 'success' if employee.employee_status.upper() == 'ACTIVE' else 'danger' }}">
                                 {{ employee.employee_status }}
                             </span>
                         {% else %}
@@ -269,13 +269,4 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // Delete confirmation
-    function confirmDelete(employeeId, employeeName) {
-        document.getElementById('employeeName').textContent = employeeName;
-        document.getElementById('deleteForm').action = `/employee/delete/${employeeId}`;
-        var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
-    }
-</script>
 {% endblock %}

@@ -87,7 +87,7 @@
                         </td>
                         <td>
                             {% if employee.employee_status %}
-                                <span class="badge bg-{{ 'success' if employee.employee_status == 'Active' else 'danger' }}">
+                                <span class="badge bg-{{ 'success' if employee.employee_status.upper() == 'ACTIVE' else 'danger' }}">
                                     {{ employee.employee_status }}
                                 </span>
                             {% else %}
@@ -172,13 +172,7 @@
         });
     });
     
-    // Delete confirmation
-    function confirmDelete(employeeId, employeeName) {
-        document.getElementById('employeeName').textContent = employeeName;
-        document.getElementById('deleteForm').action = `/employee/delete/${employeeId}`;
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
-    }
+    // Delete functionality is now handled globally in base.html
     
     // Auto-hide alerts after 5 seconds
     setTimeout(function() {
