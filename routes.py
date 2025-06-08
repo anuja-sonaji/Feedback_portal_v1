@@ -42,6 +42,8 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # Check if enhanced dashboard is requested
+    enhanced = request.args.get('enhanced', 'true').lower() == 'true'
     # Get analytics data for current user's scope
     if current_user.is_manager:
         subordinates = current_user.get_all_subordinates()
@@ -58,7 +60,9 @@ def dashboard():
                                       .order_by(Feedback.created_at.desc())\
                                       .limit(5).all()
     
-    return render_template('dashboard.html', 
+    # Render enhanced template by default
+    template_name = 'dashboard_enhanced.html' if enhanced else 'dashboard.html'
+    return render_template(template_name, 
                          analytics=analytics, 
                          recent_feedback=recent_feedback)
 
