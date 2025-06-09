@@ -42,10 +42,12 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Get analytics data for current user's scope
+    # Get analytics data for current user's scope - only their direct hierarchy
     if current_user.is_manager:
+        # Get direct reports and all subordinates in hierarchy
+        direct_reports = Employee.query.filter_by(manager_id=current_user.id).all()
         subordinates = current_user.get_all_subordinates()
-        employees_in_scope = subordinates + [current_user]
+        employees_in_scope = list(set(direct_reports + subordinates + [current_user]))
     else:
         employees_in_scope = [current_user]
     
@@ -69,10 +71,14 @@ def employees():
         flash('Access denied. Only managers can view employee lists.', 'error')
         return redirect(url_for('dashboard'))
     
-    # Get employees under current manager
-    subordinates = current_user.get_all_subordinates()
+    # Get only direct reportees and employees in hierarchy under current manager
+    direct_reports = Employee.query.filter_by(manager_id=current_user.id).all()
+    all_subordinates = current_user.get_all_subordinates()
     
-    return render_template('employees.html', employees=subordinates)
+    # Combine direct reports with all subordinates to ensure complete hierarchy
+    employees_to_show = list(set(direct_reports + all_subordinates))
+    
+    return render_template('employees.html', employees=employees_to_show)
 
 @app.route('/employee/add', methods=['GET', 'POST'])
 @login_required
@@ -257,9 +263,15 @@ def feedback():
         flash('Access denied. Only managers can manage feedback.', 'error')
         return redirect(url_for('dashboard'))
     
-    # Get feedback given by current manager
-    feedback_list = Feedback.query.filter_by(manager_id=current_user.id)\
-                                 .order_by(Feedback.created_at.desc()).all()
+    # Get feedback given by current manager only for their direct reports and subordinates
+    subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
+    direct_report_ids = [emp.id for emp in Employee.query.filter_by(manager_id=current_user.id).all()]
+    all_manageable_ids = list(set(subordinate_ids + direct_report_ids))
+    
+    feedback_list = Feedback.query.filter(
+        (Feedback.manager_id == current_user.id) & 
+        (Feedback.employee_id.in_(all_manageable_ids))
+    ).order_by(Feedback.created_at.desc()).all()
     
     return render_template('feedback.html', feedback_list=feedback_list)
 
@@ -270,10 +282,23 @@ def add_feedback():
         flash('Access denied. Only managers can give feedback.', 'error')
         return redirect(url_for('dashboard'))
     
+    # Get employees this manager can give feedback to
+    subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
+    direct_report_ids = [emp.id for emp in Employee.query.filter_by(manager_id=current_user.id).all()]
+    manageable_employee_ids = list(set(subordinate_ids + direct_report_ids))
+    manageable_employees = Employee.query.filter(Employee.id.in_(manageable_employee_ids)).all()
+    
     if request.method == 'POST':
+        employee_id = int(request.form['employee_id'])
+        
+        # Verify manager can give feedback to this employee
+        if employee_id not in manageable_employee_ids:
+            flash('Access denied. You can only give feedback to employees under your management.', 'error')
+            return redirect(url_for('feedback'))
+        
         try:
             feedback = Feedback(
-                employee_id=int(request.form['employee_id']),
+                employee_id=employee_id,
                 manager_id=current_user.id,
                 feedback_type=request.form['feedback_type'],
                 period_year=int(request.form['period_year']),
@@ -305,9 +330,8 @@ def add_feedback():
             db.session.rollback()
             flash(f'Error adding feedback: {str(e)}', 'error')
     
-    # Get direct reports for dropdown
-    direct_reports = current_user.direct_reports
-    return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add')
+    # Get manageable employees for dropdown
+    return render_template('feedback_form.html', feedback=None, employees=manageable_employees, action='Add')
 
 @app.route('/feedback/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -353,11 +377,13 @@ def billing():
         flash('Access denied. Only managers can view billing details.', 'error')
         return redirect(url_for('dashboard'))
     
-    # Get billing details for employees under current manager
-    subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
-    subordinate_ids.append(current_user.id)
+    # Get billing details only for direct reports and employees in hierarchy
+    direct_reports = Employee.query.filter_by(manager_id=current_user.id).all()
+    subordinates = current_user.get_all_subordinates()
+    manageable_employees = list(set(direct_reports + subordinates))
+    manageable_ids = [emp.id for emp in manageable_employees] + [current_user.id]
     
-    billing_records = BillingDetail.query.filter(BillingDetail.employee_id.in_(subordinate_ids))\
+    billing_records = BillingDetail.query.filter(BillingDetail.employee_id.in_(manageable_ids))\
                                         .order_by(BillingDetail.billing_year.desc(), 
                                                 BillingDetail.billing_month.desc()).all()
     
@@ -366,31 +392,36 @@ def billing():
 @app.route('/hierarchy')
 @login_required
 def hierarchy():
-    # Get all employees and build hierarchy tree
-    all_employees = Employee.query.all()
+    if current_user.is_manager:
+        # Managers see only their hierarchy
+        direct_reports = Employee.query.filter_by(manager_id=current_user.id).all()
+        all_subordinates = current_user.get_all_subordinates()
+        hierarchy_employees = list(set([current_user] + direct_reports + all_subordinates))
+    else:
+        # Regular employees see only themselves
+        hierarchy_employees = [current_user]
     
-    # Build a mapping of managers to their direct reports
-    manager_reports = {}
-    employee_dict = {emp.id: emp for emp in all_employees}
+    # Build hierarchy tree for visible employees
+    employee_dict = {emp.id: emp for emp in hierarchy_employees}
     
     # Initialize direct_reports list for each employee
-    for emp in all_employees:
+    for emp in hierarchy_employees:
         emp.direct_reports = []
     
     # Build the hierarchy relationships
     top_managers = []
-    for emp in all_employees:
-        if emp.manager_id is None:
-            # This is a top-level employee/manager
+    for emp in hierarchy_employees:
+        if emp.manager_id is None or emp.manager_id not in employee_dict:
+            # This is a top-level employee/manager in visible scope
             top_managers.append(emp)
         else:
-            # This employee has a manager
+            # This employee has a manager in visible scope
             manager = employee_dict.get(emp.manager_id)
             if manager:
                 manager.direct_reports.append(emp)
     
     # Sort direct reports by name for each manager
-    for emp in all_employees:
+    for emp in hierarchy_employees:
         emp.direct_reports.sort(key=lambda x: x.full_name or '')
     
     # Sort top managers by name
