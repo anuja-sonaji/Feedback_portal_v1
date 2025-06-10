@@ -22,11 +22,14 @@ def login():
         
         employee = Employee.query.filter_by(emailid=emailid).first()
         
-        if employee and employee.check_password(password):
+        # Restrict access only to line managers
+        if employee and employee.check_password(password) and employee.is_manager:
             login_user(employee)
             next_page = request.args.get('next')
-            flash('Login successful!', 'success')
+            flash(f'Welcome back, {employee.full_name}!', 'success')
             return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+        elif employee and not employee.is_manager:
+            flash('Access denied. Only line managers can access this system.', 'error')
         else:
             flash('Invalid email or password', 'error')
     
