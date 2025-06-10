@@ -445,6 +445,22 @@
                 sidebar.classList.remove('show');
             }
         });
+
+        // Global delete confirmation function
+        function confirmDelete(employeeId, employeeName) {
+            const modal = document.getElementById('deleteModal');
+            const employeeNameElement = document.getElementById('employeeName');
+            const deleteForm = document.getElementById('deleteForm');
+            
+            if (modal && employeeNameElement && deleteForm) {
+                employeeNameElement.textContent = employeeName;
+                deleteForm.action = '/employee/delete/' + employeeId;
+                
+                // Show the modal
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            }
+        }
     </script>
 
     {% block scripts %}{% endblock %}
