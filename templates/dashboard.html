@@ -18,7 +18,7 @@
 <!-- Analytics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
+        <div class="card dashboard-card bg-primary text-white">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -26,7 +26,7 @@
                         <h2 class="mb-0">{{ analytics.total_employees }}</h2>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-users fa-2x opacity-75"></i>
+                        <i class="fas fa-users fa-lg opacity-75"></i>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
     
     {% if current_user.is_manager %}
     <div class="col-md-3">
-        <div class="card bg-success text-white">
+        <div class="card dashboard-card bg-success text-white">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -43,7 +43,7 @@
                         <h2 class="mb-0">{{ current_user.direct_reports|length }}</h2>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-user-friends fa-2x opacity-75"></i>
+                        <i class="fas fa-user-friends fa-lg opacity-75"></i>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card bg-info text-white">
+        <div class="card dashboard-card bg-info text-white">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -59,7 +59,7 @@
                         <h2 class="mb-0">{{ recent_feedback|length }}</h2>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-comments fa-2x opacity-75"></i>
+                        <i class="fas fa-comments fa-lg opacity-75"></i>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
     {% endif %}
     
     <div class="col-md-3">
-        <div class="card bg-warning text-dark">
+        <div class="card dashboard-card bg-warning text-dark">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -76,7 +76,7 @@
                         <h2 class="mb-0">{{ analytics.team.keys()|length }}</h2>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-project-diagram fa-2x opacity-75"></i>
+                        <i class="fas fa-project-diagram fa-lg opacity-75"></i>
                     </div>
                 </div>
             </div>
@@ -94,7 +94,9 @@
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="employmentTypeChart" height="300"></canvas>
+                <div class="chart-container">
+                    <canvas id="employmentTypeChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -107,7 +109,9 @@
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="billableStatusChart" height="300"></canvas>
+                <div class="chart-container">
+                    <canvas id="billableStatusChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -122,7 +126,9 @@
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="teamChart" height="300"></canvas>
+                <div class="chart-container">
+                    <canvas id="teamChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -135,7 +141,9 @@
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="locationChart" height="300"></canvas>
+                <div class="chart-container">
+                    <canvas id="locationChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -151,7 +159,9 @@
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="skillsChart" height="200"></canvas>
+                <div class="skills-chart-container">
+                    <canvas id="skillsChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
