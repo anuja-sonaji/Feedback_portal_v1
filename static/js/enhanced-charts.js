@@ -34,7 +34,7 @@ function initializeDashboardCharts(analyticsData) {
 
         // Set chart defaults
         Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        Chart.defaults.font.size = 10;
+        Chart.defaults.font.size = 11;
         Chart.defaults.color = '#64748b';
 
         // Initialize each chart type safely
