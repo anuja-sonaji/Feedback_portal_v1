@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Anuja Sonaji",
+    "email": "anuja.sonaji@allianz.com",
+    "system_id": "i31155",
+    "designation": "Technical Lead",
+    "team": "UFS"
+  },
+  {
+    "name": "Asha Vijayan",
+    "email": "asha.vijayan@allianz.com",
+    "system_id": "I85250",
+    "designation": "Project Manager",
+    "team": "UFS"
+  },
+  {
+    "name": "Deepak Krishnan",
+    "email": "deepak.krishnan2@allianz.com",
+    "system_id": "I82658",
+    "designation": "Senior Technical Architect",
+    "team": "UFS"
+  }
+]

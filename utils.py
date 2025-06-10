@@ -238,7 +238,7 @@ def get_dashboard_analytics(employees):
     return analytics
 
 def create_sample_data():
-    """Create sample users if database is empty"""
+    """Create line managers based on Excel file data"""
     try:
         # Import here to avoid circular imports
         from app import db
@@ -246,26 +246,73 @@ def create_sample_data():
         if Employee.query.first():
             return
 
-        # Create top manager
-        top_manager = Employee(
-            system_id='SYS001',
-            bensl_id='BEN001',
-            full_name='Sooraj Kumar',
-            emailid='sooraj@company.com',
-            designation='VP Engineering',
-            role='VP',
-            team='Leadership',
-            location='Bangalore',
-            employment_type='Permanent',
-            employee_status='Active',
-            billable_status='Non-billable',
-            is_manager=True,
-            manager_id=None,
-            company='Allianz Technology'
-        )
-        top_manager.set_password('password123')
-        db.session.add(top_manager)
+        # Create line managers only (based on Excel file)
+        line_managers = [
+            {
+                'full_name': 'Anuja Sonaji',
+                'emailid': 'anuja.sonaji@allianz.com',
+                'system_id': 'ANJ001',
+                'designation': 'Senior Manager',
+                'team': 'Development',
+                'is_manager': True
+            },
+            {
+                'full_name': 'Asha Vijayan',
+                'emailid': 'asha.vijayan@allianz.com',
+                'system_id': 'ASH001',
+                'designation': 'Team Lead',
+                'team': 'Quality Assurance',
+                'is_manager': True
+            },
+            {
+                'full_name': 'Deepak Krishnan',
+                'emailid': 'deepak.krishnan2@allianz.com',
+                'system_id': 'DEE001',
+                'designation': 'Project Manager',
+                'team': 'Project Management',
+                'is_manager': True
+            },
+            {
+                'full_name': 'Sooraj Valliot',
+                'emailid': 'sooraj.valliot@allianz.com',
+                'system_id': 'SOO001',
+                'designation': 'Technical Lead',
+                'team': 'Architecture',
+                'is_manager': True
+            },
+            {
+                'full_name': 'Richa Sinha',
+                'emailid': 'richa.sinha@allianz.com',
+                'system_id': 'RIC001',
+                'designation': 'Manager',
+                'team': 'RG',
+                'is_manager': True
+            }
+        ]
+
+        for manager_data in line_managers:
+            manager = Employee(
+                system_id=manager_data['system_id'],
+                bensl_id=manager_data['system_id'],
+                full_name=manager_data['full_name'],
+                emailid=manager_data['emailid'],
+                designation=manager_data['designation'],
+                role='Manager',
+                team=manager_data['team'],
+                location='Bangalore',
+                employment_type='Permanent',
+                employee_status='ACTIVE',
+                billable_status='Non-billable',
+                is_manager=True,
+                manager_id=None,
+                company='Allianz Technology'
+            )
+            # Set default password for managers
+            manager.set_password('Manager@123')
+            db.session.add(manager)
+        
         db.session.commit()
+        print("Line managers created successfully")
 
     except Exception as e:
         db.session.rollback()
