@@ -17,22 +17,18 @@ login_manager = LoginManager()
 
 # create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET") or "dev-secret-key-change-in-production"
+app.secret_key = os.environ.get("SESSION_SECRET")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# configure the database
-database_url = os.environ.get("DATABASE_URL", "sqlite:///employee_feedback.db")
-# Fix SSL issues for PostgreSQL
-if database_url.startswith("postgresql://"):
-    database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+# configure the database, relative to the app instance folder
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
-    "connect_args": {
-        "sslmode": "prefer"
-    } if database_url.startswith("postgresql") else {}
 }
 
 # Configure file uploads
@@ -42,7 +38,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 # initialize extensions
 db.init_app(app)
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'login'  # type: ignore
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
 
