@@ -321,10 +321,15 @@
     function initializeHierarchy() {
         hierarchyData.expandedNodes = new Set();
         
-        document.getElementById('searchHierarchy').addEventListener('input', filterHierarchy);
-        document.getElementById('filterTeam').addEventListener('change', filterHierarchy);
-        document.getElementById('filterLocation').addEventListener('change', filterHierarchy);
-        document.getElementById('filterManager').addEventListener('input', filterHierarchy);
+        const searchHierarchy = document.getElementById('searchHierarchy');
+        const filterTeam = document.getElementById('filterTeam');
+        const filterLocation = document.getElementById('filterLocation');
+        const filterManager = document.getElementById('filterManager');
+        
+        if (searchHierarchy) searchHierarchy.addEventListener('input', filterHierarchy);
+        if (filterTeam) filterTeam.addEventListener('change', filterHierarchy);
+        if (filterLocation) filterLocation.addEventListener('change', filterHierarchy);
+        if (filterManager) filterManager.addEventListener('input', filterHierarchy);
     }
     
     function toggleSubtree(button) {
