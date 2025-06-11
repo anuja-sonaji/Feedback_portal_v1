@@ -17,7 +17,7 @@ login_manager = LoginManager()
 
 # create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+app.secret_key = os.environ.get("SESSION_SECRET")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # configure the database, relative to the app instance folder
