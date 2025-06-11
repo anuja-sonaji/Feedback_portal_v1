@@ -13,12 +13,13 @@ class Employee(UserMixin, db.Model):
     billable_status = db.Column(db.String(50))
     employee_status = db.Column(db.String(50))
     system_id = db.Column(db.String(50))
-    bensl_id = db.Column(db.String(50))
+    bensl_id = db.Column(db.String(50), unique=True, nullable=False)
     full_name = db.Column(db.String(200))
     role = db.Column(db.String(100))
     skill = db.Column(db.Text)
     team = db.Column(db.String(100))
     manager_name = db.Column(db.String(200))
+    manager_bensl_id = db.Column(db.String(50), nullable=True)  # Store manager's Bensl_ID
     manager_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=True)
     critical = db.Column(db.String(20))
     

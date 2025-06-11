@@ -46,23 +46,31 @@ def process_excel_file(file, manager_id):
             'System_ID': 'system_id',
             'Bensl_ID': 'bensl_id',
             'Full_Name': 'full_name',
-            'Role': 'role',
+            'Role ': 'role',  # Note the space in Excel column
+            'Role': 'role',   # Handle both cases
             'Skill': 'skill',
             'Team': 'team',
-            'Manager_Name': 'manager_name',
-            'Manager_ID': 'manager_id',
+            'Manager Name': 'manager_name',  # Note the space in Excel column
+            'Manager_Name': 'manager_name',  # Handle both cases
+            'Manager ID': 'manager_bensl_id',  # Map to manager_bensl_id field
+            'Manager_ID': 'manager_bensl_id',  # Handle both cases
             'Critical': 'critical',
-            'DOJ_Allianz': 'doj_allianz',
-            'DOL_Allianz': 'dol_allianz',
+            'DOJ Allianz': 'doj_allianz',  # Note the space in Excel column
+            'DOJ_Allianz': 'doj_allianz',  # Handle both cases
+            'DOL Allianz': 'dol_allianz',  # Note the space in Excel column
+            'DOL_Allianz': 'dol_allianz',  # Handle both cases
             'Grade': 'grade',
             'Designation': 'designation',
-            'DOJ_Project': 'doj_project',
-            'DOL_Project': 'dol_project',
+            'DOJ Project': 'doj_project',  # Note the space in Excel column
+            'DOJ_Project': 'doj_project',  # Handle both cases
+            'DOL Project': 'dol_project',  # Note the space in Excel column
+            'DOL_Project': 'dol_project',  # Handle both cases
             'Gender': 'gender',
             'Company': 'company',
             'Emailid': 'emailid',
             'Location': 'location',
-            'Billing_Rate': 'billing_rate',
+            'BillingRate': 'billing_rate',  # Note no underscore in Excel column
+            'Billing_Rate': 'billing_rate',  # Handle both cases
             'Rate_Card': 'rate_card',
             'Remarks': 'remarks'
         }
@@ -127,20 +135,18 @@ def process_excel_file(file, manager_id):
                         employee_data[db_field] = None
 
                 # Check if we have enough data to create an employee
-                if not employee_data.get('system_id') and not employee_data.get('full_name'):
-                    result['errors'].append(f"Row {index + 2}: Missing System ID or Full Name")
+                if not employee_data.get('bensl_id') and not employee_data.get('full_name'):
+                    result['errors'].append(f"Row {index + 2}: Missing Bensl_ID or Full Name")
                     continue
 
-                # Check if employee already exists (by system_id or emailid)
+                # Check if employee already exists (by bensl_id)
                 existing_employee = None
-                if employee_data.get('system_id'):
-                    existing_employee = Employee.query.filter_by(system_id=employee_data['system_id']).first()
-                elif employee_data.get('emailid'):
-                    existing_employee = Employee.query.filter_by(emailid=employee_data['emailid']).first()
+                if employee_data.get('bensl_id'):
+                    existing_employee = Employee.query.filter_by(bensl_id=employee_data['bensl_id']).first()
 
                 if existing_employee:
                     result['skipped'] += 1
-                    result['errors'].append(f"Row {index + 2}: Employee with System ID {employee_data.get('system_id')} already exists")
+                    result['errors'].append(f"Row {index + 2}: Employee with Bensl_ID {employee_data.get('bensl_id')} already exists")
                     continue
 
                 temp_employees.append(employee_data)
