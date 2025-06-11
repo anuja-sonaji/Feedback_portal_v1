@@ -24,7 +24,7 @@
                                     {% for employee in employees %}
                                     <option value="{{ employee.id }}" 
                                             {{ 'selected' if feedback and feedback.employee_id == employee.id else '' }}>
-                                        {{ employee.name }} ({{ employee.employee_id }})
+                                        {{ employee.full_name }} ({{ employee.system_id or employee.bensl_id or 'No ID' }})
                                     </option>
                                     {% endfor %}
                                 </select>
