@@ -224,10 +224,14 @@
 
 {% block scripts %}
 <script>
-    // Filter functionality
-    document.getElementById('filterType').addEventListener('change', applyFilters);
-    document.getElementById('filterYear').addEventListener('change', applyFilters);
-    document.getElementById('searchEmployee').addEventListener('input', applyFilters);
+    // Filter functionality - add null checks
+    const filterType = document.getElementById('filterType');
+    const filterYear = document.getElementById('filterYear');
+    const searchEmployee = document.getElementById('searchEmployee');
+    
+    if (filterType) filterType.addEventListener('change', applyFilters);
+    if (filterYear) filterYear.addEventListener('change', applyFilters);
+    if (searchEmployee) searchEmployee.addEventListener('input', applyFilters);
     
     function applyFilters() {
         const typeFilter = document.getElementById('filterType').value.toLowerCase();

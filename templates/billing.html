@@ -271,11 +271,16 @@
 
 {% block scripts %}
 <script>
-    // Filter functionality
-    document.getElementById('filterEmployee').addEventListener('change', applyBillingFilters);
-    document.getElementById('filterYear').addEventListener('change', applyBillingFilters);
-    document.getElementById('filterMonth').addEventListener('change', applyBillingFilters);
-    document.getElementById('filterStatus').addEventListener('change', applyBillingFilters);
+    // Filter functionality - add null checks
+    const filterEmployee = document.getElementById('filterEmployee');
+    const filterYear = document.getElementById('filterYear');
+    const filterMonth = document.getElementById('filterMonth');
+    const filterStatus = document.getElementById('filterStatus');
+    
+    if (filterEmployee) filterEmployee.addEventListener('change', applyBillingFilters);
+    if (filterYear) filterYear.addEventListener('change', applyBillingFilters);
+    if (filterMonth) filterMonth.addEventListener('change', applyBillingFilters);
+    if (filterStatus) filterStatus.addEventListener('change', applyBillingFilters);
     
     function applyBillingFilters() {
         const employeeFilter = document.getElementById('filterEmployee').value.toLowerCase();
