@@ -135,8 +135,8 @@ def process_excel_file(file, manager_id):
                         employee_data[db_field] = None
 
                 # Check if we have enough data to create an employee
-                if not employee_data.get('bensl_id') and not employee_data.get('full_name'):
-                    result['errors'].append(f"Row {index + 2}: Missing Bensl_ID or Full Name")
+                if not employee_data.get('full_name'):
+                    result['errors'].append(f"Row {index + 2}: Missing Full Name")
                     continue
 
                 # Check if employee already exists (by bensl_id)
