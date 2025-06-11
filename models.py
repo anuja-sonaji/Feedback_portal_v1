@@ -63,11 +63,15 @@ class Employee(UserMixin, db.Model):
     def get_all_subordinates(self):
         """Get all employees under this manager's hierarchy"""
         subordinates = []
-        direct_reports = self.direct_reports
+        direct_reports = Employee.query.filter_by(manager_id=self.id).all()
         for report in direct_reports:
             subordinates.append(report)
             subordinates.extend(report.get_all_subordinates())
         return subordinates
+    
+    def get_direct_reports(self):
+        """Get direct reports of this manager"""
+        return Employee.query.filter_by(manager_id=self.id).all()
     
     def can_manage(self, employee):
         """Check if this employee can manage another employee"""

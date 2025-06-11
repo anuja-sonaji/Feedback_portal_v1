@@ -105,8 +105,8 @@ def process_excel_file(file, manager_id):
                 for excel_col, db_field in column_mapping.items():
                     value = row.get(excel_col)
                     if pd.notna(value):
-                        if excel_col in ['Billing_Rate']:
-                            # Handle numeric fields
+                        if excel_col in ['BillingRate', 'Billing_Rate']:
+                            # Handle billing rate - if it's not numeric, store as None
                             try:
                                 employee_data[db_field] = float(value)
                             except (ValueError, TypeError):
@@ -165,9 +165,8 @@ def process_excel_file(file, manager_id):
                     if hasattr(employee, field) and value is not None:
                         setattr(employee, field, value)
 
-                # Set default manager to importing user
-                if not employee.manager_id:
-                    employee.manager_id = manager_id
+                # Don't set default manager_id here - we'll establish relationships later
+                # using manager_bensl_id after all employees are imported
 
                 # Set default values for required fields if not provided
                 if not employee.employment_type:
@@ -188,6 +187,10 @@ def process_excel_file(file, manager_id):
                 continue
 
         db.session.commit()
+        
+        # Now establish manager relationships using Bensl_ID
+        establish_manager_relationships()
+        
         result['success'] = True
 
     except Exception as e:
@@ -195,6 +198,30 @@ def process_excel_file(file, manager_id):
         result['error'] = f"Unexpected error: {str(e)}"
 
     return result
+
+def establish_manager_relationships():
+    """Establish manager-employee relationships using manager_bensl_id"""
+    from app import db
+    from models import Employee
+    
+    try:
+        # Get all employees with manager_bensl_id
+        employees = Employee.query.filter(Employee.manager_bensl_id.isnot(None)).all()
+        
+        for employee in employees:
+            if employee.manager_bensl_id:
+                # Find the manager by their Bensl_ID
+                manager = Employee.query.filter_by(bensl_id=employee.manager_bensl_id).first()
+                if manager:
+                    employee.manager_id = manager.id
+                    manager.is_manager = True
+        
+        db.session.commit()
+        print("Manager relationships established successfully")
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error establishing manager relationships: {str(e)}")
 
 def get_dashboard_analytics(employees):
     """Generate analytics data for dashboard charts"""
