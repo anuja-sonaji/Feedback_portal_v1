@@ -367,7 +367,7 @@ def add_feedback():
     
     # Get direct reports for dropdown
     direct_reports = current_user.direct_reports
-    return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add')
+    return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add', now=datetime.now())
 
 @app.route('/feedback/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -404,7 +404,7 @@ def edit_feedback(id):
             flash(f'Error updating feedback: {str(e)}', 'error')
     
     direct_reports = current_user.direct_reports
-    return render_template('feedback_form.html', feedback=feedback, employees=direct_reports, action='Edit')
+    return render_template('feedback_form.html', feedback=feedback, employees=direct_reports, action='Edit', now=datetime.now())
 
 @app.route('/billing')
 @login_required
