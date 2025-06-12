@@ -315,28 +315,42 @@ def add_feedback():
     
     if request.method == 'POST':
         try:
-            feedback = Feedback(
-                employee_id=int(request.form['employee_id']),
-                manager_id=current_user.id,
-                feedback_type=request.form['feedback_type'],
-                period_year=int(request.form['period_year']),
-                performance_rating=int(request.form['performance_rating']) if request.form['performance_rating'] else None,
-                goals_achieved=request.form['goals_achieved'],
-                areas_of_improvement=request.form['areas_of_improvement'],
-                strengths=request.form['strengths'],
-                comments=request.form['comments']
-            )
+            # Validate required fields
+            employee_id = request.form.get('employee_id')
+            feedback_type = request.form.get('feedback_type')
+            period_year = request.form.get('period_year')
             
-            if request.form['feedback_type'] == 'Monthly':
-                feedback.period_month = int(request.form['period_month'])
-            else:
-                feedback.period_quarter = int(request.form['period_quarter'])
+            if not employee_id or not feedback_type or not period_year:
+                flash('Please fill in all required fields.', 'error')
+                direct_reports = current_user.direct_reports
+                return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add')
             
-            # Verify employee is under current manager
-            employee = Employee.query.get(feedback.employee_id)
-            if not current_user.can_manage(employee):
+            # Verify employee is under current manager first
+            employee = Employee.query.get(int(employee_id))
+            if not employee or not current_user.can_manage(employee):
                 flash('Access denied. You can only give feedback to your direct reports.', 'error')
                 return redirect(url_for('feedback'))
+            
+            feedback = Feedback(
+                employee_id=int(employee_id),
+                manager_id=current_user.id,
+                feedback_type=feedback_type,
+                period_year=int(period_year),
+                performance_rating=int(request.form['performance_rating']) if request.form.get('performance_rating') else None,
+                goals_achieved=request.form.get('goals_achieved', ''),
+                areas_of_improvement=request.form.get('areas_of_improvement', ''),
+                strengths=request.form.get('strengths', ''),
+                comments=request.form.get('comments', '')
+            )
+            
+            if feedback_type == 'Monthly':
+                period_month = request.form.get('period_month')
+                if period_month:
+                    feedback.period_month = int(period_month)
+            else:
+                period_quarter = request.form.get('period_quarter')
+                if period_quarter:
+                    feedback.period_quarter = int(period_quarter)
             
             db.session.add(feedback)
             db.session.commit()
@@ -344,6 +358,9 @@ def add_feedback():
             flash('Feedback added successfully!', 'success')
             return redirect(url_for('feedback'))
             
+        except ValueError as e:
+            db.session.rollback()
+            flash('Invalid data format. Please check your inputs.', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error adding feedback: {str(e)}', 'error')

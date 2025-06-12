@@ -67,14 +67,14 @@
                 <tbody>
                     {% for feedback in feedback_list %}
                     <tr data-type="{{ feedback.feedback_type }}" data-year="{{ feedback.period_year }}" 
-                        data-employee="{{ feedback.received_by.name.lower() }}">
+                        data-employee="{{ feedback.received_by.full_name.lower() }}">
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="avatar-sm bg-info rounded-circle d-flex align-items-center justify-content-center me-2">
                                     <i class="fas fa-user text-white"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-semibold">{{ feedback.received_by.name }}</div>
+                                    <div class="fw-semibold">{{ feedback.received_by.full_name }}</div>
                                     <small class="text-muted">{{ feedback.received_by.designation or 'Employee' }}</small>
                                 </div>
                             </div>
