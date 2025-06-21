@@ -11,7 +11,7 @@ git config user.email "anuja.sonaji@example.com"
 
 # Add remote repository if not already added
 git remote remove origin 2>/dev/null || true
-git remote add origin https://github.com/anuja-sonaji/Bmp_Aus_emp_feedback_portal1.git
+git remote add origin https://github.com/anuja-sonaji/Feedback_portal_v1.git
 
 # Add all files to staging
 echo "📁 Adding files to git..."
