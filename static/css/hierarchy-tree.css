@@ -395,27 +395,49 @@
 
 /* Actions */
 .employee-actions {
-    margin-top: 10px;
+    margin-top: 15px;
     display: flex;
     justify-content: center;
-    gap: 5px;
+    gap: 8px;
 }
 
 .action-btn {
-    background: none;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 5px 8px;
-    color: #6c757d;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    padding: 8px;
+    width: 35px;
+    height: 35px;
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .action-btn:hover {
-    background: #f8f9fa;
-    border-color: #007bff;
-    color: #007bff;
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.employee-card.ceo-card .action-btn:hover {
+    color: #ff4757;
+    border-color: #ff4757;
+}
+
+.employee-card.manager-card .action-btn:hover {
+    color: #3742fa;
+    border-color: #3742fa;
+}
+
+.employee-card.employee-card .action-btn:hover {
+    color: #2ed573;
+    border-color: #2ed573;
 }
 
 /* Responsive Design */

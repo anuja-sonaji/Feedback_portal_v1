@@ -16,7 +16,10 @@
                 </h2>
                 <div class="btn-group">
                     {% if current_user.is_manager %}
-                    <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
+                    <a href="{{ url_for('import_excel') }}" class="btn" 
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                              border: none; color: white; font-weight: 600; padding: 10px 20px; 
+                              border-radius: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
                         <i class="fas fa-file-excel me-1"></i>Import Data
                     </a>
                     {% endif %}
@@ -26,25 +29,26 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h6 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>Filters & Search
+    <div class="card mb-4" style="border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-radius: 15px;">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0; border: none;">
+            <h6 class="card-title mb-0" style="font-weight: 700; font-size: 16px;">
+                <i class="fas fa-filter me-2" style="color: #ffd700;"></i>Filters & Search
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 0 0 15px 15px;">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="searchHierarchy">Search Employee</label>
+                        <label for="searchHierarchy" style="color: #495057; font-weight: 600; margin-bottom: 8px;">Search Employee</label>
                         <input type="text" id="searchHierarchy" class="form-control" 
-                               placeholder="Search by name or designation...">
+                               placeholder="Search by name or designation..."
+                               style="border: 2px solid #667eea; border-radius: 10px; padding: 10px; transition: all 0.3s ease;">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label for="filterTeam">Team</label>
-                        <select id="filterTeam" class="form-select">
+                        <label for="filterTeam" style="color: #495057; font-weight: 600; margin-bottom: 8px;">Team</label>
+                        <select id="filterTeam" class="form-select" style="border: 2px solid #2ed573; border-radius: 10px; padding: 10px;">
                             <option value="">All Teams</option>
                             {% for team in stats.teams %}
                             <option value="{{ team }}">{{ team }}</option>
@@ -54,8 +58,8 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label for="filterLocation">Location</label>
-                        <select id="filterLocation" class="form-select">
+                        <label for="filterLocation" style="color: #495057; font-weight: 600; margin-bottom: 8px;">Location</label>
+                        <select id="filterLocation" class="form-select" style="border: 2px solid #3742fa; border-radius: 10px; padding: 10px;">
                             <option value="">All Locations</option>
                             {% for location in stats.locations %}
                             <option value="{{ location }}">{{ location }}</option>
@@ -65,16 +69,20 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="filterManager">Manager</label>
+                        <label for="filterManager" style="color: #495057; font-weight: 600; margin-bottom: 8px;">Manager</label>
                         <input type="text" id="filterManager" class="form-control" 
-                               placeholder="Search by manager name...">
+                               placeholder="Search by manager name..."
+                               style="border: 2px solid #ff6b6b; border-radius: 10px; padding: 10px; transition: all 0.3s ease;">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
                         <label>&nbsp;</label>
                         <div class="d-grid">
-                            <button type="button" class="btn btn-outline-secondary" onclick="clearHierarchyFilters()">
+                            <button type="button" class="btn" onclick="clearHierarchyFilters()"
+                                    style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); 
+                                           border: none; color: white; font-weight: 600; border-radius: 10px; 
+                                           padding: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);">
                                 <i class="fas fa-times me-1"></i>Clear
                             </button>
                         </div>
@@ -88,34 +96,38 @@
     {% if stats %}
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="text-primary">{{ stats.total_employees }}</h3>
-                    <p class="card-text">Total Employees</p>
+            <div class="card text-center" style="border: none; border-radius: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);">
+                <div class="card-body" style="padding: 25px;">
+                    <i class="fas fa-users fa-2x mb-3" style="color: #ffd700;"></i>
+                    <h3 style="font-weight: 700; margin-bottom: 10px;">{{ stats.total_employees }}</h3>
+                    <p class="card-text" style="font-weight: 500; opacity: 0.9;">Total Employees</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="text-success">{{ stats.total_managers }}</h3>
-                    <p class="card-text">Managers</p>
+            <div class="card text-center" style="border: none; border-radius: 15px; background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%); color: white; box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);">
+                <div class="card-body" style="padding: 25px;">
+                    <i class="fas fa-user-tie fa-2x mb-3" style="color: #ffd700;"></i>
+                    <h3 style="font-weight: 700; margin-bottom: 10px;">{{ stats.total_managers }}</h3>
+                    <p class="card-text" style="font-weight: 500; opacity: 0.9;">Managers</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="text-info">{{ stats.hierarchy_depth }}</h3>
-                    <p class="card-text">Hierarchy Levels</p>
+            <div class="card text-center" style="border: none; border-radius: 15px; background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%); color: white; box-shadow: 0 8px 25px rgba(55, 66, 250, 0.4);">
+                <div class="card-body" style="padding: 25px;">
+                    <i class="fas fa-layer-group fa-2x mb-3" style="color: #ffd700;"></i>
+                    <h3 style="font-weight: 700; margin-bottom: 10px;">{{ stats.hierarchy_depth }}</h3>
+                    <p class="card-text" style="font-weight: 500; opacity: 0.9;">Hierarchy Levels</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="text-warning">{{ access_level }}</h3>
-                    <p class="card-text">Your Access Level</p>
+            <div class="card text-center" style="border: none; border-radius: 15px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);">
+                <div class="card-body" style="padding: 25px;">
+                    <i class="fas fa-crown fa-2x mb-3" style="color: #ffd700;"></i>
+                    <h3 style="font-weight: 700; margin-bottom: 10px;">{{ access_level }}</h3>
+                    <p class="card-text" style="font-weight: 500; opacity: 0.9;">Your Access Level</p>
                 </div>
             </div>
         </div>
@@ -124,10 +136,10 @@
 
     <!-- Organization Tree Structure -->
     {% if top_managers %}
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-sitemap me-2"></i>Organization Tree Structure
+    <div class="card" style="border: none; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden;">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: white; border: none; padding: 20px;">
+            <h5 class="card-title mb-0" style="font-weight: 700; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+                <i class="fas fa-sitemap me-2" style="color: #ffd700; font-size: 24px;"></i>Organization Tree Structure
             </h5>
         </div>
         <div class="card-body p-0">
@@ -138,37 +150,37 @@
     </div>
 
     <!-- Legend -->
-    <div class="card mt-4">
-        <div class="card-header">
-            <h6 class="card-title mb-0">
-                <i class="fas fa-info-circle me-2"></i>Organization Hierarchy Legend
+    <div class="card mt-4" style="border: none; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+        <div class="card-header" style="background: linear-gradient(135deg, #2f3542 0%, #40407a 100%); color: white; border-radius: 15px 15px 0 0; border: none;">
+            <h6 class="card-title mb-0" style="font-weight: 700; font-size: 16px;">
+                <i class="fas fa-info-circle me-2" style="color: #ffd700;"></i>Organization Hierarchy Legend
             </h6>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 0 0 15px 15px; padding: 25px;">
             <div class="hierarchy-legend">
                 <div class="row">
                     <div class="col-md-3">
-                        <div class="legend-item">
-                            <div class="legend-color legend-ceo"></div>
-                            <span>CEO/Director Level</span>
+                        <div class="legend-item" style="padding: 15px; background: rgba(255, 107, 107, 0.1); border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #ff6b6b;">
+                            <div class="legend-color legend-ceo" style="border-radius: 8px;"></div>
+                            <span style="font-weight: 600; color: #2f3542;">CEO/Director Level</span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="legend-item">
-                            <div class="legend-color legend-manager"></div>
-                            <span>Line Managers</span>
+                        <div class="legend-item" style="padding: 15px; background: rgba(55, 66, 250, 0.1); border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #3742fa;">
+                            <div class="legend-color legend-manager" style="border-radius: 8px;"></div>
+                            <span style="font-weight: 600; color: #2f3542;">Line Managers</span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="legend-item">
-                            <div class="legend-color legend-employee"></div>
-                            <span>Team Members</span>
+                        <div class="legend-item" style="padding: 15px; background: rgba(46, 213, 115, 0.1); border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #2ed573;">
+                            <div class="legend-color legend-employee" style="border-radius: 8px;"></div>
+                            <span style="font-weight: 600; color: #2f3542;">Team Members</span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="legend-item">
-                            <div class="legend-color legend-current"></div>
-                            <span>Your Position</span>
+                        <div class="legend-item" style="padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #ffd700;">
+                            <div class="legend-color legend-current" style="border-radius: 8px;"></div>
+                            <span style="font-weight: 600; color: #2f3542;">Your Position</span>
                         </div>
                     </div>
                 </div>
@@ -184,7 +196,10 @@
                 <h4>No Organization Structure Found</h4>
                 <p>No organizational hierarchy data is available for your access level.</p>
                 {% if current_user.is_manager %}
-                <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
+                <a href="{{ url_for('import_excel') }}" class="btn" 
+                   style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%); 
+                          border: none; color: white; font-weight: 600; padding: 12px 24px; 
+                          border-radius: 10px; text-decoration: none; box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);">
                     <i class="fas fa-file-excel me-1"></i>Import Employee Data
                 </a>
                 {% endif %}
@@ -197,17 +212,25 @@
 <!-- Employee Details Modal -->
 <div class="modal fade" id="employeeModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Employee Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content" style="border: none; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; border: none; padding: 20px;">
+                <h5 class="modal-title" style="font-weight: 700; font-size: 18px;">
+                    <i class="fas fa-user-circle me-2" style="color: #ffd700;"></i>Employee Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="employeeDetails">
+            <div class="modal-body" id="employeeDetails" style="padding: 25px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
                 <!-- Employee details loaded here -->
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="editEmployeeBtn">Edit Employee</button>
+            <div class="modal-footer" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 0 0 20px 20px; border: none; padding: 20px;">
+                <button type="button" class="btn" data-bs-dismiss="modal" 
+                        style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); 
+                               border: none; color: white; font-weight: 600; padding: 10px 20px; 
+                               border-radius: 8px; box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);">Close</button>
+                <button type="button" class="btn" id="editEmployeeBtn"
+                        style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%); 
+                               border: none; color: white; font-weight: 600; padding: 10px 20px; 
+                               border-radius: 8px; box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);">Edit Employee</button>
             </div>
         </div>
     </div>
