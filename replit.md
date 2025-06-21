@@ -100,10 +100,18 @@ The Employee Feedback Portal is a comprehensive web application built with Flask
 - **Static Assets**: CDN delivery for frontend dependencies
 - **Session Management**: Server-side sessions for horizontal scaling
 
+## Recent Changes
+
+- June 21, 2025: Fixed hierarchy page crash and implemented professional tree structure
+- June 21, 2025: Created comprehensive professional UI design system with enhanced CSS variables
+- June 21, 2025: Implemented interactive hierarchy with expand/collapse functionality and search filters
+- June 21, 2025: Added gradient-based design patterns and improved card styling throughout application
+- June 21, 2025: Enhanced employee cards with professional avatars, badges, and action buttons
+
 ## Changelog
 
-Changelog:
-- June 21, 2025. Initial setup
+- June 21, 2025: Initial setup
+- June 21, 2025: Professional UI overhaul and hierarchy implementation
 
 ## User Preferences
 
