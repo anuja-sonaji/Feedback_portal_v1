@@ -1,5 +1,6 @@
 import os
 import json
+import pandas as pd
 from datetime import datetime, date
 from flask import render_template, redirect, url_for, flash, request, jsonify, send_file
 from flask_login import login_user, logout_user, login_required, current_user
@@ -50,18 +51,45 @@ def dashboard():
     # Get analytics data for current user's scope
     if current_user.is_manager:
         subordinates = current_user.get_all_subordinates()
+        direct_reports = current_user.get_direct_reports()
         employees_in_scope = subordinates + [current_user]
     else:
+        direct_reports = []
         employees_in_scope = [current_user]
     
     analytics = get_dashboard_analytics(employees_in_scope)
     
-    # Get recent feedback
+    # Get recent feedback given by manager
     recent_feedback = []
+    feedback_summary = {
+        'total_given': 0,
+        'this_month': 0,
+        'pending_reviews': 0
+    }
+    
     if current_user.is_manager:
-        recent_feedback = Feedback.query.filter_by(manager_id=current_user.id)\
-                                      .order_by(Feedback.created_at.desc())\
-                                      .limit(5).all()
+        # Get all feedback given by this manager
+        all_feedback = Feedback.query.filter_by(manager_id=current_user.id)\
+                                   .order_by(Feedback.created_at.desc()).all()
+        recent_feedback = all_feedback[:5]  # Last 5 feedback entries
+        
+        feedback_summary['total_given'] = len(all_feedback)
+        
+        # Count feedback given this month
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        feedback_summary['this_month'] = len([f for f in all_feedback 
+                                            if f.created_at.month == current_month 
+                                            and f.created_at.year == current_year])
+        
+        # Calculate pending reviews (employees without recent feedback)
+        employees_with_recent_feedback = set()
+        for feedback in all_feedback:
+            if feedback.created_at.month >= current_month - 1:  # Last 2 months
+                employees_with_recent_feedback.add(feedback.employee_id)
+        
+        feedback_summary['pending_reviews'] = len([emp for emp in direct_reports 
+                                                 if emp.id not in employees_with_recent_feedback])
     
     # Group employees by categories for enhanced tooltips
     employees_by_type = {}
@@ -99,6 +127,8 @@ def dashboard():
     return render_template(template_name, 
                          analytics=analytics, 
                          recent_feedback=recent_feedback,
+                         feedback_summary=feedback_summary,
+                         direct_reports=direct_reports,
                          employees_by_type=employees_by_type,
                          employees_by_billable=employees_by_billable,
                          employees_by_team=employees_by_team,
@@ -487,7 +517,7 @@ def import_excel():
             flash('No file selected', 'error')
             return redirect(request.url)
         
-        if file and allowed_file(file.filename):
+        if file and file.filename and allowed_file(file.filename):
             try:
                 filename = secure_filename(file.filename)
                 result = process_excel_file(file, current_user.id)
