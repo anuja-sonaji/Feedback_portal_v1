@@ -1,0 +1,30 @@
+<!-- Manager Quick Actions Toolbar -->
+<div class="manager-toolbar bg-light border-bottom py-2 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-crown text-warning me-2"></i>
+                    <span class="fw-semibold">Manager Tools</span>
+                    <span class="badge bg-primary ms-2">{{ current_user.get_direct_reports()|length }} Direct Reports</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2 justify-content-md-end">
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-user-plus me-1"></i>Add Employee
+                    </a>
+                    <a href="{{ url_for('add_feedback') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-comment-alt me-1"></i>Give Feedback
+                    </a>
+                    <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-users me-1"></i>Manage Team
+                    </a>
+                    <a href="{{ url_for('import_excel') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-excel me-1"></i>Import Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,6 +3,11 @@
 {% block title %}Dashboard - Employee Feedback Portal{% endblock %}
 
 {% block content %}
+<!-- Manager Toolbar -->
+{% if current_user.is_manager %}
+{% include 'manager_toolbar.html' %}
+{% endif %}
+
 <!-- Header Section -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -107,17 +112,12 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
                         <div class="metric-icon bg-info bg-opacity-10 text-info mb-3">
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-comments"></i>
                         </div>
-                        <h6 class="text-muted mb-1 fw-normal">Search Team</h6>
-                        <div class="input-group input-group-sm mt-2 search-container position-relative">
-                            <input type="text" class="form-control" id="searchDirectReports" placeholder="Search team members...">
-                            <button class="btn btn-outline-primary" type="button">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                        <small class="text-info">
-                            <i class="fas fa-users me-1"></i>{{ current_user.direct_reports|length }} team members
+                        <h6 class="text-muted mb-1 fw-normal">Feedback Given</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ feedback_summary.total_given }}</h2>
+                        <small class="text-success">
+                            <i class="fas fa-calendar me-1"></i>{{ feedback_summary.this_month }} this month
                         </small>
                     </div>
                 </div>
@@ -126,7 +126,10 @@
     </div>
 </div>
 
-{% if current_user.is_manager and direct_reports %}
+{% if current_user.is_manager %}
+<!-- Team Quick View Section -->
+{% include 'team_quick_view.html' %}
+
 <!-- Direct Reports Management Section -->
 <div class="row g-4 mb-4">
     <div class="col-12">

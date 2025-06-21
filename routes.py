@@ -68,9 +68,11 @@ def dashboard():
     }
     
     if current_user.is_manager:
-        # Get all feedback given by this manager
-        all_feedback = Feedback.query.filter_by(manager_id=current_user.id)\
-                                   .order_by(Feedback.created_at.desc()).all()
+        # Get all feedback given by this manager with proper joins
+        all_feedback = db.session.query(Feedback)\
+                                .join(Employee, Feedback.employee_id == Employee.id)\
+                                .filter(Feedback.manager_id == current_user.id)\
+                                .order_by(Feedback.created_at.desc()).all()
         recent_feedback = all_feedback[:5]  # Last 5 feedback entries
         
         feedback_summary['total_given'] = len(all_feedback)
@@ -79,13 +81,16 @@ def dashboard():
         current_month = datetime.now().month
         current_year = datetime.now().year
         feedback_summary['this_month'] = len([f for f in all_feedback 
-                                            if f.created_at.month == current_month 
+                                            if f.created_at and f.created_at.month == current_month 
                                             and f.created_at.year == current_year])
         
-        # Calculate pending reviews (employees without recent feedback)
+        # Calculate pending reviews (employees without recent feedback in last 3 months)
+        from datetime import timedelta
+        three_months_ago = datetime.now() - timedelta(days=90)
+        
         employees_with_recent_feedback = set()
         for feedback in all_feedback:
-            if feedback.created_at.month >= current_month - 1:  # Last 2 months
+            if feedback.created_at and feedback.created_at >= three_months_ago:
                 employees_with_recent_feedback.add(feedback.employee_id)
         
         feedback_summary['pending_reviews'] = len([emp for emp in direct_reports 
