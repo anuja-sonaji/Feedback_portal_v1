@@ -487,7 +487,7 @@ def hierarchy():
         # Build hierarchy structure safely
         hierarchy_data = build_hierarchy_tree(all_employees)
         
-        return render_template('hierarchy.html', 
+        return render_template('hierarchy_tree.html', 
                              hierarchy_data=hierarchy_data,
                              total_employees=len(all_employees))
     except Exception as e:

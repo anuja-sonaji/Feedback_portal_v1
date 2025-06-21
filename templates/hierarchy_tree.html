@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Organizational Hierarchy - Employee Feedback Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/professional-hierarchy.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 fw-bold text-dark">
+                <i class="fas fa-sitemap me-2 text-primary"></i>Organizational Hierarchy
+            </h1>
+            <p class="text-muted mb-0">Interactive organizational tree structure with {{ total_employees }} employees</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="expandAllNodes()">
+                <i class="fas fa-expand-arrows-alt me-1"></i>Expand All
+            </button>
+            <button class="btn btn-outline-secondary" onclick="collapseAllNodes()">
+                <i class="fas fa-compress-arrows-alt me-1"></i>Collapse All
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card mb-4 hierarchy-controls">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Search Employee</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="hierarchySearch" placeholder="Search by name or role...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Team</label>
+                    <select class="form-select" id="teamFilter">
+                        <option value="">All Teams</option>
+                        <option value="Development">Development</option>
+                        <option value="Quality Assurance">Quality Assurance</option>
+                        <option value="Project Management">Project Management</option>
+                        <option value="Architecture">Architecture</option>
+                        <option value="RG">RG</option>
+                        <option value="UFS">UFS</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Grade</label>
+                    <select class="form-select" id="gradeFilter">
+                        <option value="">All Grades</option>
+                        <option value="Senior Manager">Senior Manager</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Senior Technical Engineer">Senior Technical Engineer</option>
+                        <option value="Technical Engineer">Technical Engineer</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hierarchy Tree -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="hierarchy-container">
+                {% if hierarchy_data %}
+                <div class="tree-view">
+                    {% for manager in hierarchy_data %}
+                        {{ render_employee_node(manager, 0) }}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-sitemap text-muted fa-3x mb-3"></i>
+                    <h5 class="text-muted">No Hierarchy Data</h5>
+                    <p class="text-muted">No organizational structure found for your access level.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Node Template Macro -->
+{% macro render_employee_node(employee, level) %}
+<div class="tree-node" data-level="{{ level }}" data-employee-id="{{ employee.id }}" style="--node-level: {{ level }};">
+    <div class="node-content {{ 'manager-node' if employee.is_manager else 'employee-node' }}">
+        <div class="node-connector" style="margin-left: {{ level * 40 }}px;">
+            {% if employee.direct_reports %}
+            <button class="expand-btn" onclick="toggleNode(this)">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            {% else %}
+            <span class="leaf-indicator"></span>
+            {% endif %}
+            
+            <div class="employee-card">
+                <div class="employee-info">
+                    <div class="d-flex align-items-center">
+                        <div class="employee-avatar">
+                            <span>{{ employee.full_name[:2].upper() if employee.full_name else 'NA' }}</span>
+                        </div>
+                        <div class="employee-details ms-3">
+                            <h6 class="mb-1 fw-bold">{{ employee.full_name or 'Unknown' }}</h6>
+                            <div class="employee-meta">
+                                <span class="badge bg-primary me-2">{{ employee.role or 'No Role' }}</span>
+                                {% if employee.team %}
+                                <span class="badge bg-secondary me-2">{{ employee.team }}</span>
+                                {% endif %}
+                                {% if employee.grade %}
+                                <span class="badge bg-info">{{ employee.grade }}</span>
+                                {% endif %}
+                            </div>
+                            {% if employee.is_manager %}
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>{{ employee.direct_reports|length }} direct reports
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="employee-actions">
+                        <a href="{{ url_for('employee_details', id=employee.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if current_user.is_manager and current_user.can_manage(employee) %}
+                        <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-comment"></i>
+                        </a>
+                        <a href="{{ url_for('edit_employee', id=employee.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if employee.direct_reports %}
+    <div class="child-nodes">
+        {% for subordinate in employee.direct_reports %}
+            {{ render_employee_node(subordinate, level + 1) }}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+
+
+<script>
+function toggleNode(button) {
+    const icon = button.querySelector('i');
+    const treeNode = button.closest('.tree-node');
+    const childNodes = treeNode.querySelector('.child-nodes');
+    
+    if (childNodes) {
+        const isCollapsed = childNodes.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            childNodes.classList.remove('collapsed');
+            button.classList.remove('collapsed');
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            childNodes.classList.add('collapsed');
+            button.classList.add('collapsed');
+            icon.style.transform = 'rotate(-90deg)';
+        }
+    }
+}
+
+function expandAllNodes() {
+    document.querySelectorAll('.child-nodes').forEach(node => {
+        node.classList.remove('collapsed');
+    });
+    document.querySelectorAll('.expand-btn').forEach(btn => {
+        btn.classList.remove('collapsed');
+        btn.querySelector('i').style.transform = 'rotate(0deg)';
+    });
+}
+
+function collapseAllNodes() {
+    document.querySelectorAll('.child-nodes').forEach(node => {
+        node.classList.add('collapsed');
+    });
+    document.querySelectorAll('.expand-btn').forEach(btn => {
+        btn.classList.add('collapsed');
+        btn.querySelector('i').style.transform = 'rotate(-90deg)';
+    });
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('hierarchySearch').value.toLowerCase();
+    const teamFilter = document.getElementById('teamFilter').value;
+    const gradeFilter = document.getElementById('gradeFilter').value;
+    
+    document.querySelectorAll('.tree-node').forEach(node => {
+        const employeeCard = node.querySelector('.employee-card');
+        const name = employeeCard.querySelector('h6').textContent.toLowerCase();
+        const badges = Array.from(employeeCard.querySelectorAll('.badge')).map(b => b.textContent);
+        
+        let show = true;
+        
+        if (searchTerm && !name.includes(searchTerm)) {
+            show = false;
+        }
+        
+        if (teamFilter && !badges.includes(teamFilter)) {
+            show = false;
+        }
+        
+        if (gradeFilter && !badges.includes(gradeFilter)) {
+            show = false;
+        }
+        
+        node.style.display = show ? 'block' : 'none';
+    });
+}
+
+// Real-time search
+document.getElementById('hierarchySearch').addEventListener('input', applyFilters);
+
+// Set CSS custom properties for tree lines
+document.querySelectorAll('.tree-node').forEach(node => {
+    const level = node.dataset.level;
+    node.style.setProperty('--level', level);
+});
+</script>
+{% endblock %}
