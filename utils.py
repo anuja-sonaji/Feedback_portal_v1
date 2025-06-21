@@ -90,6 +90,7 @@ def process_excel_file(file, manager_id):
 
         # Store employee data for processing
         temp_employees = []
+        processed_bensl_ids = set()
 
         # Process each row in the Excel file
         for index, row in df.iterrows():
@@ -97,6 +98,19 @@ def process_excel_file(file, manager_id):
                 # Skip completely empty rows
                 if row.isna().all():
                     continue
+                
+                # Skip rows without Full_Name (essential field)
+                if pd.isna(row.get('Full_Name')):
+                    result['errors'].append(f"Row {index + 2}: Missing Full_Name, skipping")
+                    continue
+                    
+                # Check for duplicate Bensl_ID
+                bensl_id = str(row.get('Bensl_ID', '')).strip() if pd.notna(row.get('Bensl_ID')) else None
+                if bensl_id and bensl_id in processed_bensl_ids:
+                    result['errors'].append(f"Row {index + 2}: Duplicate Bensl_ID {bensl_id}, skipping")
+                    continue
+                if bensl_id:
+                    processed_bensl_ids.add(bensl_id)
 
                 # Create employee data dictionary
                 employee_data = {}
@@ -165,8 +179,9 @@ def process_excel_file(file, manager_id):
                     if hasattr(employee, field) and value is not None:
                         setattr(employee, field, value)
 
-                # Don't set default manager_id here - we'll establish relationships later
-                # using manager_bensl_id after all employees are imported
+                # Generate email if not provided
+                if not employee.emailid and employee.full_name:
+                    employee.emailid = employee.full_name.lower().replace(' ', '.') + '@allianz.com'
 
                 # Set default values for required fields if not provided
                 if not employee.employment_type:
@@ -174,7 +189,7 @@ def process_excel_file(file, manager_id):
                 if not employee.billable_status:
                     employee.billable_status = 'Billable'
                 if not employee.employee_status:
-                    employee.employee_status = 'Active'
+                    employee.employee_status = 'ACTIVE'
 
                 # Set default password
                 employee.set_password('password123')
@@ -186,18 +201,37 @@ def process_excel_file(file, manager_id):
                 result['errors'].append(f"Failed to create employee: {str(e)}")
                 continue
 
-        db.session.commit()
+        # Commit all employees first
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            result['error'] = f"Failed to save employees: {str(e)}"
+            return result
+
+        # Third pass: Establish manager relationships
+        all_employees = Employee.query.all()
+        employee_lookup = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
         
-        # Now establish manager relationships using Bensl_ID
-        establish_manager_relationships()
+        for employee in all_employees:
+            if employee.manager_bensl_id and employee.manager_bensl_id in employee_lookup:
+                manager = employee_lookup[employee.manager_bensl_id]
+                employee.manager_id = manager.id
+                manager.is_manager = True
         
+        # Final commit for relationships
+        try:
+            db.session.commit()
+        except Exception as e:
+            result['errors'].append(f"Warning: Failed to establish some manager relationships: {str(e)}")
+
         result['success'] = True
+        return result
 
     except Exception as e:
         db.session.rollback()
         result['error'] = f"Unexpected error: {str(e)}"
-
-    return result
+        return result
 
 def establish_manager_relationships():
     """Establish manager-employee relationships using manager_bensl_id"""
