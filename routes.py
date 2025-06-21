@@ -18,8 +18,8 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        emailid = request.form['email']
-        password = request.form['password']
+        emailid = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
 
         employee = Employee.query.filter_by(emailid=emailid).first()
 
