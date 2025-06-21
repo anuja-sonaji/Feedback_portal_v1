@@ -1,0 +1,320 @@
+/* Organization Tree Structure CSS */
+.org-tree {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 400px;
+}
+
+.tree-level {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.tree-level.level-0 {
+    margin-bottom: 50px;
+}
+
+.tree-level.level-1 {
+    margin: 40px 0;
+}
+
+.tree-level.level-2 {
+    margin-top: 40px;
+}
+
+/* Employee Nodes */
+.employee-node {
+    position: relative;
+    min-width: 180px;
+    max-width: 220px;
+}
+
+.employee-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    padding: 20px;
+}
+
+/* Role-based card styles */
+.employee-card.ceo-card {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+}
+
+.employee-card.manager-card {
+    border-color: #007bff;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+}
+
+.employee-card.employee-card {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+}
+
+.employee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.employee-card.current-user {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3);
+}
+
+/* Employee Info */
+.employee-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0 auto 15px;
+    position: relative;
+}
+
+.employee-avatar.ceo-avatar {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.employee-avatar.manager-avatar {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.employee-avatar.employee-avatar {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.employee-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 5px;
+}
+
+.employee-title {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.employee-details {
+    font-size: 12px;
+    color: #868e96;
+}
+
+.employee-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    margin: 2px;
+}
+
+.badge-ceo {
+    background: #dc3545;
+    color: white;
+}
+
+.badge-manager {
+    background: #007bff;
+    color: white;
+}
+
+.badge-employee {
+    background: #28a745;
+    color: white;
+}
+
+.badge-team {
+    background: #6c757d;
+    color: white;
+}
+
+/* Tree Connections */
+.tree-connection {
+    position: relative;
+}
+
+.tree-connection::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    width: 2px;
+    height: 30px;
+    background: #dee2e6;
+    transform: translateX(-50%);
+}
+
+.tree-level.level-1 .employee-node::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    width: 2px;
+    height: 30px;
+    background: #007bff;
+    transform: translateX(-50%);
+}
+
+.tree-level.level-2 .employee-node::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    width: 2px;
+    height: 30px;
+    background: #28a745;
+    transform: translateX(-50%);
+}
+
+/* Horizontal connections for siblings */
+.tree-level.level-1::before,
+.tree-level.level-2::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #dee2e6;
+    z-index: -1;
+}
+
+/* Manager Group */
+.manager-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 20px;
+}
+
+.manager-group .manager-node {
+    margin-bottom: 40px;
+}
+
+.manager-group .reportees {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Actions */
+.employee-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.action-btn {
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.action-btn:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tree-level {
+        gap: 15px;
+    }
+    
+    .employee-node {
+        min-width: 160px;
+        max-width: 180px;
+    }
+    
+    .employee-card {
+        padding: 15px;
+    }
+    
+    .employee-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+    }
+    
+    .manager-group .reportees {
+        gap: 15px;
+    }
+}
+
+/* Legend */
+.hierarchy-legend {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.legend-ceo {
+    background: #dc3545;
+}
+
+.legend-manager {
+    background: #007bff;
+}
+
+.legend-employee {
+    background: #28a745;
+}
+
+.legend-current {
+    background: #ffc107;
+}
+
+/* Empty State */
+.empty-hierarchy {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-hierarchy i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}

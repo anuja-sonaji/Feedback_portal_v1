@@ -2,6 +2,10 @@
 
 {% block title %}Organization Hierarchy - Employee Feedback Portal{% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hierarchy-tree.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>
@@ -134,19 +138,17 @@
     </div>
 </div>
 
-<!-- Hierarchy Tree -->
+<!-- Organization Tree Structure -->
 {% if top_managers %}
 <div class="card">
     <div class="card-header">
         <h5 class="card-title mb-0">
-            <i class="fas fa-tree me-2"></i>Organization Structure
+            <i class="fas fa-sitemap me-2"></i>Organization Tree Structure
         </h5>
     </div>
-    <div class="card-body">
-        <div id="hierarchyTree" class="hierarchy-container">
-            {% for manager in top_managers %}
-                {{ render_employee_tree(manager, 0, current_user) }}
-            {% endfor %}
+    <div class="card-body p-0">
+        <div class="org-tree" id="organizationTree">
+            {{ render_org_tree(top_managers, current_user) }}
         </div>
     </div>
 </div>
@@ -155,45 +157,35 @@
 <div class="card mt-4">
     <div class="card-header">
         <h6 class="card-title mb-0">
-            <i class="fas fa-info-circle me-2"></i>Legend
+            <i class="fas fa-info-circle me-2"></i>Organization Hierarchy Legend
         </h6>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box level-0 me-2"></div>
-                    <span>CEO/VP Level</span>
+        <div class="hierarchy-legend">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="legend-item">
+                        <div class="legend-color legend-ceo"></div>
+                        <span>CEO/Director Level</span>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box level-1 me-2"></div>
-                    <span>Directors</span>
+                <div class="col-md-3">
+                    <div class="legend-item">
+                        <div class="legend-color legend-manager"></div>
+                        <span>Line Managers</span>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box level-2 me-2"></div>
-                    <span>Managers</span>
+                <div class="col-md-3">
+                    <div class="legend-item">
+                        <div class="legend-color legend-employee"></div>
+                        <span>Team Members</span>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box level-3 me-2"></div>
-                    <span>Team Leads</span>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box level-4 me-2"></div>
-                    <span>Employees</span>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="org-box current-user me-2"></div>
-                    <span>You</span>
+                <div class="col-md-3">
+                    <div class="legend-item">
+                        <div class="legend-color legend-current"></div>
+                        <span>Your Position</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -201,17 +193,19 @@
 </div>
 
 {% else %}
-<div class="text-center py-5">
-    <div class="mb-4">
-        <i class="fas fa-sitemap fa-4x text-muted"></i>
+<div class="card">
+    <div class="card-body">
+        <div class="empty-hierarchy">
+            <i class="fas fa-sitemap"></i>
+            <h4>No Organization Structure Found</h4>
+            <p>No organizational hierarchy data is available for your access level.</p>
+            {% if current_user.is_manager %}
+            <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
+                <i class="fas fa-file-excel me-1"></i>Import Employee Data
+            </a>
+            {% endif %}
+        </div>
     </div>
-    <h4 class="text-muted">No Hierarchy Data</h4>
-    <p class="text-muted mb-4">No organizational hierarchy information is available.</p>
-    {% if current_user.is_manager %}
-    <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
-        <i class="fas fa-file-excel me-1"></i>Import Employee Data
-    </a>
-    {% endif %}
 </div>
 {% endif %}
 
@@ -239,137 +233,108 @@
 </div>
 {% endblock %}
 
-<!-- Recursive macro for rendering hierarchy tree -->
-{% macro render_employee_tree(employee, depth, current_user) %}
-<div class="hierarchy-level level-{{ depth }}">
-    <div class="manager-container">
-        <!-- Manager Box -->
-        <div class="org-node manager-node" data-depth="{{ depth }}" 
-             data-employee-id="{{ employee.id }}"
-             data-name="{{ employee.full_name.lower() if employee.full_name else '' }}"
-             data-designation="{{ employee.designation.lower() if employee.designation else '' }}"
-             data-team="{{ employee.team if employee.team else '' }}"
-             data-location="{{ employee.location if employee.location else '' }}">
-
-            <div class="org-box level-{{ employee.hierarchy_level if employee.hierarchy_level is defined else min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
-                 onclick="showEmployeeDetails({{ employee.id }})">
-                <div class="org-box-header">
-                    <strong>{{ employee.full_name or 'N/A' }}</strong>
-                    {% if employee.hierarchy_level is defined and employee.hierarchy_level <= 1 %}
-                    <span class="badge bg-warning ms-2">Executive</span>
-                    {% elif employee.hierarchy_level is defined and employee.hierarchy_level <= 2 %}
-                    <span class="badge bg-info ms-2">Manager</span>
-                    {% elif employee.hierarchy_level is defined and employee.hierarchy_level <= 3 %}
-                    <span class="badge bg-success ms-2">Lead</span>
-                    {% endif %}
-                    {% if current_user.can_manage(employee) or current_user.id == employee.id %}
-                    <button type="button" class="btn btn-sm btn-outline-light ms-2" 
-                            onclick="event.stopPropagation(); editEmployee({{ employee.id }})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    {% endif %}
+<!-- Macro for rendering organization tree structure -->
+{% macro render_org_tree(top_managers, current_user) %}
+    <!-- Level 0: Top Manager (CEO/Director level) -->
+    {% for ceo in top_managers %}
+        {% if ceo.hierarchy_level <= 1 or not ceo.manager_id %}
+        <div class="tree-level level-0">
+            {{ render_employee_node(ceo, 'ceo', current_user) }}
+        </div>
+        
+        <!-- Level 1: Line Managers -->
+        {% set line_managers = ceo.direct_reports | selectattr('is_manager', 'equalto', true) | list %}
+        {% if line_managers %}
+        <div class="tree-level level-1">
+            {% for manager in line_managers %}
+            <div class="manager-group">
+                <div class="manager-node">
+                    {{ render_employee_node(manager, 'manager', current_user) }}
                 </div>
-                <div class="org-box-body">
-                    <div class="org-box-title">{{ employee.designation or employee.role or 'Employee' }}</div>
-                    <div class="org-box-details">
-                        <div class="d-flex justify-content-between">
-                            <span class="badge bg-light text-dark">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
-                            {% if employee.team %}
-                            <span class="badge bg-secondary">{{ employee.team }}</span>
-                            {% endif %}
-                        </div>
-                        {% if employee.location %}
-                        <div class="mt-1">
-                            <i class="fas fa-map-marker-alt"></i> {{ employee.location }}
-                        </div>
-                        {% endif %}
-                        {% if employee.grade %}
-                        <div class="mt-1">
-                            <i class="fas fa-star"></i> Grade {{ employee.grade }}
-                        </div>
-                        {% endif %}
-                        {% if employee.direct_reports %}
-                        <div class="mt-1">
-                            <i class="fas fa-users"></i> {{ employee.direct_reports|length }} direct report{{ 's' if employee.direct_reports|length != 1 else '' }}
-                        </div>
-                        {% endif %}
-                    </div>
+                
+                <!-- Level 2: Reportees under this manager -->
+                {% set reportees = manager.direct_reports | reject('equalto', none) | list %}
+                {% if reportees %}
+                <div class="reportees">
+                    {% for employee in reportees %}
+                        {{ render_employee_node(employee, 'employee', current_user) }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Direct reportees of CEO (if any) -->
+        {% set ceo_direct_employees = ceo.direct_reports | rejectattr('is_manager', 'equalto', true) | list %}
+        {% if ceo_direct_employees %}
+        <div class="tree-level level-1">
+            <div class="manager-group">
+                <div class="reportees">
+                    {% for employee in ceo_direct_employees %}
+                        {{ render_employee_node(employee, 'employee', current_user) }}
+                    {% endfor %}
                 </div>
             </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
 
-            <!-- Expand/Collapse Button for Manager -->
+<!-- Macro for rendering individual employee nodes -->
+{% macro render_employee_node(employee, node_type, current_user) %}
+<div class="employee-node" data-employee-id="{{ employee.id }}">
+    <div class="employee-card {{ node_type }}-card {{ 'current-user' if employee.id == current_user.id else '' }}" 
+         onclick="showEmployeeDetails({{ employee.id }})">
+        
+        <div class="employee-avatar {{ node_type }}-avatar">
+            {{ employee.full_name[:2].upper() if employee.full_name else 'NA' }}
+        </div>
+        
+        <div class="employee-name">{{ employee.full_name or 'N/A' }}</div>
+        
+        <div class="employee-title">{{ employee.designation or employee.role or 'Employee' }}</div>
+        
+        <div class="employee-details">
+            {% if node_type == 'ceo' %}
+                <span class="employee-badge badge-ceo">CEO/Director</span>
+            {% elif node_type == 'manager' %}
+                <span class="employee-badge badge-manager">Manager</span>
+            {% else %}
+                <span class="employee-badge badge-employee">Employee</span>
+            {% endif %}
+            
+            {% if employee.team %}
+                <span class="employee-badge badge-team">{{ employee.team }}</span>
+            {% endif %}
+            
+            <div class="mt-2">
+                <small>{{ employee.system_id or employee.bensl_id or 'N/A' }}</small>
+            </div>
+            
+            {% if employee.location %}
+            <div class="mt-1">
+                <small><i class="fas fa-map-marker-alt"></i> {{ employee.location }}</small>
+            </div>
+            {% endif %}
+            
             {% if employee.direct_reports %}
-            <div class="expand-control">
-                <button type="button" class="btn btn-sm btn-outline-primary expand-btn" 
-                        onclick="toggleSubtree(this)">
-                    <i class="fas fa-minus"></i>
-                </button>
+            <div class="mt-1">
+                <small><i class="fas fa-users"></i> {{ employee.direct_reports|length }} reports</small>
             </div>
             {% endif %}
         </div>
-
-        <!-- Direct Reports Listed Vertically Below Manager -->
-        {% if employee.direct_reports %}
-        <div class="direct-reports-container subtree" data-employee-id="{{ employee.id }}">
-            <div class="direct-reports-list">
-                {% for report in employee.direct_reports %}
-                <div class="direct-report-item">
-                    {% if report.direct_reports %}
-                        {{ render_employee_tree(report, depth + 1, current_user) }}
-                    {% else %}
-                        <!-- Leaf node (employee with no direct reports) -->
-                        <div class="org-node leaf-node" data-depth="{{ depth + 1 }}" 
-                             data-employee-id="{{ report.id }}"
-                             data-name="{{ report.full_name.lower() if report.full_name else '' }}"
-                             data-designation="{{ report.designation.lower() if report.designation else '' }}"
-                             data-team="{{ report.team if report.team else '' }}"
-                             data-location="{{ report.location if report.location else '' }}">
-
-                            <div class="org-box level-{{ report.hierarchy_level if report.hierarchy_level is defined else min(depth + 1, 4) }} {{ 'current-user' if report.id == current_user.id else '' }}" 
-                                 onclick="showEmployeeDetails({{ report.id }})">
-                                <div class="org-box-header">
-                                    <strong>{{ report.full_name or 'N/A' }}</strong>
-                                    {% if report.hierarchy_level is defined and report.hierarchy_level <= 1 %}
-                                    <span class="badge bg-warning ms-2">Executive</span>
-                                    {% elif report.hierarchy_level is defined and report.hierarchy_level <= 2 %}
-                                    <span class="badge bg-info ms-2">Manager</span>
-                                    {% elif report.hierarchy_level is defined and report.hierarchy_level <= 3 %}
-                                    <span class="badge bg-success ms-2">Lead</span>
-                                    {% endif %}
-                                    {% if current_user.can_manage(report) or current_user.id == report.id %}
-                                    <button type="button" class="btn btn-sm btn-outline-light ms-2" 
-                                            onclick="event.stopPropagation(); editEmployee({{ report.id }})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    {% endif %}
-                                </div>
-                                <div class="org-box-body">
-                                    <div class="org-box-title">{{ report.designation or report.role or 'Employee' }}</div>
-                                    <div class="org-box-details">
-                                        <div class="d-flex justify-content-between">
-                                            <span class="badge bg-light text-dark">{{ report.system_id or report.bensl_id or 'N/A' }}</span>
-                                            {% if report.team %}
-                                            <span class="badge bg-secondary">{{ report.team }}</span>
-                                            {% endif %}
-                                        </div>
-                                        {% if report.location %}
-                                        <div class="mt-1">
-                                            <i class="fas fa-map-marker-alt"></i> {{ report.location }}
-                                        </div>
-                                        {% endif %}
-                                        {% if report.grade %}
-                                        <div class="mt-1">
-                                            <i class="fas fa-star"></i> Grade {{ report.grade }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
+        
+        {% if current_user.can_manage(employee) or current_user.id == employee.id %}
+        <div class="employee-actions">
+            <button type="button" class="action-btn" onclick="event.stopPropagation(); editEmployee({{ employee.id }})" title="Edit">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" class="action-btn" onclick="event.stopPropagation(); viewEmployee({{ employee.id }})" title="View Details">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>
         {% endif %}
     </div>
@@ -381,27 +346,16 @@
     let hierarchyData = {};
 
     document.addEventListener('DOMContentLoaded', function() {
-        updateHierarchyStats();
         initializeHierarchy();
+        setupHierarchyFilters();
     });
 
-    function updateHierarchyStats() {
-        const allNodes = document.querySelectorAll('.org-node');
-        const allBoxes = document.querySelectorAll('.org-box');
-        const managersCount = Array.from(allBoxes).filter(box => 
-            box.closest('.org-node').querySelector('.direct-reports')).length;
-
-        const depths = Array.from(allNodes).map(node => parseInt(node.dataset.depth));
-        const maxDepth = depths.length > 0 ? Math.max(...depths) + 1 : 0;
-
-        document.getElementById('totalManagers').textContent = managersCount;
-        document.getElementById('totalEmployees').textContent = allNodes.length;
-        document.getElementById('maxDepth').textContent = maxDepth;
+    function initializeHierarchy() {
+        console.log('Hierarchy initialized');
+        // Add any initialization logic here
     }
 
-    function initializeHierarchy() {
-        hierarchyData.expandedNodes = new Set();
-
+    function setupHierarchyFilters() {
         const searchHierarchy = document.getElementById('searchHierarchy');
         const filterTeam = document.getElementById('filterTeam');
         const filterLocation = document.getElementById('filterLocation');
@@ -411,6 +365,117 @@
         if (filterTeam) filterTeam.addEventListener('change', filterHierarchy);
         if (filterLocation) filterLocation.addEventListener('change', filterHierarchy);
         if (filterManager) filterManager.addEventListener('input', filterHierarchy);
+    }
+
+    function filterHierarchy() {
+        const searchTerm = document.getElementById('searchHierarchy').value.toLowerCase();
+        const teamFilter = document.getElementById('filterTeam').value;
+        const locationFilter = document.getElementById('filterLocation').value;
+        const managerFilter = document.getElementById('filterManager').value.toLowerCase();
+
+        const employeeNodes = document.querySelectorAll('.employee-node');
+        
+        employeeNodes.forEach(node => {
+            const employeeName = node.querySelector('.employee-name').textContent.toLowerCase();
+            const employeeTeam = node.querySelector('.badge-team')?.textContent || '';
+            const employeeLocation = node.textContent.toLowerCase();
+            
+            let visible = true;
+            
+            if (searchTerm && !employeeName.includes(searchTerm)) {
+                visible = false;
+            }
+            
+            if (teamFilter && employeeTeam !== teamFilter) {
+                visible = false;
+            }
+            
+            if (locationFilter && !employeeLocation.includes(locationFilter.toLowerCase())) {
+                visible = false;
+            }
+            
+            if (managerFilter && !employeeLocation.includes(managerFilter)) {
+                visible = false;
+            }
+            
+            node.style.display = visible ? 'block' : 'none';
+        });
+    }
+
+    function clearHierarchyFilters() {
+        document.getElementById('searchHierarchy').value = '';
+        document.getElementById('filterTeam').value = '';
+        document.getElementById('filterLocation').value = '';
+        document.getElementById('filterManager').value = '';
+        
+        const employeeNodes = document.querySelectorAll('.employee-node');
+        employeeNodes.forEach(node => {
+            node.style.display = 'block';
+        });
+    }
+
+    function expandAll() {
+        // No collapsing in tree view, but we can highlight all connections
+        console.log('Expand all hierarchy');
+    }
+
+    function collapseAll() {
+        // No collapsing in tree view
+        console.log('Collapse all hierarchy');
+    }
+
+    function showEmployeeDetails(employeeId) {
+        // Load employee details in modal
+        fetch(`/api/employee/${employeeId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error loading employee details: ' + data.error);
+                    return;
+                }
+                
+                const modalContent = `
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="employee-avatar ceo-avatar mb-3" style="width: 80px; height: 80px; font-size: 24px; margin: 0 auto;">
+                                ${data.full_name ? data.full_name.substring(0, 2).toUpperCase() : 'NA'}
+                            </div>
+                            <h5>${data.full_name || 'N/A'}</h5>
+                            <p class="text-muted">${data.designation || data.role || 'Employee'}</p>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-sm">
+                                <tr><td><strong>Employee ID:</strong></td><td>${data.system_id || data.bensl_id || 'N/A'}</td></tr>
+                                <tr><td><strong>Email:</strong></td><td>${data.emailid || 'N/A'}</td></tr>
+                                <tr><td><strong>Team:</strong></td><td>${data.team || 'N/A'}</td></tr>
+                                <tr><td><strong>Location:</strong></td><td>${data.location || 'N/A'}</td></tr>
+                                <tr><td><strong>Grade:</strong></td><td>${data.grade || 'N/A'}</td></tr>
+                                <tr><td><strong>Employment Type:</strong></td><td>${data.employment_type || 'N/A'}</td></tr>
+                                <tr><td><strong>Status:</strong></td><td>${data.employee_status || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('employeeDetails').innerHTML = modalContent;
+                document.getElementById('editEmployeeBtn').onclick = () => editEmployee(employeeId);
+                
+                const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading employee details');
+            });
+    }
+
+    function editEmployee(employeeId) {
+        window.location.href = `/employee/edit/${employeeId}`;
+    }
+
+    function viewEmployee(employeeId) {
+        showEmployeeDetails(employeeId);
+    }nager) filterManager.addEventListener('input', filterHierarchy);
     }
 
     function toggleSubtree(button) {
