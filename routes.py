@@ -504,6 +504,7 @@ def hierarchy():
                              access_level=access_level,
                              stats=stats)
     except Exception as e:
+        print(f"Hierarchy error: {str(e)}")  # Debug log
         flash(f'Error loading hierarchy: {str(e)}', 'error')
         return redirect(url_for('dashboard'))
 
