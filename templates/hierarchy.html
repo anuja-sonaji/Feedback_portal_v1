@@ -17,37 +17,65 @@
     </div>
 </div>
 
+<!-- Access Level Banner -->
+<div class="alert alert-info mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h6 class="mb-1">
+                <i class="fas fa-info-circle me-2"></i>
+                {% if access_level == 'full' %}
+                    Full Organization View - You can see the complete organizational hierarchy
+                {% elif access_level == 'manager' %}
+                    Manager View - You can see your team and all subordinates ({{ stats.user_subordinates }} employees)
+                {% else %}
+                    Employee View - You can see yourself, your manager, and your immediate peers
+                {% endif %}
+            </h6>
+            <small class="text-muted">
+                Showing {{ stats.total_employees }} employees with {{ stats.total_managers }} managers across {{ stats.max_depth }} levels
+            </small>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if current_user.is_manager %}
+            <span class="badge bg-primary">Manager Access</span>
+            {% else %}
+            <span class="badge bg-secondary">Employee Access</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <!-- Hierarchy Overview Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card text-center border-primary">
             <div class="card-body">
-                <h4 class="text-primary mb-1">{{ top_managers|length }}</h4>
-                <p class="mb-0 text-muted">Top Managers</p>
+                <h4 class="text-primary mb-1">{{ stats.total_managers }}</h4>
+                <p class="mb-0 text-muted">Total Managers</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card text-center border-success">
             <div class="card-body">
-                <h4 class="text-info mb-1" id="totalManagers">0</h4>
-                <p class="mb-0 text-muted">All Managers</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h4 class="text-success mb-1" id="totalEmployees">0</h4>
+                <h4 class="text-success mb-1">{{ stats.total_employees }}</h4>
                 <p class="mb-0 text-muted">Total Employees</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card text-center border-warning">
             <div class="card-body">
-                <h4 class="text-warning mb-1" id="maxDepth">0</h4>
-                <p class="mb-0 text-muted">Max Depth</p>
+                <h4 class="text-warning mb-1">{{ stats.max_depth }}</h4>
+                <p class="mb-0 text-muted">Hierarchy Levels</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <h4 class="text-info mb-1">{{ stats.user_subordinates if current_user.is_manager else 0 }}</h4>
+                <p class="mb-0 text-muted">Your Team Size</p>
             </div>
         </div>
     </div>
@@ -223,10 +251,17 @@
              data-team="{{ employee.team if employee.team else '' }}"
              data-location="{{ employee.location if employee.location else '' }}">
 
-            <div class="org-box level-{{ min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
+            <div class="org-box level-{{ employee.hierarchy_level if employee.hierarchy_level is defined else min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
                  onclick="showEmployeeDetails({{ employee.id }})">
                 <div class="org-box-header">
                     <strong>{{ employee.full_name or 'N/A' }}</strong>
+                    {% if employee.hierarchy_level is defined and employee.hierarchy_level <= 1 %}
+                    <span class="badge bg-warning ms-2">Executive</span>
+                    {% elif employee.hierarchy_level is defined and employee.hierarchy_level <= 2 %}
+                    <span class="badge bg-info ms-2">Manager</span>
+                    {% elif employee.hierarchy_level is defined and employee.hierarchy_level <= 3 %}
+                    <span class="badge bg-success ms-2">Lead</span>
+                    {% endif %}
                     {% if current_user.can_manage(employee) or current_user.id == employee.id %}
                     <button type="button" class="btn btn-sm btn-outline-light ms-2" 
                             onclick="event.stopPropagation(); editEmployee({{ employee.id }})">
@@ -235,7 +270,7 @@
                     {% endif %}
                 </div>
                 <div class="org-box-body">
-                    <div class="org-box-title">{{ employee.designation or 'Employee' }}</div>
+                    <div class="org-box-title">{{ employee.designation or employee.role or 'Employee' }}</div>
                     <div class="org-box-details">
                         <div class="d-flex justify-content-between">
                             <span class="badge bg-light text-dark">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
@@ -246,6 +281,11 @@
                         {% if employee.location %}
                         <div class="mt-1">
                             <i class="fas fa-map-marker-alt"></i> {{ employee.location }}
+                        </div>
+                        {% endif %}
+                        {% if employee.grade %}
+                        <div class="mt-1">
+                            <i class="fas fa-star"></i> Grade {{ employee.grade }}
                         </div>
                         {% endif %}
                         {% if employee.direct_reports %}
@@ -285,10 +325,17 @@
                              data-team="{{ report.team if report.team else '' }}"
                              data-location="{{ report.location if report.location else '' }}">
 
-                            <div class="org-box level-{{ min(depth + 1, 4) }} {{ 'current-user' if report.id == current_user.id else '' }}" 
+                            <div class="org-box level-{{ report.hierarchy_level if report.hierarchy_level is defined else min(depth + 1, 4) }} {{ 'current-user' if report.id == current_user.id else '' }}" 
                                  onclick="showEmployeeDetails({{ report.id }})">
                                 <div class="org-box-header">
                                     <strong>{{ report.full_name or 'N/A' }}</strong>
+                                    {% if report.hierarchy_level is defined and report.hierarchy_level <= 1 %}
+                                    <span class="badge bg-warning ms-2">Executive</span>
+                                    {% elif report.hierarchy_level is defined and report.hierarchy_level <= 2 %}
+                                    <span class="badge bg-info ms-2">Manager</span>
+                                    {% elif report.hierarchy_level is defined and report.hierarchy_level <= 3 %}
+                                    <span class="badge bg-success ms-2">Lead</span>
+                                    {% endif %}
                                     {% if current_user.can_manage(report) or current_user.id == report.id %}
                                     <button type="button" class="btn btn-sm btn-outline-light ms-2" 
                                             onclick="event.stopPropagation(); editEmployee({{ report.id }})">
@@ -297,7 +344,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="org-box-body">
-                                    <div class="org-box-title">{{ report.designation or 'Employee' }}</div>
+                                    <div class="org-box-title">{{ report.designation or report.role or 'Employee' }}</div>
                                     <div class="org-box-details">
                                         <div class="d-flex justify-content-between">
                                             <span class="badge bg-light text-dark">{{ report.system_id or report.bensl_id or 'N/A' }}</span>
@@ -308,6 +355,11 @@
                                         {% if report.location %}
                                         <div class="mt-1">
                                             <i class="fas fa-map-marker-alt"></i> {{ report.location }}
+                                        </div>
+                                        {% endif %}
+                                        {% if report.grade %}
+                                        <div class="mt-1">
+                                            <i class="fas fa-star"></i> Grade {{ report.grade }}
                                         </div>
                                         {% endif %}
                                     </div>

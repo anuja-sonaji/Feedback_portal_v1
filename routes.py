@@ -470,52 +470,97 @@ def billing():
 @login_required
 def hierarchy():
     try:
-        # Get employees based on user access level
-        if current_user.is_manager:
-            # Managers see their team hierarchy
-            subordinates = []
-            try:
-                # Get direct reports safely
-                direct_reports = db.session.query(Employee).filter(Employee.manager_id == current_user.id).all()
-                subordinates.extend(direct_reports)
-
-                # Get second-level reports
-                for report in direct_reports:
-                    second_level = db.session.query(Employee).filter(Employee.manager_id == report.id).all()
-                    subordinates.extend(second_level)
-
-            except Exception as e:
-                subordinates = []
-
+        # Determine access level and get appropriate employee data
+        if is_top_level_manager(current_user):
+            # Top-level managers see entire organization
+            all_employees = Employee.query.all()
+            access_level = "full"
+        elif current_user.is_manager:
+            # Line managers see their hierarchy (themselves + all subordinates)
+            subordinates = current_user.get_all_subordinates()
             all_employees = [current_user] + subordinates
+            access_level = "manager"
         else:
-            # Non-managers see only themselves
+            # Regular employees see only themselves and their immediate peers
             all_employees = [current_user]
+            if current_user.manager_id:
+                # Add manager and peer employees
+                manager = Employee.query.get(current_user.manager_id)
+                if manager:
+                    all_employees.append(manager)
+                    peers = Employee.query.filter_by(manager_id=current_user.manager_id).all()
+                    all_employees.extend([emp for emp in peers if emp.id != current_user.id])
+            access_level = "employee"
 
-        # Build hierarchy structure safely
-        top_managers = build_hierarchy_tree(all_employees)
+        # Build hierarchy structure with role-based organization
+        top_managers = build_role_based_hierarchy(all_employees, current_user)
+        
+        # Get statistics
+        stats = calculate_hierarchy_stats(all_employees, current_user)
 
         return render_template('hierarchy.html', 
                              top_managers=top_managers,
-                             current_user=current_user)
+                             current_user=current_user,
+                             access_level=access_level,
+                             stats=stats)
     except Exception as e:
         flash(f'Error loading hierarchy: {str(e)}', 'error')
         return redirect(url_for('dashboard'))
 
-def build_hierarchy_tree(employees):
-    """Build a hierarchical tree structure from employees list"""
-    # Create a dictionary for quick lookup
-    employee_dict = {emp.id: emp for emp in employees}
+def is_top_level_manager(employee):
+    """Check if employee is a top-level manager (CEO/VP level)"""
+    # Consider someone a top-level manager if they have no manager or their designation suggests it
+    if not employee.manager_id:
+        return True
+    
+    # Check designation for executive titles
+    designation = (employee.designation or '').lower()
+    executive_titles = ['ceo', 'cto', 'vp', 'vice president', 'director', 'head of']
+    return any(title in designation for title in executive_titles)
 
+def calculate_hierarchy_stats(employees, current_user):
+    """Calculate hierarchy statistics"""
+    total_employees = len(employees)
+    managers = [emp for emp in employees if emp.is_manager]
+    
+    # Calculate depth levels
+    depths = []
+    for emp in employees:
+        depth = 0
+        current = emp
+        visited = set()
+        while current.manager_id and current.manager_id not in visited and depth < 10:
+            visited.add(current.id)
+            current = next((e for e in employees if e.id == current.manager_id), None)
+            if not current:
+                break
+            depth += 1
+        depths.append(depth)
+    
+    return {
+        'total_employees': total_employees,
+        'total_managers': len(managers),
+        'max_depth': max(depths) + 1 if depths else 1,
+        'user_subordinates': len(current_user.get_all_subordinates()) if current_user.is_manager else 0
+    }
+
+def build_role_based_hierarchy(employees, current_user):
+    """Build a role-based hierarchical tree structure"""
+    # Create employee lookup dictionary
+    employee_dict = {emp.id: emp for emp in employees}
+    
     # Initialize direct_reports for each employee
     for emp in employees:
         emp.direct_reports = []
+        # Add role-based level for styling
+        emp.hierarchy_level = determine_hierarchy_level(emp)
 
     # Build the hierarchy relationships
     top_managers = []
+    
     for emp in employees:
         if emp.manager_id is None or emp.manager_id not in employee_dict:
-            # This is a top-level manager or employee without manager in current scope
+            # This is a top-level manager or orphaned employee
             top_managers.append(emp)
         else:
             # This employee has a manager in our scope
@@ -523,14 +568,53 @@ def build_hierarchy_tree(employees):
             if manager:
                 manager.direct_reports.append(emp)
 
-    # Sort direct reports by grade and name for each manager
-    for emp in employees:
-        emp.direct_reports.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
+    # Sort employees by hierarchy level, then by role importance, then by name
+    def sort_key(emp):
+        role_priority = get_role_priority(emp)
+        return (role_priority, emp.grade or 'ZZ', emp.full_name or '')
 
-    # Sort top managers by grade and name
-    top_managers.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
+    # Sort direct reports for each manager
+    for emp in employees:
+        emp.direct_reports.sort(key=sort_key)
+
+    # Sort top managers
+    top_managers.sort(key=sort_key)
 
     return top_managers
+
+def determine_hierarchy_level(employee):
+    """Determine the hierarchy level based on role and designation"""
+    designation = (employee.designation or '').lower()
+    role = (employee.role or '').lower()
+    
+    # Executive level (0)
+    if any(title in designation for title in ['ceo', 'cto', 'vp', 'vice president', 'chief']):
+        return 0
+    
+    # Director level (1)
+    if any(title in designation for title in ['director', 'head of', 'associate director']):
+        return 1
+    
+    # Manager level (2)
+    if any(title in designation for title in ['manager', 'lead manager', 'senior manager']):
+        return 2
+    
+    # Team Lead level (3)
+    if any(title in designation for title in ['lead', 'team lead', 'tech lead', 'senior lead']):
+        return 3
+    
+    # Senior level (4)
+    if any(title in designation for title in ['senior', 'sr', 'principal']):
+        return 4
+    
+    # Regular employee (5)
+    return 5
+
+def get_role_priority(employee):
+    """Get role priority for sorting (lower number = higher priority)"""
+    level = determine_hierarchy_level(employee)
+    is_manager_bonus = 0 if employee.is_manager else 10
+    return level + is_manager_bonus
 
 @app.route('/import_excel', methods=['GET', 'POST'])
 @login_required
