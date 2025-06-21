@@ -2,10 +2,12 @@
 .org-tree {
     text-align: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    min-height: 500px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 600px;
     position: relative;
     overflow-x: auto;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .tree-level {
@@ -28,10 +30,11 @@
     bottom: -40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
+    width: 4px;
     height: 40px;
-    background: #007bff;
+    background: linear-gradient(180deg, #ff6b6b 0%, #ee5a52 100%);
     border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
 .tree-level.level-1 {
@@ -57,129 +60,230 @@
 /* Employee Nodes */
 .employee-node {
     position: relative;
-    min-width: 180px;
-    max-width: 220px;
+    min-width: 200px;
+    max-width: 240px;
+    margin: 10px;
 }
 
 .employee-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    border: 3px solid transparent;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
     position: relative;
-    padding: 24px;
-    min-height: 200px;
+    padding: 25px;
+    min-height: 220px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
-/* Role-based card styles with enhanced gradients */
+/* Role-based card styles with vibrant gradients */
 .employee-card.ceo-card {
-    border-color: #dc3545;
-    background: linear-gradient(145deg, #ffffff 0%, #fff1f1 50%, #ffe6e6 100%);
-    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+    background: linear-gradient(145deg, #ff6b6b 0%, #ee5a52 50%, #ffffff 100%);
+    border: 3px solid #ff4757;
+    box-shadow: 0 15px 35px rgba(255, 75, 87, 0.4);
+    color: white;
+}
+
+.employee-card.ceo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
 }
 
 .employee-card.manager-card {
-    border-color: #007bff;
-    background: linear-gradient(145deg, #ffffff 0%, #f0f8ff 50%, #e6f3ff 100%);
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+    background: linear-gradient(145deg, #3742fa 0%, #2f3542 50%, #ffffff 100%);
+    border: 3px solid #2f3542;
+    box-shadow: 0 15px 35px rgba(55, 66, 250, 0.4);
+    color: white;
+}
+
+.employee-card.manager-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
 }
 
 .employee-card.employee-card {
-    border-color: #28a745;
-    background: linear-gradient(145deg, #ffffff 0%, #f0fff4 50%, #e6ffe6 100%);
-    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+    background: linear-gradient(145deg, #2ed573 0%, #1e90ff 50%, #ffffff 100%);
+    border: 3px solid #2ed573;
+    box-shadow: 0 15px 35px rgba(46, 213, 115, 0.4);
+    color: white;
+}
+
+.employee-card.employee-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
 }
 
 .employee-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.employee-card.ceo-card:hover {
+    box-shadow: 0 20px 50px rgba(255, 75, 87, 0.6);
+}
+
+.employee-card.manager-card:hover {
+    box-shadow: 0 20px 50px rgba(55, 66, 250, 0.6);
+}
+
+.employee-card.employee-card:hover {
+    box-shadow: 0 20px 50px rgba(46, 213, 115, 0.6);
 }
 
 .employee-card.current-user {
-    border-color: #ffc107;
-    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
-    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(145deg, #ffd700 0%, #ff8c00 50%, #ffffff 100%);
+    border: 4px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    animation: currentUserPulse 2s infinite;
+    color: #333;
+}
+
+@keyframes currentUserPulse {
+    0% { 
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+        transform: scale(1.02);
+    }
+    100% { 
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        transform: scale(1);
+    }
 }
 
 /* Employee Info */
 .employee-avatar {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #007bff, #0056b3);
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
     margin: 0 auto 15px;
     position: relative;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
 }
 
 .employee-avatar.ceo-avatar {
-    background: linear-gradient(135deg, #dc3545, #c82333);
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border-color: #ff4757;
+    animation: avatarGlow 3s infinite;
 }
 
 .employee-avatar.manager-avatar {
-    background: linear-gradient(135deg, #007bff, #0056b3);
+    background: linear-gradient(135deg, #3742fa, #2f3542);
+    border-color: #3742fa;
+    animation: avatarGlow 3s infinite 1s;
 }
 
 .employee-avatar.employee-avatar {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
+    background: linear-gradient(135deg, #2ed573, #1e90ff);
+    border-color: #2ed573;
+    animation: avatarGlow 3s infinite 2s;
+}
+
+@keyframes avatarGlow {
+    0%, 100% { 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    50% { 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.5);
+    }
 }
 
 .employee-name {
-    font-weight: 600;
-    font-size: 16px;
-    color: #212529;
-    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    z-index: 1;
+    position: relative;
 }
 
 .employee-title {
     font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+    font-weight: 500;
+    z-index: 1;
+    position: relative;
 }
 
 .employee-details {
     font-size: 12px;
-    color: #868e96;
+    opacity: 0.8;
+    z-index: 1;
+    position: relative;
 }
 
 .employee-badge {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-    margin: 2px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    margin: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
 }
 
 .badge-ceo {
-    background: #dc3545;
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #ff4757;
+    border: 1px solid rgba(255, 71, 87, 0.3);
 }
 
 .badge-manager {
-    background: #007bff;
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #3742fa;
+    border: 1px solid rgba(55, 66, 250, 0.3);
 }
 
 .badge-employee {
-    background: #28a745;
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
 }
 
 .badge-team {
-    background: #6c757d;
-    color: white;
+    background: rgba(255, 255, 255, 0.7);
+    color: #2f3542;
+    border: 1px solid rgba(47, 53, 66, 0.3);
 }
 
 /* Tree Connections - Chart Style */
@@ -197,10 +301,11 @@
     top: -40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
+    width: 4px;
     height: 40px;
-    background: #007bff;
+    background: linear-gradient(180deg, #3742fa 0%, #2f3542 100%);
     border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(55, 66, 250, 0.3);
 }
 
 .manager-group .manager-node {
@@ -214,10 +319,11 @@
     bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
+    width: 4px;
     height: 30px;
-    background: #28a745;
+    background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
     border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
 }
 
 .manager-group .reportees {
@@ -234,9 +340,10 @@
     top: -30px;
     left: 15%;
     right: 15%;
-    height: 3px;
-    background: #28a745;
+    height: 4px;
+    background: linear-gradient(90deg, #2ed573 0%, #1e90ff 100%);
     border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
 }
 
 .manager-group .reportees .employee-node::before {
@@ -245,38 +352,45 @@
     top: -30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
+    width: 4px;
     height: 30px;
-    background: #28a745;
+    background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
     border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
 }
 
 /* Chart Level Headers */
 .chart-level-header {
     position: absolute;
-    left: 20px;
+    left: 30px;
     top: 50%;
     transform: translateY(-50%);
-    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
     color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .chart-level-header.level-0 {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
 }
 
 .chart-level-header.level-1 {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+    box-shadow: 0 8px 25px rgba(55, 66, 250, 0.5);
 }
 
 .chart-level-header.level-2 {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+    box-shadow: 0 8px 25px rgba(46, 213, 115, 0.5);
 }
 
 /* Actions */
