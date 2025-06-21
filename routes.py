@@ -147,8 +147,12 @@ def employees():
         flash('Access denied. Only managers can view employee lists.', 'error')
         return redirect(url_for('dashboard'))
 
-    # Get employees under current manager
+    # Get employees under current manager - if no subordinates, show all employees for managers
     subordinates = current_user.get_all_subordinates()
+    
+    # If manager has no subordinates, allow viewing all employees (for initial setup)
+    if not subordinates and current_user.is_manager:
+        subordinates = Employee.query.filter(Employee.id != current_user.id).all()
 
     return render_template('employees.html', employees=subordinates)
 
