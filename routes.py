@@ -150,9 +150,13 @@ def employees():
     # Get employees under current manager - if no subordinates, show all employees for managers
     subordinates = current_user.get_all_subordinates()
     
+    # Debug: Log the subordinates count
+    print(f"Manager {current_user.full_name} has {len(subordinates)} subordinates")
+    
     # If manager has no subordinates, allow viewing all employees (for initial setup)
     if not subordinates and current_user.is_manager:
         subordinates = Employee.query.filter(Employee.id != current_user.id).all()
+        print(f"Showing all employees: {len(subordinates)} total")
 
     return render_template('employees.html', employees=subordinates)
 

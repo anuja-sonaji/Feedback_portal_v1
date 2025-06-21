@@ -64,27 +64,28 @@ class Employee(UserMixin, db.Model):
         """Get all employees under this manager's hierarchy"""
         from app import db
         subordinates = []
+        visited = set()
         
-        # Use a safer query approach to avoid infinite recursion
-        try:
-            # Get direct reports first
-            direct_reports = db.session.query(Employee).filter(Employee.manager_id == self.id).all()
+        def get_subordinates_recursive(manager_id, depth=0):
+            if depth > 5 or manager_id in visited:  # Prevent infinite recursion
+                return []
             
-            # Add direct reports to subordinates
+            visited.add(manager_id)
+            direct_reports = db.session.query(Employee).filter(Employee.manager_id == manager_id).all()
+            all_subs = []
+            
             for report in direct_reports:
-                subordinates.append(report)
-                
-                # Recursively get their subordinates (with depth limit for safety)
-                if hasattr(report, '_recursion_depth'):
-                    if report._recursion_depth < 5:  # Limit recursion depth
-                        report._recursion_depth += 1
-                        subordinates.extend(report.get_all_subordinates())
-                else:
-                    report._recursion_depth = 1
-                    subordinates.extend(report.get_all_subordinates())
-                    
+                all_subs.append(report)
+                # Recursively get their subordinates
+                all_subs.extend(get_subordinates_recursive(report.id, depth + 1))
+            
+            return all_subs
+        
+        try:
+            subordinates = get_subordinates_recursive(self.id)
         except Exception as e:
-            # Fallback to direct reports only if recursion fails
+            print(f"Error getting subordinates for {self.full_name}: {e}")
+            # Fallback to direct reports only
             subordinates = db.session.query(Employee).filter(Employee.manager_id == self.id).all()
             
         return subordinates
