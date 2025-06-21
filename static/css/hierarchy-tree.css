@@ -1,68 +1,108 @@
 /* Organization Chart Structure CSS */
 .org-tree {
-    text-align: center;
-    padding: 40px 20px;
+    padding: 30px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     min-height: 600px;
     position: relative;
     overflow-x: auto;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.tree-level {
-    margin: 60px 0;
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 40px;
+    gap: 30px;
+}
+
+/* Column-based layout */
+.hierarchy-column {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     position: relative;
 }
 
-.tree-level.level-0 {
-    margin-bottom: 80px;
+.hierarchy-column.executive-column {
+    border-color: rgba(255, 107, 107, 0.4);
+    background: rgba(255, 107, 107, 0.1);
 }
 
-.tree-level.level-0::after {
-    content: '';
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 40px;
-    background: linear-gradient(180deg, #ff6b6b 0%, #ee5a52 100%);
-    border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+.hierarchy-column.management-column {
+    border-color: rgba(55, 66, 250, 0.4);
+    background: rgba(55, 66, 250, 0.1);
 }
 
-.tree-level.level-1 {
-    margin: 60px 0;
-    position: relative;
+.hierarchy-column.employee-column {
+    border-color: rgba(46, 213, 115, 0.4);
+    background: rgba(46, 213, 115, 0.1);
 }
 
-.tree-level.level-1::before {
-    content: '';
-    position: absolute;
-    top: -40px;
-    left: 25%;
-    right: 25%;
-    height: 3px;
-    background: #007bff;
-    border-radius: 2px;
+.column-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    border-radius: 15px;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.tree-level.level-2 {
-    margin-top: 60px;
+.column-header.executive-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+}
+
+.column-header.management-header {
+    background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+}
+
+.column-header.employee-header {
+    background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+}
+
+.column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
 }
 
 /* Employee Nodes */
 .employee-node {
     position: relative;
-    min-width: 200px;
-    max-width: 240px;
-    margin: 10px;
+    width: 100%;
+    max-width: 280px;
+    margin: 10px auto;
+}
+
+.manager-with-team {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.team-indicator {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+}
+
+.team-section {
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.team-section-header {
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 .employee-card {
@@ -286,77 +326,40 @@
     border: 1px solid rgba(47, 53, 66, 0.3);
 }
 
-/* Tree Connections - Chart Style */
-.manager-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 30px;
-    position: relative;
-}
-
-.manager-group::before {
+/* Column connections and visual indicators */
+.hierarchy-column::before {
     content: '';
     position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 40px;
-    background: linear-gradient(180deg, #3742fa 0%, #2f3542 100%);
-    border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(55, 66, 250, 0.3);
-}
-
-.manager-group .manager-node {
-    margin-bottom: 60px;
-    position: relative;
-}
-
-.manager-group .manager-node::after {
-    content: '';
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 30px;
-    background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
-    border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
-}
-
-.manager-group .reportees {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    flex-wrap: wrap;
-    position: relative;
-}
-
-.manager-group .reportees::before {
-    content: '';
-    position: absolute;
-    top: -30px;
-    left: 15%;
-    right: 15%;
+    top: 50%;
+    right: -15px;
+    width: 30px;
     height: 4px;
-    background: linear-gradient(90deg, #2ed573 0%, #1e90ff 100%);
+    background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
     border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
+    transform: translateY(-50%);
+    z-index: 1;
 }
 
-.manager-group .reportees .employee-node::before {
+.hierarchy-column:last-child::before {
+    display: none;
+}
+
+.hierarchy-column::after {
     content: '';
     position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 30px;
-    background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
-    border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
+    top: 50%;
+    right: -10px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid rgba(255,255,255,0.3);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.hierarchy-column:last-child::after {
+    display: none;
 }
 
 /* Chart Level Headers */
@@ -441,28 +444,45 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .org-tree {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .hierarchy-column {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
-    .tree-level {
-        gap: 15px;
+    .org-tree {
+        padding: 20px;
+    }
+    
+    .hierarchy-column {
+        padding: 20px;
     }
     
     .employee-node {
-        min-width: 160px;
-        max-width: 180px;
+        max-width: 100%;
     }
     
     .employee-card {
-        padding: 15px;
+        padding: 20px;
+        min-height: 180px;
     }
     
     .employee-avatar {
-        width: 50px;
-        height: 50px;
-        font-size: 16px;
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
     }
     
-    .manager-group .reportees {
-        gap: 15px;
+    .column-header {
+        font-size: 16px;
+        padding: 12px;
     }
 }
 

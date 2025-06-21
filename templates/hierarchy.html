@@ -237,61 +237,92 @@
 </div>
 {% endblock %}
 
-<!-- Macro for rendering organization chart structure -->
+<!-- Macro for rendering organization chart structure with columns -->
 {% macro render_org_tree(top_managers, current_user) %}
-    <!-- Level 0: Executive Level (CEO/Director) -->
-    {% for ceo in top_managers %}
-        {% if ceo.hierarchy_level <= 1 or not ceo.manager_id %}
-        <div class="tree-level level-0">
-            <div class="chart-level-header level-0">Executive Level</div>
-            {{ render_employee_node(ceo, 'ceo', current_user) }}
+    <!-- Column 1: Executive Level -->
+    <div class="hierarchy-column executive-column">
+        <div class="column-header executive-header">
+            <i class="fas fa-crown me-2"></i>Executive Level
         </div>
-        
-        <!-- Level 1: Management Level (Line Managers) -->
-        {% set line_managers = ceo.direct_reports | selectattr('is_manager', 'equalto', true) | list %}
-        {% if line_managers %}
-        <div class="tree-level level-1">
-            <div class="chart-level-header level-1">Management Level</div>
-            {% for manager in line_managers %}
-            <div class="manager-group">
-                <div class="manager-node">
-                    {{ render_employee_node(manager, 'manager', current_user) }}
-                </div>
-                
-                <!-- Level 2: Employee Level (Team Members) -->
-                {% set reportees = manager.direct_reports | reject('equalto', none) | list %}
-                {% if reportees %}
-                <div class="reportees">
-                    {% for employee in reportees %}
-                        {{ render_employee_node(employee, 'employee', current_user) }}
-                    {% endfor %}
-                </div>
+        <div class="column-content">
+            {% for ceo in top_managers %}
+                {% if ceo.hierarchy_level <= 1 or not ceo.manager_id %}
+                    {{ render_employee_node(ceo, 'ceo', current_user) }}
                 {% endif %}
-            </div>
             {% endfor %}
         </div>
-        {% endif %}
-        
-        <!-- Level 2 Header for Employee Level -->
-        {% if line_managers and line_managers|selectattr('direct_reports')|list %}
-        <div class="chart-level-header level-2" style="top: calc(100% - 120px);">Employee Level</div>
-        {% endif %}
-        
-        <!-- Direct reportees of CEO (if any) -->
-        {% set ceo_direct_employees = ceo.direct_reports | rejectattr('is_manager', 'equalto', true) | list %}
-        {% if ceo_direct_employees %}
-        <div class="tree-level level-1">
-            <div class="manager-group">
-                <div class="reportees">
-                    {% for employee in ceo_direct_employees %}
-                        {{ render_employee_node(employee, 'employee', current_user) }}
-                    {% endfor %}
-                </div>
-            </div>
+    </div>
+
+    <!-- Column 2: Management Level -->
+    <div class="hierarchy-column management-column">
+        <div class="column-header management-header">
+            <i class="fas fa-users-cog me-2"></i>Management Level
         </div>
-        {% endif %}
-        {% endif %}
-    {% endfor %}
+        <div class="column-content">
+            {% for ceo in top_managers %}
+                {% if ceo.hierarchy_level <= 1 or not ceo.manager_id %}
+                    {% set line_managers = ceo.direct_reports | selectattr('is_manager', 'equalto', true) | list %}
+                    {% for manager in line_managers %}
+                        <div class="manager-with-team">
+                            {{ render_employee_node(manager, 'manager', current_user) }}
+                            {% set team_count = manager.direct_reports | reject('equalto', none) | list | length %}
+                            {% if team_count > 0 %}
+                            <div class="team-indicator">
+                                <small style="color: rgba(255,255,255,0.8); font-weight: 600;">
+                                    <i class="fas fa-arrow-right me-1"></i>{{ team_count }} Team Members
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Column 3: Employee Level -->
+    <div class="hierarchy-column employee-column">
+        <div class="column-header employee-header">
+            <i class="fas fa-users me-2"></i>Team Members
+        </div>
+        <div class="column-content">
+            {% for ceo in top_managers %}
+                {% if ceo.hierarchy_level <= 1 or not ceo.manager_id %}
+                    {% set line_managers = ceo.direct_reports | selectattr('is_manager', 'equalto', true) | list %}
+                    {% for manager in line_managers %}
+                        {% set reportees = manager.direct_reports | reject('equalto', none) | list %}
+                        {% if reportees %}
+                        <div class="team-section">
+                            <div class="team-section-header">
+                                <small style="color: rgba(255,255,255,0.9); font-weight: 600; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 10px; margin-bottom: 15px; display: inline-block;">
+                                    {{ manager.full_name }}'s Team
+                                </small>
+                            </div>
+                            {% for employee in reportees %}
+                                {{ render_employee_node(employee, 'employee', current_user) }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Direct reportees of CEO -->
+                    {% set ceo_direct_employees = ceo.direct_reports | rejectattr('is_manager', 'equalto', true) | list %}
+                    {% if ceo_direct_employees %}
+                    <div class="team-section">
+                        <div class="team-section-header">
+                            <small style="color: rgba(255,255,255,0.9); font-weight: 600; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 10px; margin-bottom: 15px; display: inline-block;">
+                                Direct Reports
+                            </small>
+                        </div>
+                        {% for employee in ceo_direct_employees %}
+                            {{ render_employee_node(employee, 'employee', current_user) }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 {% endmacro %}
 
 <!-- Macro for rendering individual employee nodes -->
