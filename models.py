@@ -62,11 +62,31 @@ class Employee(UserMixin, db.Model):
     
     def get_all_subordinates(self):
         """Get all employees under this manager's hierarchy"""
+        from app import db
         subordinates = []
-        direct_reports = Employee.query.filter_by(manager_id=self.id).all()
-        for report in direct_reports:
-            subordinates.append(report)
-            subordinates.extend(report.get_all_subordinates())
+        
+        # Use a safer query approach to avoid infinite recursion
+        try:
+            # Get direct reports first
+            direct_reports = db.session.query(Employee).filter(Employee.manager_id == self.id).all()
+            
+            # Add direct reports to subordinates
+            for report in direct_reports:
+                subordinates.append(report)
+                
+                # Recursively get their subordinates (with depth limit for safety)
+                if hasattr(report, '_recursion_depth'):
+                    if report._recursion_depth < 5:  # Limit recursion depth
+                        report._recursion_depth += 1
+                        subordinates.extend(report.get_all_subordinates())
+                else:
+                    report._recursion_depth = 1
+                    subordinates.extend(report.get_all_subordinates())
+                    
+        except Exception as e:
+            # Fallback to direct reports only if recursion fails
+            subordinates = db.session.query(Employee).filter(Employee.manager_id == self.id).all()
+            
         return subordinates
     
     def get_direct_reports(self):

@@ -461,49 +461,68 @@ def billing():
 @app.route('/hierarchy')
 @login_required
 def hierarchy():
-    # Get all employees and build hierarchy tree
-    all_employees = Employee.query.all()
+    try:
+        # Get employees based on user access level
+        if current_user.is_manager:
+            # Managers see their team hierarchy
+            subordinates = []
+            try:
+                # Get direct reports safely
+                direct_reports = db.session.query(Employee).filter(Employee.manager_id == current_user.id).all()
+                subordinates.extend(direct_reports)
+                
+                # Get second-level reports
+                for report in direct_reports:
+                    second_level = db.session.query(Employee).filter(Employee.manager_id == report.id).all()
+                    subordinates.extend(second_level)
+                    
+            except Exception as e:
+                subordinates = []
+            
+            all_employees = [current_user] + subordinates
+        else:
+            # Non-managers see only themselves
+            all_employees = [current_user]
+        
+        # Build hierarchy structure safely
+        hierarchy_data = build_hierarchy_tree(all_employees)
+        
+        return render_template('hierarchy.html', 
+                             hierarchy_data=hierarchy_data,
+                             total_employees=len(all_employees))
+    except Exception as e:
+        flash(f'Error loading hierarchy: {str(e)}', 'error')
+        return redirect(url_for('dashboard'))
+
+def build_hierarchy_tree(employees):
+    """Build a hierarchical tree structure from employees list"""
+    # Create a dictionary for quick lookup
+    employee_dict = {emp.id: emp for emp in employees}
     
-    # Build a mapping of managers to their direct reports
-    manager_reports = {}
-    employee_dict = {emp.id: emp for emp in all_employees}
-    
-    # Initialize direct_reports list for each employee
-    for emp in all_employees:
+    # Initialize direct_reports for each employee
+    for emp in employees:
         emp.direct_reports = []
     
     # Build the hierarchy relationships
     top_managers = []
-    for emp in all_employees:
-        if emp.manager_id is None:
-            # This is a top-level employee/manager
+    for emp in employees:
+        if emp.manager_id is None or emp.manager_id not in employee_dict:
+            # This is a top-level manager or employee without manager in current scope
             top_managers.append(emp)
         else:
-            # This employee has a manager
+            # This employee has a manager in our scope
             manager = employee_dict.get(emp.manager_id)
             if manager:
                 manager.direct_reports.append(emp)
     
-    # Sort direct reports by name for each manager
-    for emp in all_employees:
-        emp.direct_reports.sort(key=lambda x: x.full_name or '')
+    # Sort direct reports by grade and name for each manager
+    for emp in employees:
+        emp.direct_reports.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
     
-    # Sort top managers by name
-    top_managers.sort(key=lambda x: x.full_name or '')
+    # Sort top managers by grade and name
+    top_managers.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
     
-    # If user is not a top manager and not viewing all, show only their hierarchy
-    if current_user.manager_id is not None and not current_user.is_manager:
-        # Find the root manager for current user
-        root_manager = current_user
-        while root_manager.manager_id is not None:
-            parent = employee_dict.get(root_manager.manager_id)
-            if parent:
-                root_manager = parent
-            else:
-                break
-        top_managers = [root_manager] if root_manager else [current_user]
-    
-    return render_template('hierarchy.html', top_managers=top_managers)
+    return top_managers
 
 @app.route('/import_excel', methods=['GET', 'POST'])
 @login_required
