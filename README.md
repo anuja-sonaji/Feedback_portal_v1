@@ -88,125 +88,185 @@ A comprehensive web application built with Flask for managing employee informati
 - **File Handling**: openpyxl for Excel operations
 - **Data Processing**: Pandas for data manipulation
 
-## Setup Instructions for Visual Studio Code
+## Setup Instructions for Visual Studio Code (Windows & Mac)
 
 ### Prerequisites
 
 1. **Python 3.11 or higher**
+   - **Windows**: Download from [python.org](https://www.python.org/downloads/windows/) and install
+   - **Mac**: Install via Homebrew: `brew install python@3.11` or download from [python.org](https://www.python.org/downloads/mac-osx/)
+   
+   Verify installation:
    ```bash
    python --version
+   # or on some systems:
+   python3 --version
    ```
 
-2. **Git** (for version control)
-   ```bash
-   git --version
-   ```
+2. **Visual Studio Code**
+   - Download from [code.visualstudio.com](https://code.visualstudio.com/)
+   - Install the **Python** extension by Microsoft
 
-3. **Visual Studio Code** with Python extension
+3. **Git** (optional, for version control)
+   - **Windows**: Download from [git-scm.com](https://git-scm.com/download/win)
+   - **Mac**: Install via Homebrew: `brew install git` or download from [git-scm.com](https://git-scm.com/download/mac)
 
-### Step 1: Clone or Download the Project
+### Step 1: Download the Project
 
+Choose one of these methods:
+
+**Method A: Clone with Git (if you have Git installed)**
 ```bash
-# If using Git
 git clone <repository-url>
 cd employee-feedback-portal
-
-# Or download and extract the project files
 ```
 
-### Step 2: Set Up Python Virtual Environment
+**Method B: Download ZIP**
+1. Download the project as a ZIP file
+2. Extract to a folder (e.g., `C:\Projects\employee-feedback-portal` on Windows or `~/Projects/employee-feedback-portal` on Mac)
+3. Open terminal/command prompt and navigate to the folder:
+   ```bash
+   # Windows
+   cd C:\Projects\employee-feedback-portal
+   
+   # Mac
+   cd ~/Projects/employee-feedback-portal
+   ```
 
-```bash
-# Create virtual environment
-python -m venv venv
+### Step 2: Open in Visual Studio Code
 
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
+1. **Option A**: Open VS Code, then File → Open Folder → Select the project folder
+2. **Option B**: From terminal in the project folder:
+   ```bash
+   code .
+   ```
 
-### Step 3: Install Dependencies
+### Step 3: Set Up Python Environment
 
-```bash
-# Install required packages
-pip install -r requirements.txt
-```
+**Important**: Do NOT create a virtual environment. This application runs directly with system Python.
 
-If `requirements.txt` doesn't exist, install manually:
-```bash
-pip install flask flask-sqlalchemy flask-login psycopg2-binary gunicorn pandas openpyxl email-validator werkzeug sqlalchemy
-```
+1. **Open VS Code Terminal**:
+   - Press `Ctrl+`` (backtick) or go to Terminal → New Terminal
+
+2. **Install Dependencies**:
+   
+   **If pyproject.toml exists** (recommended):
+   ```bash
+   # Windows
+   pip install -e .
+   
+   # Mac
+   pip3 install -e .
+   ```
+   
+   **If using requirements file**:
+   ```bash
+   # Windows
+   pip install flask flask-sqlalchemy flask-login psycopg2-binary gunicorn pandas openpyxl email-validator werkzeug sqlalchemy
+   
+   # Mac
+   pip3 install flask flask-sqlalchemy flask-login psycopg2-binary gunicorn pandas openpyxl email-validator werkzeug sqlalchemy
+   ```
 
 ### Step 4: Set Up Environment Variables
 
-Create a `.env` file in the project root:
-
-```env
-# Database Configuration
-DATABASE_URL=postgresql://username:password@localhost:5432/employee_feedback
-
-# Session Security
-SESSION_SECRET=your-secret-key-here
-
-# Development Settings
-FLASK_ENV=development
-FLASK_DEBUG=True
-```
-
-### Step 5: Database Setup
-
-#### Option A: PostgreSQL (Recommended for Production)
-
-1. **Install PostgreSQL**:
-   - Download from [postgresql.org](https://www.postgresql.org/download/)
-   - Install and start the service
-
-2. **Create Database**:
-   ```sql
-   CREATE DATABASE employee_feedback;
-   CREATE USER your_username WITH PASSWORD 'your_password';
-   GRANT ALL PRIVILEGES ON DATABASE employee_feedback TO your_username;
+1. **Copy the example environment file**:
+   ```bash
+   # Windows
+   copy .env.example .env
+   
+   # Mac
+   cp .env.example .env
    ```
 
-3. **Update DATABASE_URL** in `.env` file with your credentials
+2. **Edit the `.env` file** using VS Code:
+   ```env
+   # For quick setup, use SQLite (no database installation needed)
+   DATABASE_URL=sqlite:///employee_feedback.db
+   
+   # Session Security (change this for production)
+   SESSION_SECRET=dev-secret-key-change-in-production
+   
+   # Development Settings
+   FLASK_ENV=development
+   FLASK_DEBUG=True
+   ```
 
-#### Option B: SQLite (for Development)
+### Step 5: Database Setup (Multiple Options)
 
-```env
-DATABASE_URL=sqlite:///employee_feedback.db
-```
+**🚀 QUICKSTART - Option A: SQLite (Easiest for development)**
+- No additional installation required
+- Database file will be created automatically
+- Perfect for testing and development
 
-### Step 6: Initialize the Application
+**🏢 Option B: PostgreSQL (For production-like setup)**
 
-```bash
-# Create database tables and sample data
-python create_users.py
+**Windows**:
+1. Download PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/)
+2. Install with default settings (remember the password you set)
+3. Open pgAdmin or use psql command line:
+   ```sql
+   CREATE DATABASE employee_feedback;
+   ```
+4. Update `.env` file:
+   ```env
+   DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/employee_feedback
+   ```
 
-# Or run the main application (it will auto-create tables)
-python main.py
-```
+**Mac**:
+1. Install PostgreSQL:
+   ```bash
+   brew install postgresql
+   brew services start postgresql
+   ```
+2. Create database:
+   ```bash
+   createdb employee_feedback
+   ```
+3. Update `.env` file:
+   ```env
+   DATABASE_URL=postgresql://$(whoami)@localhost:5432/employee_feedback
+   ```
 
-### Step 7: Run the Application
+### Step 6: Initialize and Run the Application
 
-```bash
-# Development server
-python main.py
+1. **Initialize the Database** (automatic on first run):
+   ```bash
+   # Windows
+   python main.py
+   
+   # Mac
+   python3 main.py
+   ```
+   
+   The application will:
+   - Create database tables automatically
+   - Generate sample user data
+   - Start the web server
 
-# Or using Flask CLI
-flask run
+2. **Alternative: Use VS Code's Run Configuration**:
+   - Press `F5` to start debugging
+   - Or use `Ctrl+F5` to run without debugging
+   - VS Code will use the launch configuration provided
 
-# Or using Gunicorn (production-like)
-gunicorn --bind 0.0.0.0:5000 --reload main:app
-```
+### Step 7: Access the Application
 
-### Step 8: Access the Application
+1. **Open your web browser** and go to:
+   ```
+   http://localhost:5000
+   ```
 
-Open your web browser and navigate to:
-```
-http://localhost:5000
-```
+2. **Login with default credentials**:
+   - **Top Manager**: `sooraj@company.com` / `password123`
+   - **Line Manager**: `anuja@company.com` / `password123`
+   - **Line Manager**: `asha@company.com` / `password123`
+
+### Step 8: Verify Everything Works
+
+1. **Check the terminal** for any error messages
+2. **Test login** with the provided credentials
+3. **Navigate through** the dashboard, employees, feedback sections
+4. **Check database file**: You should see `employee_feedback.db` in your project folder (if using SQLite)
 
 ### Default Login Credentials
 
@@ -363,24 +423,60 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 ### Common Issues
 
-1. **Database Connection Errors**:
-   - Check DATABASE_URL in `.env`
-   - Ensure PostgreSQL service is running
-   - Verify database credentials
+1. **Python Command Not Found**:
+   - **Windows**: Use `python` instead of `python3`, or add Python to PATH
+   - **Mac**: Use `python3` if `python` doesn't work, or install Python properly
 
-2. **Import Errors**:
-   - Activate virtual environment
-   - Install missing packages: `pip install -r requirements.txt`
+2. **Database Connection Errors**:
+   - **SQLite**: Ensure you have write permissions in the project folder
+   - **PostgreSQL**: Check DATABASE_URL in `.env`, ensure PostgreSQL service is running
 
-3. **Template Errors**:
-   - Check file paths in templates folder
-   - Verify Jinja2 syntax
-
-4. **Port Already in Use**:
+3. **Import/Module Errors**:
    ```bash
-   # Find and kill process
+   # Reinstall dependencies
+   # Windows:
+   pip install --upgrade flask flask-sqlalchemy flask-login psycopg2-binary pandas openpyxl
+   
+   # Mac:
+   pip3 install --upgrade flask flask-sqlalchemy flask-login psycopg2-binary pandas openpyxl
+   ```
+
+4. **Port Already in Use (5000)**:
+   
+   **Windows**:
+   ```cmd
+   # Find process using port 5000
+   netstat -ano | findstr :5000
+   # Kill the process (replace PID with actual process ID)
+   taskkill /PID <PID> /F
+   ```
+   
+   **Mac**:
+   ```bash
+   # Find and kill process using port 5000
    lsof -ti:5000 | xargs kill -9
    ```
+
+5. **Permission Errors**:
+   - **Windows**: Run VS Code as Administrator if needed
+   - **Mac**: Use `sudo` only if absolutely necessary, check folder permissions
+
+6. **VS Code Python Interpreter Issues**:
+   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
+   - Type "Python: Select Interpreter"
+   - Choose the correct Python installation
+
+### Platform-Specific Notes
+
+**Windows**:
+- Use Command Prompt or PowerShell in VS Code terminal
+- Ensure Python is added to system PATH during installation
+- Some antivirus software may interfere with Flask development server
+
+**Mac**:
+- Use Terminal in VS Code
+- If using Homebrew Python, the command might be `python3`
+- Ensure Xcode command line tools are installed: `xcode-select --install`
 
 ## Contributing
 
