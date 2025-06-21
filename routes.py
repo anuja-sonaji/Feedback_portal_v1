@@ -485,11 +485,11 @@ def hierarchy():
             all_employees = [current_user]
         
         # Build hierarchy structure safely
-        hierarchy_data = build_hierarchy_tree(all_employees)
+        top_managers = build_hierarchy_tree(all_employees)
         
-        return render_template('hierarchy_simple.html', 
-                             hierarchy_data=hierarchy_data,
-                             total_employees=len(all_employees))
+        return render_template('hierarchy.html', 
+                             top_managers=top_managers,
+                             current_user=current_user)
     except Exception as e:
         flash(f'Error loading hierarchy: {str(e)}', 'error')
         return redirect(url_for('dashboard'))

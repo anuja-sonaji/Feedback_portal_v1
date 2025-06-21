@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Organization Hierarchy - Employee Feedback Portal{% endblock %}
@@ -220,7 +219,7 @@
      data-designation="{{ employee.designation.lower() if employee.designation else '' }}"
      data-team="{{ employee.team if employee.team else '' }}"
      data-location="{{ employee.location if employee.location else '' }}">
-    
+
     <!-- Employee Box -->
     <div class="org-box-container" style="margin-left: {{ depth * 50 }}px;">
         <div class="org-box level-{{ min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
@@ -261,7 +260,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Expand/Collapse Button -->
         {% if employee.direct_reports %}
         <div class="expand-control">
@@ -272,19 +271,19 @@
         </div>
         {% endif %}
     </div>
-    
+
     <!-- Connection Lines -->
     {% if employee.direct_reports and depth > 0 %}
     <div class="connection-line vertical" style="margin-left: {{ (depth * 50) + 100 }}px;"></div>
     {% endif %}
-    
+
     <!-- Direct Reports Container -->
     {% if employee.direct_reports %}
     <div class="subtree" data-employee-id="{{ employee.id }}">
         {% if employee.direct_reports|length > 1 %}
         <div class="connection-line horizontal" style="margin-left: {{ (depth + 1) * 50 + 100 }}px;"></div>
         {% endif %}
-        
+
         <div class="direct-reports">
             {% for report in employee.direct_reports %}
                 {{ render_employee_tree(report, depth + 1, current_user) }}
@@ -298,45 +297,45 @@
 {% block scripts %}
 <script>
     let hierarchyData = {};
-    
+
     document.addEventListener('DOMContentLoaded', function() {
         updateHierarchyStats();
         initializeHierarchy();
     });
-    
+
     function updateHierarchyStats() {
         const allNodes = document.querySelectorAll('.org-node');
         const allBoxes = document.querySelectorAll('.org-box');
         const managersCount = Array.from(allBoxes).filter(box => 
             box.closest('.org-node').querySelector('.direct-reports')).length;
-        
+
         const depths = Array.from(allNodes).map(node => parseInt(node.dataset.depth));
         const maxDepth = depths.length > 0 ? Math.max(...depths) + 1 : 0;
-        
+
         document.getElementById('totalManagers').textContent = managersCount;
         document.getElementById('totalEmployees').textContent = allNodes.length;
         document.getElementById('maxDepth').textContent = maxDepth;
     }
-    
+
     function initializeHierarchy() {
         hierarchyData.expandedNodes = new Set();
-        
+
         const searchHierarchy = document.getElementById('searchHierarchy');
         const filterTeam = document.getElementById('filterTeam');
         const filterLocation = document.getElementById('filterLocation');
         const filterManager = document.getElementById('filterManager');
-        
+
         if (searchHierarchy) searchHierarchy.addEventListener('input', filterHierarchy);
         if (filterTeam) filterTeam.addEventListener('change', filterHierarchy);
         if (filterLocation) filterLocation.addEventListener('change', filterHierarchy);
         if (filterManager) filterManager.addEventListener('input', filterHierarchy);
     }
-    
+
     function toggleSubtree(button) {
         const orgNode = button.closest('.org-node');
         const subtree = orgNode.querySelector('.subtree');
         const icon = button.querySelector('i');
-        
+
         if (subtree.style.display === 'none') {
             subtree.style.display = 'block';
             icon.className = 'fas fa-minus';
@@ -347,56 +346,56 @@
             hierarchyData.expandedNodes.delete(orgNode.dataset.employeeId);
         }
     }
-    
+
     function expandAll() {
         const subtrees = document.querySelectorAll('.subtree');
         const buttons = document.querySelectorAll('.expand-btn i');
-        
+
         subtrees.forEach(subtree => subtree.style.display = 'block');
         buttons.forEach(icon => icon.className = 'fas fa-minus');
-        
+
         document.querySelectorAll('.org-node').forEach(item => {
             hierarchyData.expandedNodes.add(item.dataset.employeeId);
         });
     }
-    
+
     function collapseAll() {
         const subtrees = document.querySelectorAll('.subtree');
         const buttons = document.querySelectorAll('.expand-btn i');
-        
+
         subtrees.forEach(subtree => subtree.style.display = 'none');
         buttons.forEach(icon => icon.className = 'fas fa-plus');
-        
+
         hierarchyData.expandedNodes.clear();
     }
-    
+
     function filterHierarchy() {
         const searchTerm = document.getElementById('searchHierarchy').value.toLowerCase();
         const teamFilter = document.getElementById('filterTeam').value;
         const locationFilter = document.getElementById('filterLocation').value;
         const managerFilter = document.getElementById('filterManager').value.toLowerCase();
-        
+
         const orgNodes = document.querySelectorAll('.org-node');
-        
+
         orgNodes.forEach(node => {
             const name = node.dataset.name;
             const designation = node.dataset.designation;
             const team = node.dataset.team;
             const location = node.dataset.location;
-            
+
             // Get manager name from the org-box content
             const managerElement = node.querySelector('.org-box-details');
             const managerText = managerElement ? managerElement.textContent.toLowerCase() : '';
-            
+
             const matchesSearch = !searchTerm || 
                                 name.includes(searchTerm) || 
                                 designation.includes(searchTerm);
             const matchesTeam = !teamFilter || team === teamFilter;
             const matchesLocation = !locationFilter || location === locationFilter;
             const matchesManager = !managerFilter || managerText.includes(managerFilter);
-            
+
             const shouldShow = matchesSearch && matchesTeam && matchesLocation && matchesManager;
-            
+
             if (shouldShow) {
                 node.style.display = 'block';
                 showParentPath(node);
@@ -405,7 +404,7 @@
             }
         });
     }
-    
+
     function showParentPath(node) {
         let parent = node.parentElement;
         while (parent && !parent.classList.contains('hierarchy-container')) {
@@ -415,43 +414,43 @@
             parent = parent.parentElement;
         }
     }
-    
+
     function clearHierarchyFilters() {
         document.getElementById('searchHierarchy').value = '';
         document.getElementById('filterTeam').value = '';
         document.getElementById('filterLocation').value = '';
         document.getElementById('filterManager').value = '';
-        
+
         document.querySelectorAll('.org-node').forEach(node => {
             node.style.display = 'block';
         });
     }
-    
+
     function highlightPath() {
         const searchTerm = document.getElementById('searchHierarchy').value.toLowerCase();
         if (!searchTerm) {
             alert('Please enter a search term to highlight the path');
             return;
         }
-        
+
         document.querySelectorAll('.highlighted-path').forEach(el => {
             el.classList.remove('highlighted-path');
         });
-        
+
         const orgNodes = document.querySelectorAll('.org-node');
         orgNodes.forEach(node => {
             const name = node.dataset.name;
             const designation = node.dataset.designation;
-            
+
             if (name.includes(searchTerm) || designation.includes(searchTerm)) {
                 highlightEmployeePath(node);
             }
         });
     }
-    
+
     function highlightEmployeePath(node) {
         node.classList.add('highlighted-path');
-        
+
         let parent = node.parentElement;
         while (parent && !parent.classList.contains('hierarchy-container')) {
             if (parent.classList.contains('org-node')) {
@@ -460,7 +459,7 @@
             parent = parent.parentElement;
         }
     }
-    
+
     function showEmployeeDetails(employeeId) {
         const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
         document.getElementById('employeeDetails').innerHTML = `
@@ -471,10 +470,10 @@
                 <p class="mt-2">Loading employee details...</p>
             </div>
         `;
-        
+
         document.getElementById('editEmployeeBtn').onclick = () => editEmployee(employeeId);
         modal.show();
-        
+
         fetch(`/api/employee/${employeeId}`)
             .then(response => response.json())
             .then(data => {
@@ -514,7 +513,7 @@
                 `;
             });
     }
-    
+
     function editEmployee(employeeId) {
         window.location.href = `{{ url_for('edit_employee', id=0) }}`.replace('0', employeeId);
     }
@@ -528,17 +527,17 @@
         border-radius: 10px;
         overflow-x: auto;
     }
-    
+
     .org-node {
         position: relative;
         margin-bottom: 20px;
     }
-    
+
     .org-box-container {
         position: relative;
         display: inline-block;
     }
-    
+
     .org-box {
         width: 220px;
         min-height: 120px;
@@ -550,55 +549,55 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .org-box:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
-    
+
     /* Level-based colors */
     .org-box.level-0 {
         background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
         color: white;
         border: 2px solid #2c5aa0;
     }
-    
+
     .org-box.level-1 {
         background: linear-gradient(135deg, #5cb85c 0%, #449d44 100%);
         color: white;
         border: 2px solid #357a35;
     }
-    
+
     .org-box.level-2 {
         background: linear-gradient(135deg, #f0ad4e 0%, #ec971f 100%);
         color: white;
         border: 2px solid #d58512;
     }
-    
+
     .org-box.level-3 {
         background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
         color: white;
         border: 2px solid #ac2925;
     }
-    
+
     .org-box.level-4 {
         background: linear-gradient(135deg, #c39bd3 0%, #a569bd 100%);
         color: white;
         border: 2px solid #8e44ad;
     }
-    
+
     .org-box.current-user {
         background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
         border: 3px solid #ff6b6b !important;
         animation: pulse-glow 2s infinite;
     }
-    
+
     @keyframes pulse-glow {
         0% { box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 0 0 0 rgba(255, 107, 107, 0.7); }
         50% { box-shadow: 0 6px 12px rgba(0,0,0,0.15), 0 0 0 10px rgba(255, 107, 107, 0); }
         100% { box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 0 0 0 rgba(255, 107, 107, 0); }
     }
-    
+
     .org-box-header {
         padding: 10px 15px;
         background: rgba(0,0,0,0.1);
@@ -608,27 +607,27 @@
         font-weight: bold;
         font-size: 14px;
     }
-    
+
     .org-box-body {
         padding: 15px;
     }
-    
+
     .org-box-title {
         font-weight: 600;
         margin-bottom: 8px;
         font-size: 13px;
     }
-    
+
     .org-box-details {
         font-size: 12px;
         opacity: 0.9;
     }
-    
+
     .org-box-details .badge {
         font-size: 10px;
         padding: 2px 6px;
     }
-    
+
     .expand-control {
         position: absolute;
         bottom: -15px;
@@ -636,7 +635,7 @@
         transform: translateX(-50%);
         z-index: 10;
     }
-    
+
     .expand-btn {
         width: 30px;
         height: 30px;
@@ -648,48 +647,48 @@
         border: 2px solid #007bff;
         color: #007bff;
     }
-    
+
     .expand-btn:hover {
         background: #007bff;
         color: white;
     }
-    
+
     .connection-line {
         background-color: #ddd;
         position: absolute;
     }
-    
+
     .connection-line.vertical {
         width: 2px;
         height: 30px;
         top: -30px;
     }
-    
+
     .connection-line.horizontal {
         height: 2px;
         width: 100px;
         top: 60px;
     }
-    
+
     .direct-reports {
         margin-top: 40px;
     }
-    
+
     .subtree {
         margin-left: 20px;
         position: relative;
     }
-    
+
     .highlighted-path {
         animation: highlight-pulse 2s infinite;
     }
-    
+
     @keyframes highlight-pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
     }
-    
+
     /* Legend styles */
     .org-box.level-0:not(.current-user) {
         width: 40px;
@@ -698,7 +697,7 @@
         margin: 0;
         cursor: default;
     }
-    
+
     .org-box.level-1:not(.current-user) {
         width: 40px;
         height: 20px;
@@ -706,7 +705,7 @@
         margin: 0;
         cursor: default;
     }
-    
+
     .org-box.level-2:not(.current-user) {
         width: 40px;
         height: 20px;
@@ -714,7 +713,7 @@
         margin: 0;
         cursor: default;
     }
-    
+
     .org-box.level-3:not(.current-user) {
         width: 40px;
         height: 20px;
@@ -722,7 +721,7 @@
         margin: 0;
         cursor: default;
     }
-    
+
     .org-box.level-4:not(.current-user) {
         width: 40px;
         height: 20px;
@@ -730,7 +729,7 @@
         margin: 0;
         cursor: default;
     }
-    
+
     .org-box.current-user:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
@@ -739,26 +738,26 @@
         cursor: default;
         animation: none;
     }
-    
+
     @media (max-width: 768px) {
         .org-box {
             width: 180px;
             min-height: 100px;
         }
-        
+
         .org-box-header {
             padding: 8px 12px;
             font-size: 12px;
         }
-        
+
         .org-box-body {
             padding: 12px;
         }
-        
+
         .org-box-title {
             font-size: 11px;
         }
-        
+
         .org-box-details {
             font-size: 10px;
         }
