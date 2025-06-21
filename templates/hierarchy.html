@@ -213,84 +213,114 @@
 
 <!-- Recursive macro for rendering hierarchy tree -->
 {% macro render_employee_tree(employee, depth, current_user) %}
-<div class="org-node" data-depth="{{ depth }}" 
-     data-employee-id="{{ employee.id }}"
-     data-name="{{ employee.full_name.lower() if employee.full_name else '' }}"
-     data-designation="{{ employee.designation.lower() if employee.designation else '' }}"
-     data-team="{{ employee.team if employee.team else '' }}"
-     data-location="{{ employee.location if employee.location else '' }}">
+<div class="hierarchy-level level-{{ depth }}">
+    <div class="manager-container">
+        <!-- Manager Box -->
+        <div class="org-node manager-node" data-depth="{{ depth }}" 
+             data-employee-id="{{ employee.id }}"
+             data-name="{{ employee.full_name.lower() if employee.full_name else '' }}"
+             data-designation="{{ employee.designation.lower() if employee.designation else '' }}"
+             data-team="{{ employee.team if employee.team else '' }}"
+             data-location="{{ employee.location if employee.location else '' }}">
 
-    <!-- Employee Box -->
-    <div class="org-box-container" style="margin-left: {{ depth * 50 }}px;">
-        <div class="org-box level-{{ min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
-             onclick="showEmployeeDetails({{ employee.id }})">
-            <div class="org-box-header">
-                <strong>{{ employee.full_name or 'N/A' }}</strong>
-                {% if current_user.can_manage(employee) or current_user.id == employee.id %}
-                <button type="button" class="btn btn-sm btn-outline-light ms-2" 
-                        onclick="event.stopPropagation(); editEmployee({{ employee.id }})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                {% endif %}
-            </div>
-            <div class="org-box-body">
-                <div class="org-box-title">{{ employee.designation or 'Employee' }}</div>
-                <div class="org-box-details">
-                    <div class="d-flex justify-content-between">
-                        <span class="badge bg-light text-dark">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
-                        {% if employee.team %}
-                        <span class="badge bg-secondary">{{ employee.team }}</span>
-                        {% endif %}
-                    </div>
-                    {% if employee.location %}
-                    <div class="mt-1">
-                        <i class="fas fa-map-marker-alt"></i> {{ employee.location }}
-                    </div>
-                    {% endif %}
-                    {% if employee.manager_name and employee.manager_id %}
-                    <div class="mt-1">
-                        <i class="fas fa-user-tie"></i> Reports to: {{ employee.manager_name }}
-                    </div>
-                    {% endif %}
-                    {% if employee.direct_reports %}
-                    <div class="mt-1">
-                        <i class="fas fa-users"></i> {{ employee.direct_reports|length }} direct report{{ 's' if employee.direct_reports|length != 1 else '' }}
-                    </div>
+            <div class="org-box level-{{ min(depth, 4) }} {{ 'current-user' if employee.id == current_user.id else '' }}" 
+                 onclick="showEmployeeDetails({{ employee.id }})">
+                <div class="org-box-header">
+                    <strong>{{ employee.full_name or 'N/A' }}</strong>
+                    {% if current_user.can_manage(employee) or current_user.id == employee.id %}
+                    <button type="button" class="btn btn-sm btn-outline-light ms-2" 
+                            onclick="event.stopPropagation(); editEmployee({{ employee.id }})">
+                        <i class="fas fa-edit"></i>
+                    </button>
                     {% endif %}
                 </div>
+                <div class="org-box-body">
+                    <div class="org-box-title">{{ employee.designation or 'Employee' }}</div>
+                    <div class="org-box-details">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-light text-dark">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
+                            {% if employee.team %}
+                            <span class="badge bg-secondary">{{ employee.team }}</span>
+                            {% endif %}
+                        </div>
+                        {% if employee.location %}
+                        <div class="mt-1">
+                            <i class="fas fa-map-marker-alt"></i> {{ employee.location }}
+                        </div>
+                        {% endif %}
+                        {% if employee.direct_reports %}
+                        <div class="mt-1">
+                            <i class="fas fa-users"></i> {{ employee.direct_reports|length }} direct report{{ 's' if employee.direct_reports|length != 1 else '' }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expand/Collapse Button for Manager -->
+            {% if employee.direct_reports %}
+            <div class="expand-control">
+                <button type="button" class="btn btn-sm btn-outline-primary expand-btn" 
+                        onclick="toggleSubtree(this)">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Direct Reports Listed Vertically Below Manager -->
+        {% if employee.direct_reports %}
+        <div class="direct-reports-container subtree" data-employee-id="{{ employee.id }}">
+            <div class="direct-reports-list">
+                {% for report in employee.direct_reports %}
+                <div class="direct-report-item">
+                    {% if report.direct_reports %}
+                        {{ render_employee_tree(report, depth + 1, current_user) }}
+                    {% else %}
+                        <!-- Leaf node (employee with no direct reports) -->
+                        <div class="org-node leaf-node" data-depth="{{ depth + 1 }}" 
+                             data-employee-id="{{ report.id }}"
+                             data-name="{{ report.full_name.lower() if report.full_name else '' }}"
+                             data-designation="{{ report.designation.lower() if report.designation else '' }}"
+                             data-team="{{ report.team if report.team else '' }}"
+                             data-location="{{ report.location if report.location else '' }}">
+
+                            <div class="org-box level-{{ min(depth + 1, 4) }} {{ 'current-user' if report.id == current_user.id else '' }}" 
+                                 onclick="showEmployeeDetails({{ report.id }})">
+                                <div class="org-box-header">
+                                    <strong>{{ report.full_name or 'N/A' }}</strong>
+                                    {% if current_user.can_manage(report) or current_user.id == report.id %}
+                                    <button type="button" class="btn btn-sm btn-outline-light ms-2" 
+                                            onclick="event.stopPropagation(); editEmployee({{ report.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <div class="org-box-body">
+                                    <div class="org-box-title">{{ report.designation or 'Employee' }}</div>
+                                    <div class="org-box-details">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="badge bg-light text-dark">{{ report.system_id or report.bensl_id or 'N/A' }}</span>
+                                            {% if report.team %}
+                                            <span class="badge bg-secondary">{{ report.team }}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if report.location %}
+                                        <div class="mt-1">
+                                            <i class="fas fa-map-marker-alt"></i> {{ report.location }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
         </div>
-
-        <!-- Expand/Collapse Button -->
-        {% if employee.direct_reports %}
-        <div class="expand-control">
-            <button type="button" class="btn btn-sm btn-outline-primary expand-btn" 
-                    onclick="toggleSubtree(this)">
-                <i class="fas fa-minus"></i>
-            </button>
-        </div>
         {% endif %}
     </div>
-
-    <!-- Connection Lines -->
-    {% if employee.direct_reports and depth > 0 %}
-    <div class="connection-line vertical" style="margin-left: {{ (depth * 50) + 100 }}px;"></div>
-    {% endif %}
-
-    <!-- Direct Reports Container -->
-    {% if employee.direct_reports %}
-    <div class="subtree" data-employee-id="{{ employee.id }}">
-        {% if employee.direct_reports|length > 1 %}
-        <div class="connection-line horizontal" style="margin-left: {{ (depth + 1) * 50 + 100 }}px;"></div>
-        {% endif %}
-
-        <div class="direct-reports">
-            {% for report in employee.direct_reports %}
-                {{ render_employee_tree(report, depth + 1, current_user) }}
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endmacro %}
 
@@ -526,16 +556,40 @@
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 10px;
         overflow-x: auto;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 40px;
+    }
+
+    .hierarchy-level {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 250px;
+    }
+
+    .manager-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
 
     .org-node {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .org-box-container {
-        position: relative;
-        display: inline-block;
+    .manager-node {
+        margin-bottom: 30px;
+    }
+
+    .leaf-node {
+        margin-bottom: 10px;
     }
 
     .org-box {
@@ -629,10 +683,8 @@
     }
 
     .expand-control {
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
+        position: relative;
+        margin-top: 10px;
         z-index: 10;
     }
 
@@ -653,30 +705,46 @@
         color: white;
     }
 
-    .connection-line {
-        background-color: #ddd;
+    .direct-reports-container {
+        margin-top: 20px;
+        width: 100%;
+        border-left: 2px solid #007bff;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .direct-reports-container::before {
+        content: '';
         position: absolute;
-    }
-
-    .connection-line.vertical {
-        width: 2px;
-        height: 30px;
-        top: -30px;
-    }
-
-    .connection-line.horizontal {
+        left: -2px;
+        top: -20px;
+        width: 22px;
         height: 2px;
-        width: 100px;
-        top: 60px;
+        background-color: #007bff;
     }
 
-    .direct-reports {
-        margin-top: 40px;
+    .direct-reports-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .direct-report-item {
+        position: relative;
+    }
+
+    .direct-report-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 60px;
+        width: 20px;
+        height: 2px;
+        background-color: #007bff;
     }
 
     .subtree {
-        margin-left: 20px;
-        position: relative;
+        width: 100%;
     }
 
     .highlighted-path {
@@ -690,7 +758,7 @@
     }
 
     /* Legend styles */
-    .org-box.level-0:not(.current-user) {
+    .org-box.level-0:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
         min-height: unset;
@@ -698,7 +766,7 @@
         cursor: default;
     }
 
-    .org-box.level-1:not(.current-user) {
+    .org-box.level-1:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
         min-height: unset;
@@ -706,7 +774,7 @@
         cursor: default;
     }
 
-    .org-box.level-2:not(.current-user) {
+    .org-box.level-2:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
         min-height: unset;
@@ -714,7 +782,7 @@
         cursor: default;
     }
 
-    .org-box.level-3:not(.current-user) {
+    .org-box.level-3:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
         min-height: unset;
@@ -722,7 +790,7 @@
         cursor: default;
     }
 
-    .org-box.level-4:not(.current-user) {
+    .org-box.level-4:not(.hierarchy-container .org-box) {
         width: 40px;
         height: 20px;
         min-height: unset;
@@ -740,6 +808,15 @@
     }
 
     @media (max-width: 768px) {
+        .hierarchy-container {
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hierarchy-level {
+            min-width: 100%;
+        }
+
         .org-box {
             width: 180px;
             min-height: 100px;

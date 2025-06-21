@@ -20,9 +20,9 @@ def login():
     if request.method == 'POST':
         emailid = request.form['email']
         password = request.form['password']
-        
+
         employee = Employee.query.filter_by(emailid=emailid).first()
-        
+
         # Restrict access only to line managers
         if employee and employee.check_password(password) and employee.is_manager:
             login_user(employee)
@@ -33,7 +33,7 @@ def login():
             flash('Access denied. Only line managers can access this system.', 'error')
         else:
             flash('Invalid email or password', 'error')
-    
+
     return render_template('login.html')
 
 @app.route('/logout')
@@ -56,9 +56,9 @@ def dashboard():
     else:
         direct_reports = []
         employees_in_scope = [current_user]
-    
+
     analytics = get_dashboard_analytics(employees_in_scope)
-    
+
     # Get recent feedback given by manager
     recent_feedback = []
     feedback_summary = {
@@ -66,7 +66,7 @@ def dashboard():
         'this_month': 0,
         'pending_reviews': 0
     }
-    
+
     if current_user.is_manager:
         # Get all feedback given by this manager with proper joins
         all_feedback = db.session.query(Feedback)\
@@ -74,59 +74,59 @@ def dashboard():
                                 .filter(Feedback.manager_id == current_user.id)\
                                 .order_by(Feedback.created_at.desc()).all()
         recent_feedback = all_feedback[:5]  # Last 5 feedback entries
-        
+
         feedback_summary['total_given'] = len(all_feedback)
-        
+
         # Count feedback given this month
         current_month = datetime.now().month
         current_year = datetime.now().year
         feedback_summary['this_month'] = len([f for f in all_feedback 
                                             if f.created_at and f.created_at.month == current_month 
                                             and f.created_at.year == current_year])
-        
+
         # Calculate pending reviews (employees without recent feedback in last 3 months)
         from datetime import timedelta
         three_months_ago = datetime.now() - timedelta(days=90)
-        
+
         employees_with_recent_feedback = set()
         for feedback in all_feedback:
             if feedback.created_at and feedback.created_at >= three_months_ago:
                 employees_with_recent_feedback.add(feedback.employee_id)
-        
+
         feedback_summary['pending_reviews'] = len([emp for emp in direct_reports 
                                                  if emp.id not in employees_with_recent_feedback])
-    
+
     # Group employees by categories for enhanced tooltips
     employees_by_type = {}
     employees_by_billable = {}
     employees_by_team = {}
     employees_by_location = {}
-    
+
     for emp in employees_in_scope:
         # Group by employment type
         emp_type = emp.employment_type or 'Not Specified'
         if emp_type not in employees_by_type:
             employees_by_type[emp_type] = []
         employees_by_type[emp_type].append(emp.to_dict())
-        
+
         # Group by billable status
         billable = emp.billable_status or 'Not Specified'
         if billable not in employees_by_billable:
             employees_by_billable[billable] = []
         employees_by_billable[billable].append(emp.to_dict())
-        
+
         # Group by team
         team = emp.team or 'Not Assigned'
         if team not in employees_by_team:
             employees_by_team[team] = []
         employees_by_team[team].append(emp.to_dict())
-        
+
         # Group by location
         location = emp.location or 'Not Specified'
         if location not in employees_by_location:
             employees_by_location[location] = []
         employees_by_location[location].append(emp.to_dict())
-    
+
     # Render enhanced template by default
     template_name = 'dashboard_enhanced.html' if enhanced else 'dashboard.html'
     return render_template(template_name, 
@@ -146,10 +146,10 @@ def employees():
     if not current_user.is_manager:
         flash('Access denied. Only managers can view employee lists.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     # Get employees under current manager
     subordinates = current_user.get_all_subordinates()
-    
+
     return render_template('employees.html', employees=subordinates)
 
 @app.route('/employee/add', methods=['GET', 'POST'])
@@ -158,7 +158,7 @@ def add_employee():
     if not current_user.is_manager:
         flash('Access denied. Only managers can add employees.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     if request.method == 'POST':
         try:
             employee = Employee(
@@ -185,7 +185,7 @@ def add_employee():
                 remarks=request.form.get('remarks'),
                 is_manager=request.form.get('is_manager') == 'on'
             )
-            
+
             # Handle date fields
             if request.form.get('doj_allianz'):
                 employee.doj_allianz = datetime.strptime(request.form['doj_allianz'], '%Y-%m-%d').date()
@@ -195,31 +195,31 @@ def add_employee():
                 employee.doj_project = datetime.strptime(request.form['doj_project'], '%Y-%m-%d').date()
             if request.form.get('dol_project'):
                 employee.dol_project = datetime.strptime(request.form['dol_project'], '%Y-%m-%d').date()
-            
+
             # Set default password (employee should change it)
             employee.set_password('password123')
-            
+
             db.session.add(employee)
             db.session.commit()
-            
+
             flash('Employee added successfully!', 'success')
             return redirect(url_for('employees'))
-            
+
         except Exception as e:
             db.session.rollback()
             flash(f'Error adding employee: {str(e)}', 'error')
-    
+
     return render_template('employee_form.html', employee=None, action='Add')
 
 @app.route('/employee/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_employee(id):
     employee = Employee.query.get_or_404(id)
-    
+
     if not current_user.can_manage(employee) and current_user.id != employee.id:
         flash('Access denied. You can only edit employees under your management.', 'error')
         return redirect(url_for('employees'))
-    
+
     if request.method == 'POST':
         try:
             employee.employment_type = request.form.get('employment_type')
@@ -242,7 +242,7 @@ def edit_employee(id):
             employee.billing_rate = float(request.form['billing_rate']) if request.form.get('billing_rate') else None
             employee.rate_card = request.form.get('rate_card')
             employee.remarks = request.form.get('remarks')
-            
+
             # Handle date fields
             if request.form.get('doj_allianz'):
                 employee.doj_allianz = datetime.strptime(request.form['doj_allianz'], '%Y-%m-%d').date()
@@ -252,38 +252,38 @@ def edit_employee(id):
                 employee.doj_project = datetime.strptime(request.form['doj_project'], '%Y-%m-%d').date()
             if request.form.get('dol_project'):
                 employee.dol_project = datetime.strptime(request.form['dol_project'], '%Y-%m-%d').date()
-            
+
             if current_user.is_manager:
                 employee.is_manager = request.form.get('is_manager') == 'on'
-            
+
             db.session.commit()
             flash('Employee updated successfully!', 'success')
             return redirect(url_for('employees'))
-            
+
         except Exception as e:
             db.session.rollback()
             flash(f'Error updating employee: {str(e)}', 'error')
-    
+
     return render_template('employee_form.html', employee=employee, action='Edit')
 
 @app.route('/employee/<int:id>')
 @login_required
 def employee_details(id):
     employee = Employee.query.get_or_404(id)
-    
+
     # Check if user can view this employee
     if not current_user.is_manager and current_user.id != employee.id:
         if not current_user.can_manage(employee):
             flash('Access denied. You can only view employees under your management.', 'error')
             return redirect(url_for('employees'))
-    
+
     return render_template('employee_details.html', employee=employee)
 
 @app.route('/employee/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_employee(id):
     employee = Employee.query.get_or_404(id)
-    
+
     # Enhanced permission check for managers
     can_delete = False
     if current_user.is_manager:
@@ -293,16 +293,16 @@ def delete_employee(id):
         # Also allow if current user is a higher-level manager
         elif current_user.id != employee.id:  # Can't delete themselves
             can_delete = True
-    
+
     if not can_delete:
         flash('Access denied. You can only delete employees under your management.', 'error')
         return redirect(url_for('employees'))
-    
+
     # Prevent self-deletion
     if employee.id == current_user.id:
         flash('You cannot delete your own account.', 'error')
         return redirect(url_for('employees'))
-    
+
     try:
         # First, check for dependencies and handle them
         # Remove manager relationships for subordinates
@@ -310,14 +310,14 @@ def delete_employee(id):
         for subordinate in subordinates:
             subordinate.manager_id = None
             subordinate.manager_name = None
-        
+
         # Delete related feedback records
         Feedback.query.filter((Feedback.employee_id == employee.id) | 
                              (Feedback.manager_id == employee.id)).delete()
-        
+
         # Delete related billing records
         BillingDetail.query.filter_by(employee_id=employee.id).delete()
-        
+
         # Finally delete the employee
         db.session.delete(employee)
         db.session.commit()
@@ -325,7 +325,7 @@ def delete_employee(id):
     except Exception as e:
         db.session.rollback()
         flash(f'Error deleting employee: {str(e)}', 'error')
-    
+
     return redirect(url_for('employees'))
 
 @app.route('/feedback')
@@ -334,11 +334,11 @@ def feedback():
     if not current_user.is_manager:
         flash('Access denied. Only managers can manage feedback.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     # Get feedback given by current manager
     feedback_list = Feedback.query.filter_by(manager_id=current_user.id)\
                                  .order_by(Feedback.created_at.desc()).all()
-    
+
     return render_template('feedback.html', feedback_list=feedback_list)
 
 @app.route('/feedback/add', methods=['GET', 'POST'])
@@ -347,25 +347,25 @@ def add_feedback():
     if not current_user.is_manager:
         flash('Access denied. Only managers can give feedback.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     if request.method == 'POST':
         try:
             # Validate required fields
             employee_id = request.form.get('employee_id')
             feedback_type = request.form.get('feedback_type')
             period_year = request.form.get('period_year')
-            
+
             if not employee_id or not feedback_type or not period_year:
                 flash('Please fill in all required fields.', 'error')
                 direct_reports = current_user.direct_reports
                 return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add')
-            
+
             # Verify employee is under current manager first
             employee = Employee.query.get(int(employee_id))
             if not employee or not current_user.can_manage(employee):
                 flash('Access denied. You can only give feedback to your direct reports.', 'error')
                 return redirect(url_for('feedback'))
-            
+
             feedback = Feedback(
                 employee_id=int(employee_id),
                 manager_id=current_user.id,
@@ -377,7 +377,7 @@ def add_feedback():
                 strengths=request.form.get('strengths', ''),
                 comments=request.form.get('comments', '')
             )
-            
+
             if feedback_type == 'Monthly':
                 period_month = request.form.get('period_month')
                 if period_month:
@@ -386,20 +386,20 @@ def add_feedback():
                 period_quarter = request.form.get('period_quarter')
                 if period_quarter:
                     feedback.period_quarter = int(period_quarter)
-            
+
             db.session.add(feedback)
             db.session.commit()
-            
+
             flash('Feedback added successfully!', 'success')
             return redirect(url_for('feedback'))
-            
+
         except ValueError as e:
             db.session.rollback()
             flash('Invalid data format. Please check your inputs.', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error adding feedback: {str(e)}', 'error')
-    
+
     # Get direct reports for dropdown
     direct_reports = current_user.direct_reports
     return render_template('feedback_form.html', feedback=None, employees=direct_reports, action='Add', now=datetime.now())
@@ -408,11 +408,11 @@ def add_feedback():
 @login_required
 def edit_feedback(id):
     feedback = Feedback.query.get_or_404(id)
-    
+
     if feedback.manager_id != current_user.id:
         flash('Access denied. You can only edit your own feedback.', 'error')
         return redirect(url_for('feedback'))
-    
+
     if request.method == 'POST':
         try:
             feedback.feedback_type = request.form['feedback_type']
@@ -422,22 +422,22 @@ def edit_feedback(id):
             feedback.areas_of_improvement = request.form['areas_of_improvement']
             feedback.strengths = request.form['strengths']
             feedback.comments = request.form['comments']
-            
+
             if request.form['feedback_type'] == 'Monthly':
                 feedback.period_month = int(request.form['period_month'])
                 feedback.period_quarter = None
             else:
                 feedback.period_quarter = int(request.form['period_quarter'])
                 feedback.period_month = None
-            
+
             db.session.commit()
             flash('Feedback updated successfully!', 'success')
             return redirect(url_for('feedback'))
-            
+
         except Exception as e:
             db.session.rollback()
             flash(f'Error updating feedback: {str(e)}', 'error')
-    
+
     direct_reports = current_user.direct_reports
     return render_template('feedback_form.html', feedback=feedback, employees=direct_reports, action='Edit', now=datetime.now())
 
@@ -447,15 +447,15 @@ def billing():
     if not current_user.is_manager:
         flash('Access denied. Only managers can view billing details.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     # Get billing details for employees under current manager
     subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
     subordinate_ids.append(current_user.id)
-    
+
     billing_records = BillingDetail.query.filter(BillingDetail.employee_id.in_(subordinate_ids))\
                                         .order_by(BillingDetail.billing_year.desc(), 
                                                 BillingDetail.billing_month.desc()).all()
-    
+
     return render_template('billing.html', billing_records=billing_records)
 
 @app.route('/hierarchy')
@@ -470,23 +470,23 @@ def hierarchy():
                 # Get direct reports safely
                 direct_reports = db.session.query(Employee).filter(Employee.manager_id == current_user.id).all()
                 subordinates.extend(direct_reports)
-                
+
                 # Get second-level reports
                 for report in direct_reports:
                     second_level = db.session.query(Employee).filter(Employee.manager_id == report.id).all()
                     subordinates.extend(second_level)
-                    
+
             except Exception as e:
                 subordinates = []
-            
+
             all_employees = [current_user] + subordinates
         else:
             # Non-managers see only themselves
             all_employees = [current_user]
-        
+
         # Build hierarchy structure safely
         top_managers = build_hierarchy_tree(all_employees)
-        
+
         return render_template('hierarchy.html', 
                              top_managers=top_managers,
                              current_user=current_user)
@@ -498,11 +498,11 @@ def build_hierarchy_tree(employees):
     """Build a hierarchical tree structure from employees list"""
     # Create a dictionary for quick lookup
     employee_dict = {emp.id: emp for emp in employees}
-    
+
     # Initialize direct_reports for each employee
     for emp in employees:
         emp.direct_reports = []
-    
+
     # Build the hierarchy relationships
     top_managers = []
     for emp in employees:
@@ -514,14 +514,14 @@ def build_hierarchy_tree(employees):
             manager = employee_dict.get(emp.manager_id)
             if manager:
                 manager.direct_reports.append(emp)
-    
+
     # Sort direct reports by grade and name for each manager
     for emp in employees:
         emp.direct_reports.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
-    
+
     # Sort top managers by grade and name
     top_managers.sort(key=lambda x: (x.grade or 'ZZ', x.full_name or ''))
-    
+
     return top_managers
 
 @app.route('/import_excel', methods=['GET', 'POST'])
@@ -530,52 +530,52 @@ def import_excel():
     if not current_user.is_manager:
         flash('Access denied. Only managers can import employee data.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file selected', 'error')
             return redirect(request.url)
-        
+
         file = request.files['file']
         if file.filename == '':
             flash('No file selected', 'error')
             return redirect(request.url)
-        
+
         if file and file.filename and allowed_file(file.filename):
             try:
                 filename = secure_filename(file.filename)
                 result = process_excel_file(file, current_user.id)
-                
+
                 if result['success']:
                     success_msg = f'Successfully imported {result["count"]} employees'
                     if result['skipped'] > 0:
                         success_msg += f' (skipped {result["skipped"]} duplicates)'
-                    
+
                     flash(success_msg, 'success')
-                    
+
                     # Show errors if any
                     if result['errors']:
                         error_summary = f"Import completed with {len(result['errors'])} warnings/errors. "
                         error_summary += "Check the details below."
                         flash(error_summary, 'warning')
-                        
+
                         # Store detailed errors in session for display
                         session = request.environ.get('werkzeug.session') 
                         if session:
                             session['import_errors'] = result['errors'][:20]  # Limit to 20 errors
-                    
+
                     return redirect(url_for('employees'))
                 else:
                     error_msg = f'Import failed: {result["error"]}'
                     if result['errors']:
                         error_msg += f' Additional errors: {len(result["errors"])} rows had issues.'
                     flash(error_msg, 'error')
-                    
+
             except Exception as e:
                 flash(f'Error processing file: {str(e)}', 'error')
         else:
             flash('Invalid file type. Please upload an Excel file (.xlsx or .xls)', 'error')
-    
+
     return render_template('import_excel.html')
 
 # API endpoints for charts
@@ -587,7 +587,7 @@ def dashboard_data():
         employees_in_scope = subordinates + [current_user]
     else:
         employees_in_scope = [current_user]
-    
+
     analytics = get_dashboard_analytics(employees_in_scope)
     return jsonify(analytics)
 
@@ -613,12 +613,12 @@ def import_results():
 @login_required
 def api_employee_details(id):
     employee = Employee.query.get_or_404(id)
-    
+
     # Check if user can view this employee
     if not current_user.is_manager and current_user.id != employee.id:
         if not current_user.can_manage(employee):
             return jsonify({'error': 'Access denied'}), 403
-    
+
     return jsonify(employee.to_dict())
 @app.route('/download_template')
 @login_required
@@ -626,7 +626,7 @@ def download_template():
     if not current_user.is_manager:
         flash('Access denied. Only managers can download templates.', 'error')
         return redirect(url_for('dashboard'))
-    
+
     try:
         # Create sample data matching database schema
         sample_data = [
@@ -685,21 +685,21 @@ def download_template():
                 'Remarks': 'Team lead'
             }
         ]
-        
+
         # Create DataFrame and save to Excel
         df = pd.DataFrame(sample_data)
-        
+
         # Create Excel file in memory
         from io import BytesIO
         output = BytesIO()
-        
+
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='Employees', index=False)
-            
+
             # Get the workbook and worksheet
             workbook = writer.book
             worksheet = writer.sheets['Employees']
-            
+
             # Auto-adjust column widths
             for column in worksheet.columns:
                 max_length = 0
@@ -712,16 +712,16 @@ def download_template():
                         pass
                 adjusted_width = min(max_length + 2, 50)
                 worksheet.column_dimensions[column_letter].width = adjusted_width
-        
+
         output.seek(0)
-        
+
         return send_file(
             output,
             as_attachment=True,
             download_name='employee_import_template.xlsx',
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        
+
     except Exception as e:
         flash(f'Error generating template: {str(e)}', 'error')
         return redirect(url_for('import_excel'))
