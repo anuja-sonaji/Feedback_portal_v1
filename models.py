@@ -44,6 +44,14 @@ class Employee(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     is_manager = db.Column(db.Boolean, default=False)
     
+    def set_password(self, password):
+        """Set password hash"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check password against hash"""
+        return check_password_hash(self.password_hash, password)
+    
     # Relationships
     manager = db.relationship('Employee', remote_side=[id], backref='direct_reports')
     feedback_given = db.relationship('Feedback', foreign_keys='Feedback.manager_id', backref='given_by')

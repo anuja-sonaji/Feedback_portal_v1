@@ -21,6 +21,7 @@
     <link href="{{ url_for('static', filename='css/style.css') }}?v=20250122" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/professional-ui.css') }}?v=20250122" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/modern-dashboard.css') }}?v=20250122" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
 
     <style>
         body {
