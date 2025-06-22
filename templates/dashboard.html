@@ -197,130 +197,46 @@
     </div>
 </div>
 
-<!-- Enhanced Professional Team Analytics -->
+<!-- Compact Analytics Distribution -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card analytics-dashboard-card">
-            <div class="card-header analytics-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="section-title-wrapper">
-                        <h5 class="section-title mb-0">
-                            <div class="title-icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            Team Analytics
-                        </h5>
-                        <p class="section-subtitle mb-0">Visualize your team distribution and insights</p>
-                    </div>
-                    <div class="analytics-badge">
-                        <span class="badge bg-gradient-primary px-3 py-2">Interactive</span>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="card-title text-sm mb-0 professional-section-title">
+                    <i class="fas fa-chart-pie me-2 gradient-icon"></i>
+                    <span class="gradient-text">Team Analytics</span>
+                </h6>
             </div>
-            <div class="card-body analytics-body">
-                <div class="row g-4">
-                    <!-- Enhanced Filter Panel -->
-                    <div class="col-lg-3 col-md-4">
-                        <div class="filter-panel">
-                            <div class="filter-header">
-                                <h6 class="filter-title">
-                                    <i class="fas fa-filter me-2"></i>
-                                    Analytics Filters
-                                </h6>
-                                <small class="filter-subtitle">Select visualization type</small>
-                            </div>
-                            <div class="filter-options">
-                                <div class="filter-option active" data-chart="team" onclick="switchDataView('team')">
-                                    <div class="option-icon team-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="option-content">
-                                        <div class="option-title">Team Distribution</div>
-                                        <div class="option-desc">View by team structure</div>
-                                    </div>
-                                    <div class="option-indicator">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-option" data-chart="location" onclick="switchDataView('location')">
-                                    <div class="option-icon location-icon">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                    </div>
-                                    <div class="option-content">
-                                        <div class="option-title">Location Analysis</div>
-                                        <div class="option-desc">Geographic distribution</div>
-                                    </div>
-                                    <div class="option-indicator">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-option" data-chart="employment_type" onclick="switchDataView('employment_type')">
-                                    <div class="option-icon employment-icon">
-                                        <i class="fas fa-briefcase"></i>
-                                    </div>
-                                    <div class="option-content">
-                                        <div class="option-title">Employment Types</div>
-                                        <div class="option-desc">Contract vs permanent</div>
-                                    </div>
-                                    <div class="option-indicator">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-option" data-chart="billable_status" onclick="switchDataView('billable_status')">
-                                    <div class="option-icon billable-icon">
-                                        <i class="fas fa-dollar-sign"></i>
-                                    </div>
-                                    <div class="option-content">
-                                        <div class="option-title">Billable Status</div>
-                                        <div class="option-desc">Revenue generating roles</div>
-                                    </div>
-                                    <div class="option-indicator">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
-                                </div>
+            <div class="card-body p-3">
+                <div class="row g-3">
+                    <div class="col-lg-2 col-md-3">
+                        <div class="analytics-filters">
+                            <h6 class="text-xs text-muted mb-2">View by:</h6>
+                            <div class="btn-group-vertical d-grid gap-1" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs active" data-chart="team" onclick="switchDataView('team')">
+                                    <i class="fas fa-users me-1"></i>Team
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="location" onclick="switchDataView('location')">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Location
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="employment_type" onclick="switchDataView('employment_type')">
+                                    <i class="fas fa-briefcase me-1"></i>Employment
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="billable_status" onclick="switchDataView('billable_status')">
+                                    <i class="fas fa-dollar-sign me-1"></i>Billable
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Enhanced Chart Container -->
                     <div class="col-lg-6 col-md-5">
-                        <div class="chart-display-container">
-                            <div class="chart-header">
-                                <h6 class="chart-title" id="currentChartTitle">Team Distribution</h6>
-                                <div class="chart-controls">
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="exportChart('distributionChart')" title="Export Chart">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="chart-wrapper">
-                                <canvas id="distributionChart" width="280" height="280"></canvas>
-                                <div class="chart-overlay" id="noDataOverlay" style="display: none;">
-                                    <div class="no-data-content">
-                                        <i class="fas fa-chart-pie text-muted"></i>
-                                        <p class="mb-0">No data available</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="chart-container text-center">
+                            <canvas id="distributionChart" width="250" height="250"></canvas>
                         </div>
                     </div>
-                    
-                    <!-- Enhanced Legend Panel -->
-                    <div class="col-lg-3 col-md-3">
-                        <div class="legend-panel">
-                            <div class="legend-header">
-                                <h6 class="legend-title">
-                                    <i class="fas fa-list me-2"></i>
-                                    Distribution Details
-                                </h6>
-                                <div class="legend-stats">
-                                    <span class="total-count" id="totalEmployees">0 employees</span>
-                                </div>
-                            </div>
-                            <div class="legend-content" id="chartLegend">
+                    <div class="col-lg-4 col-md-4">
+                        <div class="legend-container">
+                            <h6 class="text-xs text-muted mb-2">Distribution Details</h6>
+                            <div id="chartLegend" class="chart-legend">
                                 <!-- Legend populated by JavaScript -->
                             </div>
                         </div>

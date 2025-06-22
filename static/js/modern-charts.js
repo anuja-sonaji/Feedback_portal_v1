@@ -1,199 +1,205 @@
-The code has been updated to include enhanced chart switching functionality and a more professional look for team analytics.
-```
 
-```replit_final_file
-// Global chart instance
-let currentChart = null;
-let currentDataType = 'team';
+// Modern Charts for Team Data Distribution
+let teamDistributionChart = null;
+let activeDataType = 'skill';
 
-// Chart switching functionality
-function switchDataView(dataType) {
-    currentDataType = dataType;
+const chartColors = [
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+];
 
-    // Update active filter option
-    const filterOptions = document.querySelectorAll('.filter-option');
-    filterOptions.forEach(option => {
-        option.classList.remove('active');
-        if (option.dataset.chart === dataType) {
-            option.classList.add('active');
-        }
-    });
+const dataTypeConfigs = {
+    skill: { field: 'skills', title: 'Skills Distribution' },
+    billable_status: { field: 'billable_status', title: 'Billable Status' },
+    employment_type: { field: 'employment_type', title: 'Employment Type' },
+    team: { field: 'team', title: 'Team Distribution' },
+    location: { field: 'location', title: 'Location Distribution' }
+};
 
-    // Update chart title
-    const titles = {
-        'team': 'Team Distribution',
-        'location': 'Location Analysis', 
-        'employment_type': 'Employment Types',
-        'billable_status': 'Billable Status'
-    };
+/**
+ * Initialize dashboard charts with analytics data
+ */
+function initializeDashboardCharts(analyticsData) {
+    console.log('Initializing dashboard charts:', analyticsData);
 
-    const chartTitleElement = document.getElementById('currentChartTitle');
-    if (chartTitleElement) {
-        chartTitleElement.textContent = titles[dataType] || 'Analytics';
-    }
-
-    // Update chart and legend
-    updateChart(dataType);
-    updateLegend(dataType);
-}
-
-// Update chart based on data type
-function updateChart(dataType) {
-    const canvas = document.getElementById('distributionChart');
-    const noDataOverlay = document.getElementById('noDataOverlay');
-
-    if (!canvas || !window.employeesByCategory) return;
-
-    const data = window.employeesByCategory[dataType];
-
-    if (!data || Object.keys(data).length === 0) {
-        if (noDataOverlay) noDataOverlay.style.display = 'flex';
-        if (currentChart) {
-            currentChart.destroy();
-            currentChart = null;
-        }
+    if (!analyticsData) {
+        console.error('No analytics data available');
         return;
     }
 
-    if (noDataOverlay) noDataOverlay.style.display = 'none';
-
-    // Destroy existing chart
-    if (currentChart) {
-        currentChart.destroy();
+    // Set Chart.js defaults
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+        Chart.defaults.color = '#6b7280';
     }
 
-    const ctx = canvas.getContext('2d');
+    // Store data globally for chart switching
+    window.analyticsData = analyticsData;
+
+    // Initialize with skills data by default
+    updateDistributionChart(analyticsData, activeDataType);
+}
+
+/**
+ * Update the distribution chart with new data
+ */
+function updateDistributionChart(analyticsData, dataType) {
+    const ctx = document.getElementById('distributionChart');
+    if (!ctx) {
+        console.error('Distribution chart canvas not found');
+        return;
+    }
+
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js library not loaded');
+        return;
+    }
+
+    const config = dataTypeConfigs[dataType];
+    if (!config || !analyticsData[config.field]) {
+        console.error('Invalid data type or missing data:', dataType);
+        return;
+    }
+
+    const data = analyticsData[config.field] || {};
     const labels = Object.keys(data);
     const values = Object.values(data);
 
-    // Color schemes for different data types
-    const colorSchemes = {
-        'team': ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
-        'location': ['#f093fb', '#f5576c', '#667eea', '#764ba2', '#4facfe', '#00f2fe'],
-        'employment_type': ['#4facfe', '#00f2fe', '#667eea', '#764ba2'],
-        'billable_status': ['#43e97b', '#38f9d7', '#f093fb', '#f5576c']
-    };
+    if (labels.length === 0) {
+        console.warn('No data available for', dataType);
+        showNoDataMessage();
+        return;
+    }
 
-    currentChart = new Chart(ctx, {
-        type: 'doughnut',
+    // Destroy existing chart
+    if (teamDistributionChart) {
+        teamDistributionChart.destroy();
+    }
+
+    const backgroundColors = labels.map((_, index) => chartColors[index % chartColors.length]);
+
+    teamDistributionChart = new Chart(ctx, {
+        type: 'pie',
         data: {
             labels: labels,
             datasets: [{
                 data: values,
-                backgroundColor: colorSchemes[dataType] || colorSchemes.team,
-                borderWidth: 3,
+                backgroundColor: backgroundColors,
                 borderColor: '#ffffff',
-                hoverBorderWidth: 4
+                borderWidth: 2,
+                hoverOffset: 4
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    borderWidth: 1,
-                    cornerRadius: 12,
+                    backgroundColor: '#374151',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    cornerRadius: 6,
                     padding: 12,
                     callbacks: {
                         label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
                         }
                     }
                 }
             },
-            cutout: '60%',
             animation: {
-                animateScale: true,
                 animateRotate: true,
-                duration: 800
+                duration: 600
             }
         }
     });
+
+    // Update legend
+    updateChartLegend(labels, values, backgroundColors);
 }
 
-// Update legend based on data type
-function updateLegend(dataType) {
+/**
+ * Show no data message
+ */
+function showNoDataMessage() {
     const legendContainer = document.getElementById('chartLegend');
-    const totalElement = document.getElementById('totalEmployees');
-
-    if (!legendContainer || !window.employeesByCategory) return;
-
-    const data = window.employeesByCategory[dataType];
-
-    if (!data || Object.keys(data).length === 0) {
-        legendContainer.innerHTML = '<p class="text-muted text-center p-3">No data available</p>';
-        if (totalElement) totalElement.textContent = '0 employees';
-        return;
-    }
-
-    const colorSchemes = {
-        'team': ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
-        'location': ['#f093fb', '#f5576c', '#667eea', '#764ba2', '#4facfe', '#00f2fe'],
-        'employment_type': ['#4facfe', '#00f2fe', '#667eea', '#764ba2'],
-        'billable_status': ['#43e97b', '#38f9d7', '#f093fb', '#f5576c']
-    };
-
-    const colors = colorSchemes[dataType] || colorSchemes.team;
-    const total = Object.values(data).reduce((a, b) => a + b, 0);
-
-    if (totalElement) {
-        totalElement.textContent = `${total} employee${total !== 1 ? 's' : ''}`;
-    }
-
-    let legendHTML = '';
-    Object.entries(data).forEach(([key, value], index) => {
-        const percentage = ((value / total) * 100).toFixed(1);
-        const color = colors[index % colors.length];
-
-        legendHTML += `
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: ${color}"></div>
-                <div class="legend-content">
-                    <div class="legend-label">${key}</div>
+    if (legendContainer) {
+        legendContainer.innerHTML = `
+            <div class="no-data-state text-center py-4">
+                <div class="no-data-icon text-muted mb-2">
+                    <i class="fas fa-chart-pie fa-2x"></i>
                 </div>
-                <div class="legend-count">${value}</div>
-                <div class="legend-percentage">${percentage}%</div>
+                <p class="no-data-text text-muted mb-0">No data available for this category</p>
             </div>
         `;
-    });
-
-    legendContainer.innerHTML = legendHTML;
-}
-
-// Export chart functionality
-function exportChart(canvasId, filename = 'chart.png') {
-    try {
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            const url = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = url;
-            link.click();
-        }
-    } catch (error) {
-        console.error('Error exporting chart:', error);
     }
 }
 
-// Enhanced Employee Search
+/**
+ * Update the custom legend
+ */
+function updateChartLegend(labels, values, colors) {
+    const legendContainer = document.getElementById('chartLegend');
+    if (!legendContainer) return;
+
+    const total = values.reduce((a, b) => a + b, 0);
+
+    legendContainer.innerHTML = labels.map((label, index) => {
+        const value = values[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        const color = colors[index];
+
+        return `
+            <div class="legend-item d-flex align-items-center mb-2">
+                <div class="legend-color me-3" style="width: 16px; height: 16px; background-color: ${color}; border-radius: 3px;"></div>
+                <div class="legend-content flex-grow-1">
+                    <div class="legend-label fw-medium text-dark">${label}</div>
+                    <div class="legend-stats">
+                        <span class="legend-count text-primary fw-bold">${value}</span>
+                        <span class="legend-percentage text-muted ms-1">(${percentage}%)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Switch data view (called by filter buttons)
+ */
+function switchDataView(dataType) {
+    activeDataType = dataType;
+
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`[data-chart="${dataType}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+
+    // Update chart with new data
+    if (window.analyticsData) {
+        updateDistributionChart(window.analyticsData, dataType);
+    }
+}
+
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize enhanced analytics
-    if (window.employeesByCategory) {
-        // Initialize with team view by default
-        switchDataView('team');
+    console.log('DOM ready, checking for analytics data...');
+    if (window.analyticsData) {
+        initializeDashboardCharts(window.analyticsData);
     }
 });
 
-// Make functions globally available
+// Export functions for global access
 window.switchDataView = switchDataView;
-window.exportChart = exportChart;
+window.initializeDashboardCharts = initializeDashboardCharts;
