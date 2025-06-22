@@ -184,53 +184,53 @@
     </div>
 </div>
 
-<!-- Team Data Distribution Section -->
+<!-- Team Data Distribution Section - Compact -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card analytics-distribution-card">
-            <div class="card-header bg-gradient-primary">
-                <h5 class="card-title text-white mb-0">
+        <div class="card analytics-distribution-card compact">
+            <div class="card-header bg-gradient-primary py-2">
+                <h6 class="card-title text-white mb-0">
                     <i class="fas fa-chart-pie me-2"></i>Team Data Distribution
-                </h5>
+                </h6>
             </div>
-            <div class="card-body p-4">
-                <div class="row">
+            <div class="card-body p-3">
+                <div class="row g-3">
                     <!-- Filter Buttons -->
-                    <div class="col-md-2">
-                        <div class="filter-section">
-                            <h6 class="filter-title mb-3">View by:</h6>
+                    <div class="col-lg-2 col-md-3">
+                        <div class="filter-section compact">
+                            <h6 class="filter-title mb-2">View:</h6>
                             <div class="filter-buttons">
-                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchDataView('skill')">
-                                    <i class="fas fa-code me-2"></i>Skill
+                                <button type="button" class="filter-btn active compact" data-chart="skill" onclick="switchDataView('skill')">
+                                    <i class="fas fa-code"></i>Skill
                                 </button>
-                                <button type="button" class="filter-btn" data-chart="team" onclick="switchDataView('team')">
-                                    <i class="fas fa-users me-2"></i>Team
+                                <button type="button" class="filter-btn compact" data-chart="team" onclick="switchDataView('team')">
+                                    <i class="fas fa-users"></i>Team
                                 </button>
-                                <button type="button" class="filter-btn" data-chart="location" onclick="switchDataView('location')">
-                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                <button type="button" class="filter-btn compact" data-chart="location" onclick="switchDataView('location')">
+                                    <i class="fas fa-map-marker-alt"></i>Location
                                 </button>
-                                <button type="button" class="filter-btn" data-chart="employment_type" onclick="switchDataView('employment_type')">
-                                    <i class="fas fa-briefcase me-2"></i>Employment Type
+                                <button type="button" class="filter-btn compact" data-chart="employment_type" onclick="switchDataView('employment_type')">
+                                    <i class="fas fa-briefcase"></i>Employment
                                 </button>
-                                <button type="button" class="filter-btn" data-chart="billable_status" onclick="switchDataView('billable_status')">
-                                    <i class="fas fa-dollar-sign me-2"></i>Billable
+                                <button type="button" class="filter-btn compact" data-chart="billable_status" onclick="switchDataView('billable_status')">
+                                    <i class="fas fa-dollar-sign"></i>Billable
                                 </button>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Pie Chart -->
-                    <div class="col-md-6">
-                        <div class="chart-container">
-                            <canvas id="distributionChart" width="400" height="400"></canvas>
+                    <div class="col-lg-6 col-md-5">
+                        <div class="chart-container compact">
+                            <canvas id="distributionChart" width="300" height="300"></canvas>
                         </div>
                     </div>
                     
                     <!-- Legend -->
-                    <div class="col-md-4">
-                        <div class="legend-container">
-                            <h6 class="legend-title mb-3">Distribution Details</h6>
-                            <div id="chartLegend" class="chart-legend">
+                    <div class="col-lg-4 col-md-4">
+                        <div class="legend-container compact">
+                            <h6 class="legend-title mb-2">Details</h6>
+                            <div id="chartLegend" class="chart-legend compact">
                                 <!-- Legend items will be populated by JavaScript -->
                             </div>
                         </div>
