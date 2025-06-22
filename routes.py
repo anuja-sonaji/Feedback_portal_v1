@@ -65,6 +65,10 @@ def dashboard():
         employees_in_scope = [current_user]
 
     analytics = get_dashboard_analytics(employees_in_scope)
+    
+    # Add current date for quarter calculation
+    from datetime import datetime
+    current_date = datetime.now()
 
     # Get recent feedback given by manager
     recent_feedback = []

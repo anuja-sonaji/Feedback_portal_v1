@@ -51,11 +51,13 @@
         <div class="card analytics-card card-info text-white">
             <div class="card-body">
                 <div>
-                    <h5>Feedback Given</h5>
-                    <h2>{{ feedback_summary.total_given }}</h2>
+                    <h5>Employee Search</h5>
+                    <input type="text" id="employeeSearch" class="form-control form-control-sm mt-2" 
+                           placeholder="Search employees..." 
+                           style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                 </div>
                 <div class="card-icon">
-                    <i class="fas fa-comments"></i>
+                    <i class="fas fa-search"></i>
                 </div>
             </div>
         </div>
@@ -66,11 +68,11 @@
         <div class="card analytics-card card-warning text-white">
             <div class="card-body">
                 <div>
-                    <h5>Active Teams</h5>
-                    <h2>{{ analytics.team.keys()|length }}</h2>
+                    <h5>Current Quarter View</h5>
+                    <h2>Q4</h2>
                 </div>
                 <div class="card-icon">
-                    <i class="fas fa-project-diagram"></i>
+                    <i class="fas fa-calendar-quarter"></i>
                 </div>
             </div>
         </div>
@@ -83,13 +85,13 @@
 
 {% if current_user.is_manager %}
 <!-- Team Overview Section -->
-<div class="row team-section mb-4">
+<div class="row team-section mb-3">
     <div class="col-12">
         <div class="card team-overview-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="card-title mb-0">
                     <i class="fas fa-users me-2"></i>My Team Overview
-                </h5>
+                </h6>
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-list me-1"></i>View All
@@ -99,12 +101,12 @@
                     </a>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body py-2">
                 {% set direct_reports = current_user.get_direct_reports() %}
                 {% if direct_reports %}
                 <!-- Employee Table -->
                 <div class="table-responsive">
-                    <table class="table team-table">
+                    <table class="table team-table table-sm">
                         <thead>
                             <tr>
                                 <th>Employee</th>
@@ -185,7 +187,7 @@
 </div>
 
 <!-- Team Data Distribution Section - Compact -->
-<div class="row mb-4">
+<div class="row mb-3">
     <div class="col-12">
         <div class="card analytics-distribution-card compact">
             <div class="card-header bg-gradient-primary py-2">
