@@ -1,3 +1,4 @@
+
 // Modern Charts for Team Data Distribution
 let distributionChart = null;
 let currentDataType = 'skill';
@@ -11,7 +12,7 @@ const referenceColors = [
 const dataConfigs = {
     skill: { field: 'skills', title: 'Skills Distribution' },
     billable: { field: 'billable_status', title: 'Billable Status' },
-    employment: { field: 'employment_type', title: 'Employment Type' },
+    employment_type: { field: 'employment_type', title: 'Employment Type' },
     team: { field: 'team', title: 'Team Distribution' },
     location: { field: 'location', title: 'Location Distribution' }
 };
@@ -28,8 +29,10 @@ function initializeDashboardCharts(analyticsData) {
     }
 
     // Set Chart.js defaults
-    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
-    Chart.defaults.color = '#64748b';
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+        Chart.defaults.color = '#64748b';
+    }
 
     // Store data globally for chart switching
     window.analyticsData = analyticsData;
@@ -48,6 +51,11 @@ function updateDistributionChart(analyticsData, dataType) {
         return;
     }
 
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js library not loaded');
+        return;
+    }
+
     const config = dataConfigs[dataType];
     if (!config || !analyticsData[config.field]) {
         console.error('Invalid data type or missing data:', dataType);
@@ -60,6 +68,7 @@ function updateDistributionChart(analyticsData, dataType) {
 
     if (labels.length === 0) {
         console.warn('No data available for', dataType);
+        showNoDataMessage();
         return;
     }
 
@@ -115,6 +124,23 @@ function updateDistributionChart(analyticsData, dataType) {
 
     // Update legend
     updateLegend(labels, values, backgroundColors);
+}
+
+/**
+ * Show no data message
+ */
+function showNoDataMessage() {
+    const legendContainer = document.getElementById('chartLegend');
+    if (legendContainer) {
+        legendContainer.innerHTML = `
+            <div class="no-data-state">
+                <div class="no-data-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <p class="no-data-text">No data available for this category</p>
+            </div>
+        `;
+    }
 }
 
 /**

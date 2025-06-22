@@ -242,29 +242,27 @@
 </div>
 {% endif %}
 
-<!-- Quick Actions Section - Moved to Bottom -->
-<div class="row mb-5 mt-4">
+<!-- Compact Quick Actions Section -->
+<div class="row mb-4">
     <div class="col-12">
         <div class="card professional-quick-actions">
             <div class="card-header">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-rocket me-2 text-primary"></i>Quick Actions
-                    </h5>
-                    <small class="text-muted">Streamline your workflow</small>
-                </div>
+                <h6 class="card-title mb-0">
+                    <span><i class="fas fa-rocket me-2"></i>Quick Actions</span>
+                    <small class="opacity-75">Streamline your workflow</small>
+                </h6>
             </div>
             <div class="card-body">
-                <div class="row g-4">
-                    <div class="col-lg-3 col-md-6">
+                <div class="row g-2">
+                    <div class="col-lg-3 col-md-6 col-sm-6">
                         <div class="quick-action-card">
                             <a href="{{ url_for('add_employee') }}" class="quick-action-link">
                                 <div class="action-icon bg-primary">
                                     <i class="fas fa-user-plus"></i>
                                 </div>
                                 <div class="action-content">
-                                    <h6 class="action-title">Add Employee</h6>
-                                    <p class="action-description">Register new team members</p>
+                                    <div class="action-title">Add Employee</div>
+                                    <div class="action-description">Register new team members</div>
                                 </div>
                                 <div class="action-arrow">
                                     <i class="fas fa-chevron-right"></i>
@@ -272,15 +270,15 @@
                             </a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
+                    <div class="col-lg-3 col-md-6 col-sm-6">
                         <div class="quick-action-card">
                             <a href="{{ url_for('employees') }}" class="quick-action-link">
                                 <div class="action-icon bg-info">
                                     <i class="fas fa-users"></i>
                                 </div>
                                 <div class="action-content">
-                                    <h6 class="action-title">Employee Details</h6>
-                                    <p class="action-description">View and manage team data</p>
+                                    <div class="action-title">Employee Details</div>
+                                    <div class="action-description">View and manage team data</div>
                                 </div>
                                 <div class="action-arrow">
                                     <i class="fas fa-chevron-right"></i>
@@ -288,15 +286,15 @@
                             </a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
+                    <div class="col-lg-3 col-md-6 col-sm-6">
                         <div class="quick-action-card">
                             <a href="{{ url_for('import_excel') }}" class="quick-action-link">
                                 <div class="action-icon bg-success">
                                     <i class="fas fa-file-import"></i>
                                 </div>
                                 <div class="action-content">
-                                    <h6 class="action-title">Import Data</h6>
-                                    <p class="action-description">Bulk upload employee records</p>
+                                    <div class="action-title">Import Data</div>
+                                    <div class="action-description">Bulk upload employee records</div>
                                 </div>
                                 <div class="action-arrow">
                                     <i class="fas fa-chevron-right"></i>
@@ -304,15 +302,15 @@
                             </a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
+                    <div class="col-lg-3 col-md-6 col-sm-6">
                         <div class="quick-action-card">
                             <a href="{{ url_for('download_template') }}" class="quick-action-link">
                                 <div class="action-icon bg-warning">
                                     <i class="fas fa-download"></i>
                                 </div>
                                 <div class="action-content">
-                                    <h6 class="action-title">Export Data</h6>
-                                    <p class="action-description">Download employee reports</p>
+                                    <div class="action-title">Export Data</div>
+                                    <div class="action-description">Download employee reports</div>
                                 </div>
                                 <div class="action-arrow">
                                     <i class="fas fa-chevron-right"></i>
