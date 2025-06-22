@@ -82,7 +82,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body" style="padding: 2rem;">
-                <h5 class="text-center mb-4" style="font-weight: 600; color: #2c3e50;">Team Data Distribution</h5>
+                <h5 class="text-center mb-4" style="font-weight: 600; color: #2c3e50;">Team Data Distribution - NEW LAYOUT</h5>
                 <div class="row">
                     <!-- Left Side - Chart Selection Buttons -->
                     <div class="col-md-3">
@@ -109,6 +109,10 @@
                     <div class="col-md-6">
                         <div class="pie-chart-container">
                             <canvas id="teamPieChart" width="400" height="400"></canvas>
+                        </div>
+                        <!-- Debug indicator -->
+                        <div class="text-center mt-2">
+                            <small class="text-muted">Chart Version: 2025-01-22-v2</small>
                         </div>
                     </div>
                     
@@ -224,7 +228,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('give_feedback', employee_id=employee.id) }}" class="action-btn btn-feedback">
+                                    <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" class="action-btn btn-feedback">
                                         <i class="fas fa-comment me-1"></i>Feedback
                                     </a>
                                     <a href="{{ url_for('employee_details', id=employee.id) }}" class="action-btn btn-details">
@@ -263,7 +267,7 @@
 </script>
 
 <!-- Team Data Distribution Chart Script -->
-<script src="{{ url_for('static', filename='js/modern-charts.js') }}?v=20250122"></script>
+<script src="{{ url_for('static', filename='js/modern-charts.js') }}?v={{ range(1000, 9999) | random }}"></script>
 
 <script>
 // Initialize the team pie chart when page loads

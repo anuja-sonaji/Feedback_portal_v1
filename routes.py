@@ -127,8 +127,8 @@ def dashboard():
             employees_by_location[location] = []
         employees_by_location[location].append(emp.to_dict())
 
-    # Render enhanced template by default
-    template_name = 'dashboard_enhanced.html' if enhanced else 'dashboard.html'
+    # Use the new dashboard template with pie charts
+    template_name = 'dashboard.html'
     return render_template(template_name, 
                          analytics=analytics, 
                          recent_feedback=recent_feedback,
