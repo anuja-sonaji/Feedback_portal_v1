@@ -113,12 +113,43 @@
     max-height: 280px !important;
 }
 
+/* Team Overview Container */
+.team-overview-container {
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 1.25rem;
+    height: fit-content;
+}
+
+.overview-stats {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.stat-label {
+    color: #6b7280;
+    margin-right: 0.5rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #374151;
+    margin-left: auto;
+}
+
 /* Chart Filter Buttons - Compact Professional */
 .chart-filters {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding: 0.5rem;
 }
 
 .filter-btn {
@@ -224,6 +255,10 @@
     .pie-chart-container canvas {
         max-width: 220px !important;
         max-height: 220px !important;
+    }
+    
+    .team-overview-container {
+        margin-bottom: 1rem;
     }
     
     .chart-filters {

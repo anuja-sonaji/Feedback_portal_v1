@@ -86,6 +86,23 @@ function createTeamPieChart(data, title) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((value / total) * 100).toFixed(1);
                             return `${label}: ${value} (${percentage}%)`;
+                        },
+                        afterLabel: function(context) {
+                            // Get employee names for this data point
+                            const label = context.label;
+                            const currentField = dataConfigs[currentDataType].field;
+                            const employeesByCategory = window.employeesByCategory || {};
+                            
+                            if (employeesByCategory[currentField] && employeesByCategory[currentField][label]) {
+                                const employees = employeesByCategory[currentField][label];
+                                const names = employees.map(emp => emp.full_name || emp.name).slice(0, 5); // Show max 5 names
+                                let result = '\nEmployees: ' + names.join(', ');
+                                if (employees.length > 5) {
+                                    result += ` and ${employees.length - 5} more...`;
+                                }
+                                return result;
+                            }
+                            return '';
                         }
                     }
                 }

@@ -84,38 +84,58 @@
             <div class="card-body" style="padding: 1.5rem;">
                 <h5 class="text-center mb-3" style="font-weight: 600; color: #2c3e50; font-size: 1.1rem;">Team Data Distribution</h5>
                 <div class="row">
-                    <!-- Left Side - Chart Selection Buttons -->
-                    <div class="col-md-3">
-                        <div class="chart-filters">
-                            <button type="button" class="filter-btn active" data-chart="skill" onclick="switchChartView('skill')">
-                                <i class="fas fa-cogs me-2"></i>Skill
-                            </button>
-                            <button type="button" class="filter-btn" data-chart="billable" onclick="switchChartView('billable')">
-                                <i class="fas fa-dollar-sign me-2"></i>Billable
-                            </button>
-                            <button type="button" class="filter-btn" data-chart="employment" onclick="switchChartView('employment')">
-                                <i class="fas fa-briefcase me-2"></i>Employment Type
-                            </button>
-                            <button type="button" class="filter-btn" data-chart="team" onclick="switchChartView('team')">
-                                <i class="fas fa-users me-2"></i>Team
-                            </button>
-                            <button type="button" class="filter-btn" data-chart="location" onclick="switchChartView('location')">
-                                <i class="fas fa-map-marker-alt me-2"></i>Location
-                            </button>
+                    <!-- Left Side - Team Overview -->
+                    <div class="col-md-4">
+                        <div class="team-overview-container">
+                            <h6 class="mb-3" style="color: #374151; font-weight: 600;">Team Overview</h6>
+                            <div class="overview-stats mb-3">
+                                <div class="stat-item">
+                                    <i class="fas fa-users text-primary me-2"></i>
+                                    <span class="stat-label">Total Members:</span>
+                                    <span class="stat-value">{{ analytics.total_employees }}</span>
+                                </div>
+                                {% if current_user.is_manager %}
+                                <div class="stat-item">
+                                    <i class="fas fa-user-friends text-success me-2"></i>
+                                    <span class="stat-label">Direct Reports:</span>
+                                    <span class="stat-value">{{ current_user.get_direct_reports()|length }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="chart-filters">
+                                <h6 class="mb-2" style="color: #374151; font-size: 0.9rem;">View by:</h6>
+                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchChartView('skill')">
+                                    <i class="fas fa-cogs me-2"></i>Skill
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="billable" onclick="switchChartView('billable')">
+                                    <i class="fas fa-dollar-sign me-2"></i>Billable
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="employment" onclick="switchChartView('employment')">
+                                    <i class="fas fa-briefcase me-2"></i>Employment Type
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="team" onclick="switchChartView('team')">
+                                    <i class="fas fa-users me-2"></i>Team
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="location" onclick="switchChartView('location')">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Center - Professional Pie Chart -->
-                    <div class="col-md-6">
-                        <div class="pie-chart-container">
-                            <canvas id="teamPieChart" width="280" height="280"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Side - Legend -->
-                    <div class="col-md-3">
-                        <div class="chart-legend-container" id="pieChartLegend">
-                            <!-- Dynamic legend content -->
+                    <!-- Right Side - Pie Chart and Legend -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="pie-chart-container">
+                                    <canvas id="teamPieChart" width="280" height="280"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-legend-container" id="pieChartLegend">
+                                    <!-- Dynamic legend content -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -260,6 +280,14 @@
 <!-- Pass analytics data to JavaScript -->
 <script>
     window.analyticsData = {{ analytics|tojson }};
+    // Pass employee data by category for tooltips
+    window.employeesByCategory = {
+        employment_type: {{ employees_by_type|tojson if employees_by_type else '{}' }},
+        billable_status: {{ employees_by_billable|tojson if employees_by_billable else '{}' }},
+        team: {{ employees_by_team|tojson if employees_by_team else '{}' }},
+        location: {{ employees_by_location|tojson if employees_by_location else '{}' }},
+        skills: {}  // Will be populated from skills data
+    };
 </script>
 
 <!-- Team Data Distribution Chart Script -->
