@@ -3,15 +3,18 @@
 {% block title %}Dashboard - Employee Feedback Portal{% endblock %}
 
 {% block content %}
-<!-- Compact Professional Header -->
+<!-- Enhanced Professional Header -->
 <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
     <div class="page-title">
-        <h4 class="mb-1"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Employee Feedback Management Overview</h4>
+        <h4 class="mb-1 professional-heading">
+            <i class="fas fa-tachometer-alt me-2 gradient-icon"></i>
+            <span class="gradient-text">Employee Feedback Management Overview</span>
+        </h4>
     </div>
     <div class="user-welcome">
         <span class="welcome-text text-sm">Welcome back, <strong>{{ current_user.full_name }}</strong></span>
         {% if current_user.is_manager %}
-        <span class="badge bg-primary ms-2 text-xs">Manager</span>
+        <span class="badge bg-gradient-primary ms-2 text-xs shadow-sm">Manager</span>
         {% endif %}
     </div>
 </div>
@@ -95,8 +98,9 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center py-2">
-                <h6 class="card-title mb-0 text-sm">
-                    <i class="fas fa-users me-2"></i>My Team Overview
+                <h6 class="card-title mb-0 text-sm professional-section-title">
+                    <i class="fas fa-users me-2 gradient-icon"></i>
+                    <span class="gradient-text">My Team Overview</span>
                 </h6>
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm text-xs">
@@ -198,8 +202,9 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header py-2">
-                <h6 class="card-title text-sm mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Team Analytics
+                <h6 class="card-title text-sm mb-0 professional-section-title">
+                    <i class="fas fa-chart-pie me-2 gradient-icon"></i>
+                    <span class="gradient-text">Team Analytics</span>
                 </h6>
             </div>
             <div class="card-body p-3">
@@ -248,8 +253,9 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header py-2">
-                <h6 class="card-title text-sm mb-0">
-                    <i class="fas fa-rocket me-2"></i>Quick Actions
+                <h6 class="card-title text-sm mb-0 professional-section-title">
+                    <i class="fas fa-rocket me-2 gradient-icon"></i>
+                    <span class="gradient-text">Quick Actions</span>
                 </h6>
             </div>
             <div class="card-body p-3">
@@ -405,6 +411,100 @@ function showEmployeeDetails(employeeId) {
 </script>
 
 <style>
+/* Professional Heading Styles */
+.professional-heading {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.professional-section-title {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1rem !important;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: inherit;
+    position: relative;
+}
+
+.gradient-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 50%, rgba(240, 147, 251, 0.1) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: blur(3px);
+}
+
+.gradient-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Enhanced Card Headers */
+.card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-bottom: 2px solid transparent !important;
+    border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    z-index: 1;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 33%, #f093fb 66%, #667eea 100%);
+    z-index: 1;
+}
+
 .search-results {
     max-height: 300px;
     overflow-y: auto;
@@ -426,11 +526,29 @@ function showEmployeeDetails(employeeId) {
 .metric-card {
     transition: all 0.2s ease;
     border: 1px solid #e9ecef;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.metric-card:hover::before {
+    opacity: 1;
 }
 
 .metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.125rem 0.5rem rgba(102, 126, 234, 0.15);
 }
 
 .metric-icon {
@@ -454,6 +572,7 @@ function showEmployeeDetails(employeeId) {
     color: white;
     font-weight: 600;
     font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .analytics-filters .btn {
@@ -477,6 +596,28 @@ function showEmployeeDetails(employeeId) {
 /* Compact spacing */
 .card-body.p-3 { padding: 1rem !important; }
 .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+
+/* Animation for gradient text */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
+}
+
+/* Enhanced hover effects for cards */
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
 </style>
 {% endif %}
 {% endblock %}
