@@ -3,95 +3,88 @@
 {% block title %}Dashboard - Employee Feedback Portal{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Compact Header -->
+<div class="dashboard-header d-flex justify-content-between align-items-center">
     <h2>
         <i class="fas fa-tachometer-alt me-2"></i>Dashboard
     </h2>
-    <div class="text-muted">
-        Welcome, {{ current_user.name }}
+    <div class="welcome-text">
+        Welcome, {{ current_user.full_name }}
         {% if current_user.is_manager %}
         <span class="badge bg-primary ms-2">Manager</span>
         {% endif %}
     </div>
 </div>
 
-<!-- Analytics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card dashboard-card bg-primary text-white">
+<!-- Compact Analytics Cards -->
+<div class="row analytics-row g-3">
+    <div class="col-lg-3 col-md-6">
+        <div class="card analytics-card card-primary text-white">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Total Employees</h5>
-                        <h2 class="mb-0">{{ analytics.total_employees }}</h2>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-users fa-lg opacity-75"></i>
-                    </div>
+                <div>
+                    <h5>Total Employees</h5>
+                    <h2>{{ analytics.total_employees }}</h2>
+                </div>
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
         </div>
     </div>
     
     {% if current_user.is_manager %}
-    <div class="col-md-3">
-        <div class="card dashboard-card bg-success text-white">
+    <div class="col-lg-3 col-md-6">
+        <div class="card analytics-card card-success text-white">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Direct Reports</h5>
-                        <h2 class="mb-0">{{ current_user.direct_reports|length }}</h2>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-user-friends fa-lg opacity-75"></i>
-                    </div>
+                <div>
+                    <h5>Direct Reports</h5>
+                    <h2>{{ current_user.get_direct_reports()|length }}</h2>
+                </div>
+                <div class="card-icon">
+                    <i class="fas fa-user-friends"></i>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3">
-        <div class="card dashboard-card bg-info text-white">
+    <div class="col-lg-3 col-md-6">
+        <div class="card analytics-card card-info text-white">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Feedback Given</h5>
-                        <h2 class="mb-0">{{ recent_feedback|length }}</h2>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-comments fa-lg opacity-75"></i>
-                    </div>
+                <div>
+                    <h5>Feedback Given</h5>
+                    <h2>{{ feedback_summary.total_given }}</h2>
+                </div>
+                <div class="card-icon">
+                    <i class="fas fa-comments"></i>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
     
-    <div class="col-md-3">
-        <div class="card dashboard-card bg-warning text-dark">
+    <div class="col-lg-3 col-md-6">
+        <div class="card analytics-card card-warning text-white">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Active Teams</h5>
-                        <h2 class="mb-0">{{ analytics.team.keys()|length }}</h2>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-project-diagram fa-lg opacity-75"></i>
-                    </div>
+                <div>
+                    <h5>Active Teams</h5>
+                    <h2>{{ analytics.team.keys()|length }}</h2>
+                </div>
+                <div class="card-icon">
+                    <i class="fas fa-project-diagram"></i>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Section -->
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
+<!-- Compact Charts Section -->
+<div class="row charts-section g-3">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card chart-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Employment Type
-                </h5>
+                <h6 class="card-title">
+                    <i class="fas fa-briefcase me-2"></i>Employment Type
+                </h6>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -101,12 +94,12 @@
         </div>
     </div>
     
-    <div class="col-md-6 mb-4">
-        <div class="card">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card chart-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Billable Status
-                </h5>
+                <h6 class="card-title">
+                    <i class="fas fa-dollar-sign me-2"></i>Billable Status
+                </h6>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -115,15 +108,13 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card chart-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Teams Distribution
-                </h5>
+                <h6 class="card-title">
+                    <i class="fas fa-users me-2"></i>Teams
+                </h6>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -133,12 +124,12 @@
         </div>
     </div>
     
-    <div class="col-md-6 mb-4">
-        <div class="card">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card chart-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Locations
-                </h5>
+                <h6 class="card-title">
+                    <i class="fas fa-map-marker-alt me-2"></i>Locations
+                </h6>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -151,15 +142,15 @@
 
 {% if analytics.skills %}
 <div class="row">
-    <div class="col-12 mb-4">
-        <div class="card">
+    <div class="col-12">
+        <div class="card chart-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
+                <h6 class="card-title">
                     <i class="fas fa-chart-bar me-2"></i>Skills Distribution
-                </h5>
+                </h6>
             </div>
             <div class="card-body">
-                <div class="skills-chart-container">
+                <div class="chart-container" style="height: 320px;">
                     <canvas id="skillsChart"></canvas>
                 </div>
             </div>
@@ -168,65 +159,92 @@
 </div>
 {% endif %}
 
-{% if current_user.is_manager and recent_feedback %}
-<!-- Recent Feedback Section -->
-<div class="row">
+{% if current_user.is_manager %}
+<!-- Team Quick View Section -->
+<div class="row team-section">
     <div class="col-12">
-        <div class="card">
+        <div class="card team-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-clock me-2"></i>Recent Feedback
-                </h5>
-                <a href="{{ url_for('feedback') }}" class="btn btn-sm btn-outline-primary">
-                    View All <i class="fas fa-arrow-right ms-1"></i>
-                </a>
+                <h6 class="card-title">
+                    <i class="fas fa-users me-2"></i>My Team - Quick Overview
+                </h6>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('employees') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-list me-1"></i>View All
+                    </a>
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus me-1"></i>Add Employee
+                    </a>
+                </div>
             </div>
             <div class="card-body">
+                {% set direct_reports = current_user.get_direct_reports() %}
+                {% if direct_reports %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table team-table">
                         <thead>
                             <tr>
                                 <th>Employee</th>
-                                <th>Type</th>
-                                <th>Period</th>
-                                <th>Rating</th>
-                                <th>Date</th>
+                                <th>Role & Team</th>
+                                <th>Last Feedback</th>
+                                <th>Performance</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for feedback in recent_feedback %}
+                            {% for employee in direct_reports[:10] %}
                             <tr>
-                                <td>{{ feedback.received_by.name }}</td>
                                 <td>
-                                    <span class="badge bg-{{ 'info' if feedback.feedback_type == 'Monthly' else 'warning' }}">
-                                        {{ feedback.feedback_type }}
+                                    <div class="employee-name">{{ employee.full_name }}</div>
+                                    <div class="employee-role">{{ employee.emailid or 'No email' }}</div>
+                                </td>
+                                <td>
+                                    <div>{{ employee.role or 'No role assigned' }}</div>
+                                    {% if employee.team %}
+                                    <span class="team-badge">{{ employee.team }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="feedback-status status-pending">
+                                        <i class="fas fa-clock me-1"></i>Pending
                                     </span>
                                 </td>
                                 <td>
-                                    {% if feedback.feedback_type == 'Monthly' %}
-                                        {{ feedback.period_month }}/{{ feedback.period_year }}
-                                    {% else %}
-                                        Q{{ feedback.period_quarter }} {{ feedback.period_year }}
-                                    {% endif %}
+                                    <div class="d-flex align-items-center">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star text-muted" style="font-size: 0.7rem;"></i>
+                                        {% endfor %}
+                                        <span class="ms-2 text-muted" style="font-size: 0.75rem;">No data</span>
+                                    </div>
                                 </td>
                                 <td>
-                                    {% if feedback.performance_rating %}
-                                        <div class="d-flex align-items-center">
-                                            {% for i in range(1, 6) %}
-                                                <i class="fas fa-star {{ 'text-warning' if i <= feedback.performance_rating else 'text-muted' }}"></i>
-                                            {% endfor %}
-                                            <span class="ms-2">{{ feedback.performance_rating }}/5</span>
-                                        </div>
-                                    {% else %}
-                                        <span class="text-muted">-</span>
-                                    {% endif %}
+                                    <a href="{{ url_for('give_feedback', employee_id=employee.id) }}" class="action-btn btn-feedback">
+                                        <i class="fas fa-comment me-1"></i>Feedback
+                                    </a>
+                                    <a href="{{ url_for('employee_details', id=employee.id) }}" class="action-btn btn-details">
+                                        <i class="fas fa-eye me-1"></i>Details
+                                    </a>
                                 </td>
-                                <td>{{ feedback.created_at.strftime('%Y-%m-%d') }}</td>
                             </tr>
                             {% endfor %}
+                            {% if direct_reports|length > 10 %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    <small>Showing 10 of {{ direct_reports|length }} team members</small>
+                                </td>
+                            </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
+                {% else %}
+                <div class="no-data-state">
+                    <div class="no-data-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="no-data-text">No direct reports assigned yet</div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -237,13 +255,7 @@
 <script>
     window.analyticsData = {{ analytics|tojson }};
 </script>
-{% endblock %}
 
-{% block scripts %}
-<script>
-    // Initialize charts when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeDashboardCharts(window.analyticsData);
-    });
-</script>
+<!-- Modern Charts JavaScript -->
+<script src="{{ url_for('static', filename='js/modern-charts.js') }}"></script>
 {% endblock %}
