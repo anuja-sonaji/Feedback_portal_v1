@@ -2,9 +2,11 @@
 
 /* Global Layout Improvements */
 .main-content {
-    padding: 1rem 1.5rem;
+    padding: 1.5rem 2rem;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
 }
 
 /* Compact Header */
@@ -95,46 +97,91 @@
     color: white !important;
 }
 
-/* Compact Chart Section */
-.charts-section {
-    margin-bottom: 1.5rem;
-}
-
-.chart-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    margin-bottom: 1rem;
-    background: white;
-}
-
-.chart-card .card-header {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    border-radius: 12px 12px 0 0;
-    padding: 0.875rem 1.25rem;
-}
-
-.chart-card .card-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0;
-}
-
-.chart-card .card-body {
-    padding: 1rem 1.25rem;
-}
-
-/* Optimized Chart Container */
-.chart-container {
+/* Main Chart Section */
+.main-chart-container {
     position: relative;
-    height: 280px;
+    height: 400px;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.chart-container canvas {
-    max-height: 280px !important;
+.main-chart-container canvas {
+    max-height: 400px !important;
+    max-width: 100% !important;
+}
+
+/* Chart Selector */
+.chart-selector .btn {
+    margin-bottom: 0.5rem;
+    text-align: left;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.chart-selector .btn:hover {
+    background-color: #3b82f6;
+    color: white;
+    transform: translateX(5px);
+}
+
+.chart-selector .btn.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Chart Legend */
+.chart-legend {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    flex-grow: 1;
+}
+
+.legend-value {
+    font-size: 0.8rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
 /* Team Quick View - More Compact */

@@ -1,155 +1,153 @@
 // Modern Chart Configurations for Professional Dashboard
 const chartColors = {
-    primary: ['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554'],
-    success: ['#10b981', '#059669', '#047857', '#065f46', '#064e3b'],
-    info: ['#06b6d4', '#0891b2', '#0e7490', '#155e75', '#164e63'],
-    warning: ['#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f'],
-    secondary: ['#6b7280', '#4b5563', '#374151', '#1f2937', '#111827']
+    vibrant: [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+        '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#F4D03F'
+    ],
+    professional: [
+        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+        '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6b7280'
+    ]
 };
 
-const chartDefaults = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                padding: 15,
-                usePointStyle: true,
-                font: {
-                    size: 11,
-                    family: 'Inter'
-                }
-            }
-        },
-        tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            cornerRadius: 8,
-            padding: 12,
-            titleFont: {
-                size: 12,
-                family: 'Inter'
-            },
-            bodyFont: {
-                size: 11,
-                family: 'Inter'
-            }
-        }
+let currentChart = null;
+let currentChartType = 'skill';
+
+const chartConfigs = {
+    skill: { data: 'skills', title: 'Skills Distribution', colors: chartColors.vibrant },
+    billable: { data: 'billable_status', title: 'Billable Status', colors: chartColors.professional },
+    employment: { data: 'employment_type', title: 'Employment Type', colors: chartColors.professional },
+    team: { data: 'team', title: 'Team Distribution', colors: chartColors.vibrant },
+    location: { data: 'location', title: 'Location Distribution', colors: chartColors.professional }
+};
+
+function createMainChart(data, colors, title) {
+    const ctx = document.getElementById('mainChart');
+    if (!ctx || !data) return;
+
+    // Destroy existing chart
+    if (currentChart) {
+        currentChart.destroy();
     }
-};
 
-function createDoughnutChart(canvasId, data, colors) {
-    const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+    const labels = Object.keys(data);
+    const values = Object.values(data);
 
-    return new Chart(ctx, {
-        type: 'doughnut',
+    currentChart = new Chart(ctx, {
+        type: 'pie',
         data: {
-            labels: Object.keys(data),
+            labels: labels,
             datasets: [{
-                data: Object.values(data),
-                backgroundColor: colors,
-                borderWidth: 0,
-                cutout: '60%'
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverBorderWidth: 5
             }]
         },
         options: {
-            ...chartDefaults,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                ...chartDefaults.plugins,
                 legend: {
-                    ...chartDefaults.plugins.legend,
-                    position: 'bottom'
+                    display: false // We'll create custom legend
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    cornerRadius: 8,
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        family: 'Inter',
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 12,
+                        family: 'Inter'
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
                 }
+            },
+            layout: {
+                padding: 20
             }
         }
     });
+
+    // Update custom legend
+    updateCustomLegend(labels, values, colors.slice(0, labels.length));
 }
 
-function createBarChart(canvasId, data, color) {
-    const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+function updateCustomLegend(labels, values, colors) {
+    const legendContainer = document.getElementById('chartLegend');
+    if (!legendContainer) return;
 
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                label: 'Count',
-                data: Object.values(data),
-                backgroundColor: color,
-                borderRadius: 6,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        font: {
-                            size: 10,
-                            family: 'Inter'
-                        }
-                    },
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
-                x: {
-                    ticks: {
-                        font: {
-                            size: 10,
-                            family: 'Inter'
-                        },
-                        maxRotation: 45
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
-            },
-            plugins: {
-                ...chartDefaults.plugins,
-                legend: {
-                    display: false
-                }
-            }
-        }
+    const total = values.reduce((a, b) => a + b, 0);
+    
+    legendContainer.innerHTML = labels.map((label, index) => {
+        const value = values[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        return `
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                <div class="legend-text">${label}</div>
+                <div class="legend-value">${value}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function switchChart(chartType, analyticsData) {
+    const config = chartConfigs[chartType];
+    if (!config || !analyticsData[config.data]) return;
+
+    currentChartType = chartType;
+    
+    // Update button states
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
+    document.querySelector(`[data-chart="${chartType}"]`).classList.add('active');
+
+    // Create new chart
+    createMainChart(analyticsData[config.data], config.colors, config.title);
 }
 
 function initializeDashboardCharts(analyticsData) {
     if (!analyticsData) return;
 
-    // Employment Type Chart
-    if (analyticsData.employment_type) {
-        createDoughnutChart('employmentTypeChart', analyticsData.employment_type, chartColors.primary);
+    // Set up chart switcher buttons
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const chartType = this.getAttribute('data-chart');
+            switchChart(chartType, analyticsData);
+        });
+    });
+
+    // Initialize with skills chart (or first available)
+    let initialChart = 'skill';
+    if (!analyticsData.skills) {
+        // Find first available chart
+        for (const [key, config] of Object.entries(chartConfigs)) {
+            if (analyticsData[config.data]) {
+                initialChart = key;
+                break;
+            }
+        }
     }
 
-    // Billable Status Chart
-    if (analyticsData.billable_status) {
-        createDoughnutChart('billableStatusChart', analyticsData.billable_status, chartColors.success);
-    }
-
-    // Team Chart
-    if (analyticsData.team) {
-        createDoughnutChart('teamChart', analyticsData.team, chartColors.info);
-    }
-
-    // Location Chart
-    if (analyticsData.location) {
-        createDoughnutChart('locationChart', analyticsData.location, chartColors.warning);
-    }
-
-    // Skills Chart (if exists)
-    if (analyticsData.skills) {
-        createBarChart('skillsChart', analyticsData.skills, chartColors.primary[0]);
-    }
+    switchChart(initialChart, analyticsData);
 }
 
 // Initialize charts when DOM is ready
