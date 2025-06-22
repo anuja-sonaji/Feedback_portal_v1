@@ -268,3 +268,178 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('Analytics data not available yet');
     }
 });
+// Modern Charts for Team Data Distribution
+let distributionChart = null;
+let currentDataType = 'skill';
+
+/**
+ * Initialize dashboard charts with analytics data
+ */
+function initializeDashboardCharts(analyticsData) {
+    console.log('Initializing compact team chart:', analyticsData);
+    
+    // Set Chart.js defaults
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.color = '#64748b';
+    
+    // Initialize the distribution chart
+    initializeDistributionChart(analyticsData);
+}
+
+/**
+ * Initialize the main distribution chart
+ */
+function initializeDistributionChart(analyticsData) {
+    const ctx = document.getElementById('distributionChart');
+    if (!ctx) {
+        console.error('Distribution chart canvas not found');
+        return;
+    }
+
+    // Initialize with skills data by default
+    updateDistributionChart(analyticsData, currentDataType);
+}
+
+/**
+ * Update the distribution chart with new data
+ */
+function updateDistributionChart(analyticsData, dataType) {
+    const ctx = document.getElementById('distributionChart');
+    if (!ctx) return;
+
+    const data = analyticsData[dataType] || {};
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    // Destroy existing chart
+    if (distributionChart) {
+        distributionChart.destroy();
+    }
+
+    // Color schemes for different data types
+    const colorSchemes = {
+        skill: [
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57',
+            '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43',
+            '#dda0dd', '#98d8c8', '#ffd93d', '#6c5ce7', '#fd79a8'
+        ],
+        team: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'],
+        location: ['#43e97b', '#38f9d7', '#ffecd2', '#fcb69f'],
+        employment_type: ['#667eea', '#764ba2', '#f093fb'],
+        billable_status: ['#43e97b', '#f093fb', '#ffecd2']
+    };
+
+    const colors = colorSchemes[dataType] || colorSchemes.skill;
+    const backgroundColors = labels.map((_, index) => colors[index % colors.length]);
+    const borderColors = backgroundColors.map(color => color.replace('0.8', '1'));
+
+    distributionChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 3,
+                hoverOffset: 8,
+                hoverBorderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false // We'll use custom legend
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#64748b',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            },
+            interaction: {
+                intersect: false
+            }
+        }
+    });
+
+    // Update legend
+    updateLegend(labels, values, backgroundColors);
+}
+
+/**
+ * Update the custom legend
+ */
+function updateLegend(labels, values, colors) {
+    const legendContainer = document.getElementById('chartLegend');
+    if (!legendContainer) return;
+
+    const total = values.reduce((a, b) => a + b, 0);
+    
+    legendContainer.innerHTML = labels.map((label, index) => {
+        const value = values[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        const color = colors[index];
+        
+        return `
+            <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
+                <div class="legend-color" style="width: 20px; height: 20px; border-radius: 50%; background: ${color}; margin-right: 0.75rem; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                <div class="legend-content" style="flex-grow: 1;">
+                    <div class="legend-label" style="font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">${label}</div>
+                    <div class="legend-stats" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="legend-count" style="font-size: 0.8rem; color: #64748b; background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 4px;">${value}</span>
+                        <span class="legend-percentage" style="font-size: 0.75rem; color: #9ca3af;">${percentage}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Switch data view (called by filter buttons)
+ */
+function switchDataView(dataType) {
+    currentDataType = dataType;
+    
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-chart="${dataType}"]`).classList.add('active');
+    
+    // Update chart with new data
+    if (window.analyticsData) {
+        updateDistributionChart(window.analyticsData, dataType);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.analyticsData) {
+        initializeDashboardCharts(window.analyticsData);
+    }
+});
+
+// Export functions for global access
+window.switchDataView = switchDataView;
+window.initializeDashboardCharts = initializeDashboardCharts;

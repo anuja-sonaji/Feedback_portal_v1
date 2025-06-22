@@ -82,19 +82,76 @@
 
 
 {% if current_user.is_manager %}
-<!-- Team Quick View Section -->
+<!-- Team Data Distribution Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card analytics-distribution-card">
+            <div class="card-header bg-gradient-primary">
+                <h5 class="card-title text-white mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Team Data Distribution
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <!-- Filter Buttons -->
+                    <div class="col-md-2">
+                        <div class="filter-section">
+                            <h6 class="filter-title mb-3">View by:</h6>
+                            <div class="filter-buttons">
+                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchDataView('skill')">
+                                    <i class="fas fa-code me-2"></i>Skill
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="team" onclick="switchDataView('team')">
+                                    <i class="fas fa-users me-2"></i>Team
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="location" onclick="switchDataView('location')">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="employment_type" onclick="switchDataView('employment_type')">
+                                    <i class="fas fa-briefcase me-2"></i>Employment Type
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="billable_status" onclick="switchDataView('billable_status')">
+                                    <i class="fas fa-dollar-sign me-2"></i>Billable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pie Chart -->
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="distributionChart" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="col-md-4">
+                        <div class="legend-container">
+                            <h6 class="legend-title mb-3">Distribution Details</h6>
+                            <div id="chartLegend" class="chart-legend">
+                                <!-- Legend items will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Overview Section -->
 <div class="row team-section">
     <div class="col-12">
-        <div class="card team-card">
+        <div class="card team-overview-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="card-title">
-                    <i class="fas fa-users me-2"></i>My Team - Quick Overview
-                </h6>
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>My Team Overview
+                </h5>
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('employees') }}" class="btn btn-sm btn-light">
+                    <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-list me-1"></i>View All
                     </a>
-                    <a href="{{ url_for('add_employee') }}" class="btn btn-sm btn-success">
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i>Add Employee
                     </a>
                 </div>
@@ -102,57 +159,6 @@
             <div class="card-body">
                 {% set direct_reports = current_user.get_direct_reports() %}
                 {% if direct_reports %}
-                <!-- Team Overview Stats -->
-                <div class="team-stats-compact mb-3">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="stat-box">
-                                <i class="fas fa-users text-primary"></i>
-                                <div class="stat-number">{{ direct_reports|length }}</div>
-                                <div class="stat-label">Team Members</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-box">
-                                <i class="fas fa-chart-pie text-success"></i>
-                                <div class="stat-number">{{ analytics.team.keys()|length }}</div>
-                                <div class="stat-label">Teams</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-box">
-                                <i class="fas fa-star text-warning"></i>
-                                <div class="stat-number">0</div>
-                                <div class="stat-label">Avg Rating</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Team Composition Chart -->
-                <div class="team-chart-compact mb-3">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="chart-controls mb-2">
-                                <h6 class="mb-2">Team Distribution</h6>
-                                <div class="btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-primary active btn-sm" data-chart="team" onclick="switchChartView('team')">Team</button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" data-chart="skill" onclick="switchChartView('skill')">Skill</button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" data-chart="location" onclick="switchChartView('location')">Location</button>
-                                </div>
-                            </div>
-                            <div class="compact-chart-container">
-                                <canvas id="teamCompactChart" width="200" height="200"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="compact-legend" id="compactChartLegend">
-                                <!-- Legend content -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Employee Table -->
                 <div class="table-responsive">
                     <table class="table team-table">
@@ -169,14 +175,18 @@
                             {% for employee in direct_reports[:10] %}
                             <tr>
                                 <td>
-                                    <div class="employee-name">{{ employee.full_name }}</div>
-                                    <div class="employee-role">{{ employee.emailid or 'No email' }}</div>
+                                    <div class="employee-info">
+                                        <div class="employee-name">{{ employee.full_name }}</div>
+                                        <div class="employee-email">{{ employee.emailid or 'No email' }}</div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <div>{{ employee.role or 'No role assigned' }}</div>
-                                    {% if employee.team %}
-                                    <span class="team-badge">{{ employee.team }}</span>
-                                    {% endif %}
+                                    <div class="role-info">
+                                        <div class="employee-role">{{ employee.role or 'No role assigned' }}</div>
+                                        {% if employee.team %}
+                                        <span class="team-badge">{{ employee.team }}</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="feedback-status status-pending">
@@ -184,27 +194,30 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
+                                    <div class="performance-rating">
                                         {% for i in range(1, 6) %}
-                                            <i class="fas fa-star text-muted" style="font-size: 0.7rem;"></i>
+                                            <i class="fas fa-star text-muted"></i>
                                         {% endfor %}
-                                        <span class="ms-2 text-muted" style="font-size: 0.75rem;">No data</span>
+                                        <span class="rating-text">No data</span>
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" class="action-btn btn-feedback">
-                                        <i class="fas fa-comment me-1"></i>Feedback
-                                    </a>
-                                    <a href="{{ url_for('employee_details', id=employee.id) }}" class="action-btn btn-details">
-                                        <i class="fas fa-eye me-1"></i>Details
-                                    </a>
+                                    <div class="action-buttons">
+                                        <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-comment me-1"></i>Feedback
+                                        </a>
+                                        <a href="{{ url_for('employee_details', id=employee.id) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-eye me-1"></i>Details
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% if direct_reports|length > 10 %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    <small>Showing 10 of {{ direct_reports|length }} team members</small>
+                                <td colspan="5" class="text-center">
+                                    <small class="text-muted">Showing 10 of {{ direct_reports|length }} team members</small>
+                                    <a href="{{ url_for('employees') }}" class="ms-2 btn btn-sm btn-link">View All</a>
                                 </td>
                             </tr>
                             {% endif %}
@@ -212,11 +225,15 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="no-data-state">
-                    <div class="no-data-icon">
+                <div class="empty-state">
+                    <div class="empty-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="no-data-text">No direct reports assigned yet</div>
+                    <h6 class="empty-title">No Team Members</h6>
+                    <p class="empty-text">You don't have any direct reports assigned yet.</p>
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add Your First Team Member
+                    </a>
                 </div>
                 {% endif %}
             </div>
