@@ -24,10 +24,20 @@
 
     <style>
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .sidebar-brand {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .sidebar {
@@ -372,7 +382,7 @@
                     {% endif %}
                 </h4>
             </div>
-            
+
             <div class="logo-container">
                 <div class="d-flex flex-column align-items-end">
                     <span class="text-primary mb-0">Bmp Australia</span>
@@ -442,7 +452,7 @@
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const mobileToggle = document.querySelector('.mobile-toggle');
-            
+
             if (window.innerWidth <= 768 && 
                 !sidebar.contains(event.target) && 
                 !mobileToggle.contains(event.target) && 
@@ -456,11 +466,11 @@
             const modal = document.getElementById('deleteModal');
             const employeeNameElement = document.getElementById('employeeName');
             const deleteForm = document.getElementById('deleteForm');
-            
+
             if (modal && employeeNameElement && deleteForm) {
                 employeeNameElement.textContent = employeeName;
                 deleteForm.action = '/employee/delete/' + employeeId;
-                
+
                 // Show the modal
                 const bsModal = new bootstrap.Modal(modal);
                 bsModal.show();
