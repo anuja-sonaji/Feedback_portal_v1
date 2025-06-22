@@ -206,8 +206,10 @@
             <div class="card-body">
                 {% set direct_reports = current_user.get_direct_reports() %}
                 {% if direct_reports %}
-                <div class="table-responsive">
-                    <table class="table team-table">
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="table-responsive">
+                            <table class="table team-table">
                         <thead>
                             <tr>
                                 <th>Employee</th>
@@ -262,6 +264,19 @@
                             {% endif %}
                         </tbody>
                     </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="team-mini-chart">
+                            <h6 class="mb-2">Team Composition</h6>
+                            <div class="mini-chart-container">
+                                <canvas id="teamMiniChart" width="200" height="200"></canvas>
+                            </div>
+                            <div class="mini-legend" id="teamMiniLegend">
+                                <!-- Mini legend content -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 {% else %}
                 <div class="no-data-state">

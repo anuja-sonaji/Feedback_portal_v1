@@ -310,6 +310,50 @@
     padding: 1rem 1.25rem;
 }
 
+/* Team Mini Chart */
+.team-mini-chart {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    height: fit-content;
+}
+
+.mini-chart-container {
+    position: relative;
+    height: 180px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.mini-chart-container canvas {
+    max-width: 160px !important;
+    max-height: 160px !important;
+}
+
+.mini-legend {
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.mini-legend .legend-item {
+    margin-bottom: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+}
+
+.mini-legend .legend-label {
+    font-size: 0.7rem;
+}
+
+.mini-legend .legend-count {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+}
+
 .team-card .card-title {
     font-size: 1rem;
     font-weight: 600;

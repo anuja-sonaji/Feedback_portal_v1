@@ -159,6 +159,74 @@ function switchChartView(dataType) {
     createTeamPieChart(window.analyticsData[config.field], config.title);
 }
 
+function createTeamMiniChart() {
+    const canvas = document.getElementById('teamMiniChart');
+    if (!canvas || !window.analyticsData) return;
+
+    // Use team data for mini chart
+    const teamData = window.analyticsData.team || {};
+    if (Object.keys(teamData).length === 0) return;
+
+    const labels = Object.keys(teamData);
+    const values = Object.values(teamData);
+    const colors = referenceColors.slice(0, labels.length);
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    cornerRadius: 6,
+                    padding: 12,
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 11 },
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Update mini legend
+    const legendContainer = document.getElementById('teamMiniLegend');
+    if (legendContainer) {
+        legendContainer.innerHTML = labels.map((label, index) => `
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                <div class="legend-content">
+                    <div class="legend-label">${label}</div>
+                    <div class="legend-count">${values[index]}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
 function initializeDashboardCharts(analyticsData) {
     console.log('Initializing team data distribution chart:', analyticsData);
     
@@ -181,9 +249,11 @@ function initializeDashboardCharts(analyticsData) {
 
     console.log('Initializing with data type:', initialDataType);
     
-    // Initialize chart
+    // Initialize main chart
     setTimeout(() => {
         switchChartView(initialDataType);
+        // Also initialize mini chart
+        createTeamMiniChart();
     }, 100);
 }
 
