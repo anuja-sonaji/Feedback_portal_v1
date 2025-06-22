@@ -1,71 +1,82 @@
-// Modern Chart Configurations for Professional Dashboard
-const chartColors = {
-    vibrant: [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-        '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#F4D03F'
-    ],
-    professional: [
-        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-        '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6b7280'
-    ]
+// Team Data Distribution Chart - Exact Reference Implementation
+const referenceColors = [
+    '#FF6B6B', // Red/Pink
+    '#4ECDC4', // Teal
+    '#45B7D1', // Blue
+    '#96CEB4', // Light Green
+    '#FFEAA7', // Yellow
+    '#DDA0DD', // Purple
+    '#98D8C8', // Mint
+    '#F7DC6F', // Gold
+    '#BB8FCE', // Lavender
+    '#85C1E9', // Sky Blue
+    '#F8C471', // Peach
+    '#82E0AA', // Green
+    '#F1948A', // Salmon
+    '#AED6F1', // Light Blue
+    '#F4D03F'  // Bright Yellow
+];
+
+let teamPieChart = null;
+let currentDataType = 'skill';
+
+const dataConfigs = {
+    skill: { field: 'skills', title: 'Skills Distribution' },
+    billable: { field: 'billable_status', title: 'Billable Status' },
+    employment: { field: 'employment_type', title: 'Employment Type' },
+    team: { field: 'team', title: 'Team Distribution' },
+    location: { field: 'location', title: 'Location Distribution' }
 };
 
-let currentChart = null;
-let currentChartType = 'skill';
-
-const chartConfigs = {
-    skill: { data: 'skills', title: 'Skills Distribution', colors: chartColors.vibrant },
-    billable: { data: 'billable_status', title: 'Billable Status', colors: chartColors.professional },
-    employment: { data: 'employment_type', title: 'Employment Type', colors: chartColors.professional },
-    team: { data: 'team', title: 'Team Distribution', colors: chartColors.vibrant },
-    location: { data: 'location', title: 'Location Distribution', colors: chartColors.professional }
-};
-
-function createMainChart(data, colors, title) {
-    const ctx = document.getElementById('mainChart');
-    if (!ctx || !data) return;
+function createTeamPieChart(data, title) {
+    const canvas = document.getElementById('teamPieChart');
+    if (!canvas || !data || Object.keys(data).length === 0) {
+        console.error('Cannot create chart: missing canvas or data', { canvas: !!canvas, data });
+        return;
+    }
 
     // Destroy existing chart
-    if (currentChart) {
-        currentChart.destroy();
+    if (teamPieChart) {
+        teamPieChart.destroy();
     }
 
     const labels = Object.keys(data);
     const values = Object.values(data);
+    const colors = referenceColors.slice(0, labels.length);
 
-    currentChart = new Chart(ctx, {
+    teamPieChart = new Chart(canvas, {
         type: 'pie',
         data: {
             labels: labels,
             datasets: [{
                 data: values,
-                backgroundColor: colors.slice(0, labels.length),
+                backgroundColor: colors,
                 borderColor: '#ffffff',
                 borderWidth: 3,
-                hoverBorderWidth: 5
+                hoverOffset: 8,
+                hoverBorderWidth: 4
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    display: false // We'll create custom legend
+                    display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
                     cornerRadius: 8,
-                    padding: 12,
+                    padding: 16,
                     titleFont: {
                         size: 14,
                         family: 'Inter',
-                        weight: 'bold'
+                        weight: '600'
                     },
                     bodyFont: {
-                        size: 12,
+                        size: 13,
                         family: 'Inter'
                     },
                     callbacks: {
@@ -79,87 +90,92 @@ function createMainChart(data, colors, title) {
                     }
                 }
             },
-            layout: {
-                padding: 20
+            animation: {
+                animateScale: true,
+                duration: 800
             }
         }
     });
 
-    // Update custom legend
-    updateCustomLegend(labels, values, colors.slice(0, labels.length));
+    // Update legend
+    updateLegend(labels, values, colors);
 }
 
-function updateCustomLegend(labels, values, colors) {
-    const legendContainer = document.getElementById('chartLegend');
+function updateLegend(labels, values, colors) {
+    const legendContainer = document.getElementById('pieChartLegend');
     if (!legendContainer) return;
 
-    const total = values.reduce((a, b) => a + b, 0);
-    
     legendContainer.innerHTML = labels.map((label, index) => {
-        const value = values[index];
-        const percentage = ((value / total) * 100).toFixed(1);
         return `
             <div class="legend-item">
                 <div class="legend-color" style="background-color: ${colors[index]}"></div>
-                <div class="legend-text">${label}</div>
-                <div class="legend-value">${value}</div>
+                <div class="legend-content">
+                    <div class="legend-label">${label}</div>
+                    <div class="legend-count">${values[index]}</div>
+                </div>
             </div>
         `;
     }).join('');
 }
 
-function switchChart(chartType, analyticsData) {
-    const config = chartConfigs[chartType];
-    if (!config || !analyticsData[config.data]) return;
-
-    currentChartType = chartType;
-    
-    // Update button states
-    document.querySelectorAll('.chart-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-chart="${chartType}"]`).classList.add('active');
-
-    // Create new chart
-    createMainChart(analyticsData[config.data], config.colors, config.title);
-}
-
-function initializeDashboardCharts(analyticsData) {
-    console.log('Initializing modern dashboard charts with data:', analyticsData);
-    if (!analyticsData) {
-        console.error('No analytics data provided');
+function switchChartView(dataType) {
+    if (!window.analyticsData) {
+        console.error('No analytics data available');
         return;
     }
 
-    // Set up chart switcher buttons
-    document.querySelectorAll('.chart-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const chartType = this.getAttribute('data-chart');
-            console.log('Switching to chart type:', chartType);
-            switchChart(chartType, analyticsData);
-        });
-    });
+    const config = dataConfigs[dataType];
+    if (!config || !window.analyticsData[config.field]) {
+        console.error('Invalid data type or missing data:', dataType);
+        return;
+    }
 
-    // Initialize with skills chart (or first available)
-    let initialChart = 'skill';
-    if (!analyticsData.skills || Object.keys(analyticsData.skills || {}).length === 0) {
-        // Find first available chart
-        for (const [key, config] of Object.entries(chartConfigs)) {
-            if (analyticsData[config.data] && Object.keys(analyticsData[config.data] || {}).length > 0) {
-                initialChart = key;
-                console.log('Using fallback chart:', initialChart);
-                break;
-            }
+    currentDataType = dataType;
+
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-chart="${dataType}"]`).classList.add('active');
+
+    // Create chart with new data
+    createTeamPieChart(window.analyticsData[config.field], config.title);
+}
+
+function initializeDashboardCharts(analyticsData) {
+    console.log('Initializing team data distribution chart:', analyticsData);
+    
+    if (!analyticsData) {
+        console.error('No analytics data available');
+        return;
+    }
+
+    // Store data globally for chart switching
+    window.analyticsData = analyticsData;
+
+    // Find the first available data set
+    let initialDataType = 'skill';
+    for (const [key, config] of Object.entries(dataConfigs)) {
+        if (analyticsData[config.field] && Object.keys(analyticsData[config.field] || {}).length > 0) {
+            initialDataType = key;
+            break;
         }
     }
 
-    console.log('Initializing with chart type:', initialChart);
-    switchChart(initialChart, analyticsData);
+    console.log('Initializing with data type:', initialDataType);
+    
+    // Initialize chart
+    setTimeout(() => {
+        switchChartView(initialDataType);
+    }, 100);
 }
 
-// Initialize charts when DOM is ready
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM ready, checking for analytics data...');
     if (window.analyticsData) {
         initializeDashboardCharts(window.analyticsData);
+    } else {
+        console.warn('Analytics data not available yet');
     }
 });

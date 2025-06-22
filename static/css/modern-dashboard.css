@@ -97,8 +97,8 @@
     color: white !important;
 }
 
-/* Main Chart Section */
-.main-chart-container {
+/* Team Data Distribution - Reference Layout */
+.pie-chart-container {
     position: relative;
     height: 400px;
     width: 100%;
@@ -107,39 +107,57 @@
     justify-content: center;
 }
 
-.main-chart-container canvas {
+.pie-chart-container canvas {
+    max-width: 400px !important;
     max-height: 400px !important;
-    max-width: 100% !important;
 }
 
-/* Chart Selector */
-.chart-selector .btn {
-    margin-bottom: 0.5rem;
-    text-align: left;
+/* Chart Filter Buttons - Left Side */
+.chart-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1.25rem;
+    text-align: left;
+    color: #64748b;
     font-size: 0.9rem;
+    font-weight: 500;
     transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%;
 }
 
-.chart-selector .btn:hover {
-    background-color: #3b82f6;
-    color: white;
-    transform: translateX(5px);
+.filter-btn:hover {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+    transform: translateX(3px);
 }
 
-.chart-selector .btn.active {
-    background-color: #3b82f6;
-    color: white;
+.filter-btn.active {
+    background: #3b82f6;
     border-color: #3b82f6;
+    color: white;
+    font-weight: 600;
 }
 
-/* Chart Legend */
-.chart-legend {
-    padding: 1rem;
+.filter-btn i {
+    color: inherit;
+    width: 16px;
+}
+
+/* Chart Legend Container - Right Side */
+.chart-legend-container {
     background: #f8fafc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+    padding: 1rem;
     max-height: 400px;
     overflow-y: auto;
 }
@@ -148,7 +166,7 @@
     display: flex;
     align-items: center;
     margin-bottom: 0.75rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     background: white;
     border-radius: 6px;
     border: 1px solid #e2e8f0;
@@ -156,8 +174,8 @@
 }
 
 .legend-item:hover {
-    transform: translateX(3px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .legend-color {
@@ -166,22 +184,25 @@
     border-radius: 50%;
     margin-right: 0.75rem;
     flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.legend-text {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #374151;
+.legend-content {
     flex-grow: 1;
 }
 
-.legend-value {
-    font-size: 0.8rem;
-    color: #6b7280;
-    background: #f3f4f6;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+.legend-label {
+    font-size: 0.875rem;
     font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.legend-count {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 /* Team Quick View - More Compact */
