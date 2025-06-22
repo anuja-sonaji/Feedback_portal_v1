@@ -276,12 +276,12 @@ let currentDataType = 'skill';
  * Initialize dashboard charts with analytics data
  */
 function initializeDashboardCharts(analyticsData) {
-    console.log('Initializing compact team chart:', analyticsData);
-    
+    console.log('Initializing dashboard charts:', analyticsData);
+
     // Set Chart.js defaults
     Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
     Chart.defaults.color = '#64748b';
-    
+
     // Initialize the distribution chart
     initializeDistributionChart(analyticsData);
 }
@@ -394,12 +394,12 @@ function updateLegend(labels, values, colors) {
     if (!legendContainer) return;
 
     const total = values.reduce((a, b) => a + b, 0);
-    
+
     legendContainer.innerHTML = labels.map((label, index) => {
         const value = values[index];
         const percentage = ((value / total) * 100).toFixed(1);
         const color = colors[index];
-        
+
         return `
             <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 0.75rem; padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
                 <div class="legend-color" style="width: 20px; height: 20px; border-radius: 50%; background: ${color}; margin-right: 0.75rem; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
@@ -420,13 +420,16 @@ function updateLegend(labels, values, colors) {
  */
 function switchDataView(dataType) {
     currentDataType = dataType;
-    
+
     // Update active filter button
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector(`[data-chart="${dataType}"]`).classList.add('active');
-    
+    const activeBtn = document.querySelector(`[data-chart="${dataType}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+
     // Update chart with new data
     if (window.analyticsData) {
         updateDistributionChart(window.analyticsData, dataType);

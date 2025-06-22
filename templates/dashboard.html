@@ -82,65 +82,8 @@
 
 
 {% if current_user.is_manager %}
-<!-- Team Data Distribution Section -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card analytics-distribution-card">
-            <div class="card-header bg-gradient-primary">
-                <h5 class="card-title text-white mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Team Data Distribution
-                </h5>
-            </div>
-            <div class="card-body p-4">
-                <div class="row">
-                    <!-- Filter Buttons -->
-                    <div class="col-md-2">
-                        <div class="filter-section">
-                            <h6 class="filter-title mb-3">View by:</h6>
-                            <div class="filter-buttons">
-                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchDataView('skill')">
-                                    <i class="fas fa-code me-2"></i>Skill
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="team" onclick="switchDataView('team')">
-                                    <i class="fas fa-users me-2"></i>Team
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="location" onclick="switchDataView('location')">
-                                    <i class="fas fa-map-marker-alt me-2"></i>Location
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="employment_type" onclick="switchDataView('employment_type')">
-                                    <i class="fas fa-briefcase me-2"></i>Employment Type
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="billable_status" onclick="switchDataView('billable_status')">
-                                    <i class="fas fa-dollar-sign me-2"></i>Billable
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pie Chart -->
-                    <div class="col-md-6">
-                        <div class="chart-container">
-                            <canvas id="distributionChart" width="400" height="400"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Legend -->
-                    <div class="col-md-4">
-                        <div class="legend-container">
-                            <h6 class="legend-title mb-3">Distribution Details</h6>
-                            <div id="chartLegend" class="chart-legend">
-                                <!-- Legend items will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Team Overview Section -->
-<div class="row team-section">
+<div class="row team-section mb-4">
     <div class="col-12">
         <div class="card team-overview-card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -236,6 +179,63 @@
                     </a>
                 </div>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Data Distribution Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card analytics-distribution-card">
+            <div class="card-header bg-gradient-primary">
+                <h5 class="card-title text-white mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Team Data Distribution
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <!-- Filter Buttons -->
+                    <div class="col-md-2">
+                        <div class="filter-section">
+                            <h6 class="filter-title mb-3">View by:</h6>
+                            <div class="filter-buttons">
+                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchDataView('skill')">
+                                    <i class="fas fa-code me-2"></i>Skill
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="team" onclick="switchDataView('team')">
+                                    <i class="fas fa-users me-2"></i>Team
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="location" onclick="switchDataView('location')">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="employment_type" onclick="switchDataView('employment_type')">
+                                    <i class="fas fa-briefcase me-2"></i>Employment Type
+                                </button>
+                                <button type="button" class="filter-btn" data-chart="billable_status" onclick="switchDataView('billable_status')">
+                                    <i class="fas fa-dollar-sign me-2"></i>Billable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pie Chart -->
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="distributionChart" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="col-md-4">
+                        <div class="legend-container">
+                            <h6 class="legend-title mb-3">Distribution Details</h6>
+                            <div id="chartLegend" class="chart-legend">
+                                <!-- Legend items will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
