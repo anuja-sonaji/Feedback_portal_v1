@@ -53,6 +53,13 @@ def dashboard():
         subordinates = current_user.get_all_subordinates()
         direct_reports = current_user.get_direct_reports()
         employees_in_scope = subordinates + [current_user]
+        
+        # Debug logging for employee counts
+        print(f"Manager: {current_user.full_name}")
+        print(f"Direct reports count: {len(direct_reports)}")
+        print(f"All subordinates count: {len(subordinates)}")
+        print(f"Total employees in scope: {len(employees_in_scope)}")
+        print(f"Direct reports: {[emp.full_name for emp in direct_reports]}")
     else:
         direct_reports = []
         employees_in_scope = [current_user]

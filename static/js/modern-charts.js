@@ -1,17 +1,16 @@
 
 // Modern Charts for Team Data Distribution
-let distributionChart = null;
-let currentDataType = 'skill';
+let teamDistributionChart = null;
+let activeDataType = 'skill';
 
-const referenceColors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-    '#F8C471', '#82E0AA', '#F1948A', '#AED6F1', '#F4D03F'
+const chartColors = [
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
 ];
 
-const dataConfigs = {
+const dataTypeConfigs = {
     skill: { field: 'skills', title: 'Skills Distribution' },
-    billable: { field: 'billable_status', title: 'Billable Status' },
+    billable_status: { field: 'billable_status', title: 'Billable Status' },
     employment_type: { field: 'employment_type', title: 'Employment Type' },
     team: { field: 'team', title: 'Team Distribution' },
     location: { field: 'location', title: 'Location Distribution' }
@@ -31,14 +30,14 @@ function initializeDashboardCharts(analyticsData) {
     // Set Chart.js defaults
     if (typeof Chart !== 'undefined') {
         Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
-        Chart.defaults.color = '#64748b';
+        Chart.defaults.color = '#6b7280';
     }
 
     // Store data globally for chart switching
     window.analyticsData = analyticsData;
 
     // Initialize with skills data by default
-    updateDistributionChart(analyticsData, currentDataType);
+    updateDistributionChart(analyticsData, activeDataType);
 }
 
 /**
@@ -56,7 +55,7 @@ function updateDistributionChart(analyticsData, dataType) {
         return;
     }
 
-    const config = dataConfigs[dataType];
+    const config = dataTypeConfigs[dataType];
     if (!config || !analyticsData[config.field]) {
         console.error('Invalid data type or missing data:', dataType);
         return;
@@ -73,13 +72,13 @@ function updateDistributionChart(analyticsData, dataType) {
     }
 
     // Destroy existing chart
-    if (distributionChart) {
-        distributionChart.destroy();
+    if (teamDistributionChart) {
+        teamDistributionChart.destroy();
     }
 
-    const backgroundColors = labels.map((_, index) => referenceColors[index % referenceColors.length]);
+    const backgroundColors = labels.map((_, index) => chartColors[index % chartColors.length]);
 
-    distributionChart = new Chart(ctx, {
+    teamDistributionChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: labels,
@@ -88,7 +87,7 @@ function updateDistributionChart(analyticsData, dataType) {
                 backgroundColor: backgroundColors,
                 borderColor: '#ffffff',
                 borderWidth: 2,
-                hoverOffset: 6
+                hoverOffset: 4
             }]
         },
         options: {
@@ -99,10 +98,10 @@ function updateDistributionChart(analyticsData, dataType) {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    backgroundColor: '#374151',
                     titleColor: '#ffffff',
                     bodyColor: '#ffffff',
-                    cornerRadius: 8,
+                    cornerRadius: 6,
                     padding: 12,
                     callbacks: {
                         label: function(context) {
@@ -117,13 +116,13 @@ function updateDistributionChart(analyticsData, dataType) {
             },
             animation: {
                 animateRotate: true,
-                duration: 800
+                duration: 600
             }
         }
     });
 
     // Update legend
-    updateLegend(labels, values, backgroundColors);
+    updateChartLegend(labels, values, backgroundColors);
 }
 
 /**
@@ -133,11 +132,11 @@ function showNoDataMessage() {
     const legendContainer = document.getElementById('chartLegend');
     if (legendContainer) {
         legendContainer.innerHTML = `
-            <div class="no-data-state">
-                <div class="no-data-icon">
-                    <i class="fas fa-chart-pie"></i>
+            <div class="no-data-state text-center py-4">
+                <div class="no-data-icon text-muted mb-2">
+                    <i class="fas fa-chart-pie fa-2x"></i>
                 </div>
-                <p class="no-data-text">No data available for this category</p>
+                <p class="no-data-text text-muted mb-0">No data available for this category</p>
             </div>
         `;
     }
@@ -146,7 +145,7 @@ function showNoDataMessage() {
 /**
  * Update the custom legend
  */
-function updateLegend(labels, values, colors) {
+function updateChartLegend(labels, values, colors) {
     const legendContainer = document.getElementById('chartLegend');
     if (!legendContainer) return;
 
@@ -158,13 +157,13 @@ function updateLegend(labels, values, colors) {
         const color = colors[index];
 
         return `
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: ${color}"></div>
-                <div class="legend-content">
-                    <div class="legend-label">${label}</div>
+            <div class="legend-item d-flex align-items-center mb-2">
+                <div class="legend-color me-3" style="width: 16px; height: 16px; background-color: ${color}; border-radius: 3px;"></div>
+                <div class="legend-content flex-grow-1">
+                    <div class="legend-label fw-medium text-dark">${label}</div>
                     <div class="legend-stats">
-                        <span class="legend-count">${value}</span>
-                        <span class="legend-percentage">${percentage}%</span>
+                        <span class="legend-count text-primary fw-bold">${value}</span>
+                        <span class="legend-percentage text-muted ms-1">(${percentage}%)</span>
                     </div>
                 </div>
             </div>
@@ -176,7 +175,7 @@ function updateLegend(labels, values, colors) {
  * Switch data view (called by filter buttons)
  */
 function switchDataView(dataType) {
-    currentDataType = dataType;
+    activeDataType = dataType;
 
     // Update active filter button
     document.querySelectorAll('.filter-btn').forEach(btn => {
