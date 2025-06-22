@@ -191,6 +191,13 @@ def process_excel_file(file, manager_id):
                 if not employee.employee_status:
                     employee.employee_status = 'ACTIVE'
 
+                # Set manager relationship if manager_id is provided
+                if manager_id:
+                    employee.manager_id = manager_id
+                    manager = Employee.query.get(manager_id)
+                    if manager:
+                        employee.manager_name = manager.full_name
+
                 # Set default password
                 employee.set_password('password123')
 
