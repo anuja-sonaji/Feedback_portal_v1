@@ -268,6 +268,30 @@
     window.analyticsData = {{ analytics|tojson }};
 </script>
 
+<!-- Disable old chart initializations -->
+<script>
+// Override old chart functions to prevent conflicts
+window.initializeDashboardCharts = function() { /* disabled */ };
+window.initEmploymentTypeChart = function() { /* disabled */ };
+window.initBillableStatusChart = function() { /* disabled */ };
+window.initTeamChart = function() { /* disabled */ };
+window.initLocationChart = function() { /* disabled */ };
+window.initSkillsChart = function() { /* disabled */ };
+</script>
+
 <!-- Modern Charts JavaScript -->
-<script src="{{ url_for('static', filename='js/modern-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modern-charts.js') }}?v=202501"></script>
+
+<script>
+// Force initialize modern charts
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Loading modern charts with data:', window.analyticsData);
+    if (window.analyticsData && typeof initializeDashboardCharts === 'function') {
+        // Wait a bit to ensure DOM is ready
+        setTimeout(() => {
+            initializeDashboardCharts(window.analyticsData);
+        }, 500);
+    }
+});
+</script>
 {% endblock %}

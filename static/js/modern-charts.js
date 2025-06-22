@@ -125,28 +125,35 @@ function switchChart(chartType, analyticsData) {
 }
 
 function initializeDashboardCharts(analyticsData) {
-    if (!analyticsData) return;
+    console.log('Initializing modern dashboard charts with data:', analyticsData);
+    if (!analyticsData) {
+        console.error('No analytics data provided');
+        return;
+    }
 
     // Set up chart switcher buttons
     document.querySelectorAll('.chart-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const chartType = this.getAttribute('data-chart');
+            console.log('Switching to chart type:', chartType);
             switchChart(chartType, analyticsData);
         });
     });
 
     // Initialize with skills chart (or first available)
     let initialChart = 'skill';
-    if (!analyticsData.skills) {
+    if (!analyticsData.skills || Object.keys(analyticsData.skills || {}).length === 0) {
         // Find first available chart
         for (const [key, config] of Object.entries(chartConfigs)) {
-            if (analyticsData[config.data]) {
+            if (analyticsData[config.data] && Object.keys(analyticsData[config.data] || {}).length > 0) {
                 initialChart = key;
+                console.log('Using fallback chart:', initialChart);
                 break;
             }
         }
     }
 
+    console.log('Initializing with chart type:', initialChart);
     switchChart(initialChart, analyticsData);
 }
 
