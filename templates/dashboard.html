@@ -1,32 +1,36 @@
+
 {% extends "base.html" %}
 
 {% block title %}Dashboard - Employee Feedback Portal{% endblock %}
 
 {% block content %}
-<!-- Compact Header -->
-<div class="dashboard-header d-flex justify-content-between align-items-center">
-    <h2>
-        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-    </h2>
-    <div class="welcome-text">
-        Welcome, {{ current_user.full_name }}
+<!-- Compact Professional Header -->
+<div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
+    <div class="page-title">
+        <h4 class="mb-1"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h4>
+        <small class="text-muted">Employee Management Overview</small>
+    </div>
+    <div class="user-welcome">
+        <span class="welcome-text text-sm">Welcome back, <strong>{{ current_user.full_name }}</strong></span>
         {% if current_user.is_manager %}
-        <span class="badge bg-primary ms-2">Manager</span>
+        <span class="badge bg-primary ms-2 text-xs">Manager</span>
         {% endif %}
     </div>
 </div>
 
 <!-- Compact Analytics Cards -->
-<div class="row analytics-row g-3">
+<div class="row g-3 mb-4">
     <div class="col-lg-3 col-md-6">
-        <div class="card analytics-card card-primary text-white">
-            <div class="card-body">
-                <div>
-                    <h5>Total Employees</h5>
-                    <h2>{{ analytics.total_employees }}</h2>
-                </div>
-                <div class="card-icon">
-                    <i class="fas fa-users"></i>
+        <div class="card metric-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-primary bg-opacity-10 text-primary me-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value h5 mb-0">{{ analytics.total_employees }}</div>
+                        <div class="metric-label text-xs text-muted">Total Employees</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,135 +38,141 @@
     
     {% if current_user.is_manager %}
     <div class="col-lg-3 col-md-6">
-        <div class="card analytics-card card-success text-white">
-            <div class="card-body">
-                <div>
-                    <h5>Direct Reports</h5>
-                    <h2>{{ current_user.get_direct_reports()|length }}</h2>
-                </div>
-                <div class="card-icon">
-                    <i class="fas fa-user-friends"></i>
+        <div class="card metric-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-success bg-opacity-10 text-success me-3">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value h5 mb-0">{{ current_user.get_direct_reports()|length }}</div>
+                        <div class="metric-label text-xs text-muted">Direct Reports</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-3 col-md-6">
-        <div class="card analytics-card card-info text-white">
-            <div class="card-body">
-                <div>
-                    <h5>Employee Search</h5>
-                    <input type="text" id="employeeSearch" class="form-control form-control-sm mt-2" 
-                           placeholder="Search employees..." 
-                           style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+    <div class="col-lg-6 col-md-12">
+        <div class="card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-info bg-opacity-10 text-info me-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="metric-label text-xs text-muted mb-1">Quick Employee Search</div>
+                        <div class="search-container position-relative">
+                            <input type="text" id="employeeQuickSearch" class="form-control form-control-sm" 
+                                   placeholder="Search employees by name, role, or team..." 
+                                   autocomplete="off">
+                            <div id="searchResults" class="search-results position-absolute w-100" style="display: none; z-index: 1000;"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-icon">
-                    <i class="fas fa-search"></i>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-lg-9 col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-3 d-flex align-items-center">
+                <div class="metric-icon bg-warning bg-opacity-10 text-warning me-3">
+                    <i class="fas fa-calendar-quarter"></i>
+                </div>
+                <div>
+                    <div class="metric-value h5 mb-0">Q4 2024</div>
+                    <div class="metric-label text-xs text-muted">Current Quarter</div>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="card analytics-card card-warning text-white">
-            <div class="card-body">
-                <div>
-                    <h5>Current Quarter View</h5>
-                    <h2>Q4</h2>
-                </div>
-                <div class="card-icon">
-                    <i class="fas fa-calendar-quarter"></i>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
-
-
-
-
 {% if current_user.is_manager %}
-<!-- Team Overview Section -->
-<div class="row team-section mb-3">
+<!-- Enhanced Team Overview Section -->
+<div class="row mb-4">
     <div class="col-12">
-        <div class="card team-overview-card">
+        <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center py-2">
-                <h6 class="card-title mb-0">
+                <h6 class="card-title mb-0 text-sm">
                     <i class="fas fa-users me-2"></i>My Team Overview
                 </h6>
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm">
+                    <a href="{{ url_for('employees') }}" class="btn btn-outline-primary btn-sm text-xs">
                         <i class="fas fa-list me-1"></i>View All
                     </a>
-                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary btn-sm text-xs">
                         <i class="fas fa-plus me-1"></i>Add Employee
                     </a>
                 </div>
             </div>
-            <div class="card-body py-2">
+            <div class="card-body p-0">
                 {% set direct_reports = current_user.get_direct_reports() %}
                 {% if direct_reports %}
-                <!-- Employee Table -->
                 <div class="table-responsive">
-                    <table class="table team-table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Role & Team</th>
-                                <th>Last Feedback</th>
-                                <th>Performance</th>
-                                <th>Actions</th>
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr class="text-xs">
+                                <th class="border-0 ps-3">Employee</th>
+                                <th class="border-0">Role & Team</th>
+                                <th class="border-0">Status</th>
+                                <th class="border-0">Location</th>
+                                <th class="border-0">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for employee in direct_reports[:10] %}
-                            <tr>
-                                <td>
-                                    <div class="employee-info">
-                                        <div class="employee-name">{{ employee.full_name }}</div>
-                                        <div class="employee-email">{{ employee.emailid or 'No email' }}</div>
+                            {% for employee in direct_reports[:8] %}
+                            <tr class="text-xs">
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-2">
+                                            {{ employee.full_name[0].upper() if employee.full_name else 'U' }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-sm">{{ employee.full_name or 'Unknown' }}</div>
+                                            <div class="text-muted text-xs">{{ employee.emailid or 'No email' }}</div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="role-info">
-                                        <div class="employee-role">{{ employee.role or 'No role assigned' }}</div>
+                                        <div class="text-sm">{{ employee.role or 'No role assigned' }}</div>
                                         {% if employee.team %}
-                                        <span class="team-badge">{{ employee.team }}</span>
+                                        <span class="badge bg-light text-dark text-xs">{{ employee.team }}</span>
                                         {% endif %}
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="feedback-status status-pending">
-                                        <i class="fas fa-clock me-1"></i>Pending
+                                    {% if employee.employee_status %}
+                                    <span class="badge bg-{{ 'success' if employee.employee_status.upper() == 'ACTIVE' else 'danger' }} text-xs">
+                                        {{ employee.employee_status }}
                                     </span>
+                                    {% else %}
+                                    <span class="text-muted text-xs">N/A</span>
+                                    {% endif %}
                                 </td>
+                                <td class="text-xs">{{ employee.location or 'N/A' }}</td>
                                 <td>
-                                    <div class="performance-rating">
-                                        {% for i in range(1, 6) %}
-                                            <i class="fas fa-star text-muted"></i>
-                                        {% endfor %}
-                                        <span class="rating-text">No data</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-comment me-1"></i>Feedback
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('add_feedback') }}?employee_id={{ employee.id }}" 
+                                           class="btn btn-primary btn-sm text-xs" title="Give Feedback">
+                                            <i class="fas fa-comment"></i>
                                         </a>
-                                        <a href="{{ url_for('employee_details', id=employee.id) }}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-eye me-1"></i>Details
+                                        <a href="{{ url_for('employee_details', id=employee.id) }}" 
+                                           class="btn btn-outline-secondary btn-sm text-xs" title="View Details">
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
-                            {% if direct_reports|length > 10 %}
+                            {% if direct_reports|length > 8 %}
                             <tr>
-                                <td colspan="5" class="text-center">
-                                    <small class="text-muted">Showing 10 of {{ direct_reports|length }} team members</small>
-                                    <a href="{{ url_for('employees') }}" class="ms-2 btn btn-sm btn-link">View All</a>
+                                <td colspan="5" class="text-center py-2">
+                                    <small class="text-muted text-xs">Showing 8 of {{ direct_reports|length }} team members</small>
+                                    <a href="{{ url_for('employees') }}" class="ms-2 btn btn-link btn-sm text-xs">View All</a>
                                 </td>
                             </tr>
                             {% endif %}
@@ -170,13 +180,11 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h6 class="empty-title">No Team Members</h6>
-                    <p class="empty-text">You don't have any direct reports assigned yet.</p>
-                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary">
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-users text-muted mb-2" style="font-size: 2rem;"></i>
+                    <h6 class="text-muted">No Team Members</h6>
+                    <p class="text-muted text-sm mb-3">You don't have any direct reports assigned yet.</p>
+                    <a href="{{ url_for('add_employee') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i>Add Your First Team Member
                     </a>
                 </div>
@@ -186,54 +194,46 @@
     </div>
 </div>
 
-<!-- Team Data Distribution Section - Compact -->
-<div class="row mb-3">
+<!-- Compact Analytics Distribution -->
+<div class="row mb-4">
     <div class="col-12">
-        <div class="card analytics-distribution-card compact">
-            <div class="card-header bg-gradient-primary py-2">
-                <h6 class="card-title text-white mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Team Data Distribution
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="card-title text-sm mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Team Analytics
                 </h6>
             </div>
             <div class="card-body p-3">
                 <div class="row g-3">
-                    <!-- Filter Buttons -->
                     <div class="col-lg-2 col-md-3">
-                        <div class="filter-section compact">
-                            <h6 class="filter-title mb-2">View:</h6>
-                            <div class="filter-buttons">
-                                <button type="button" class="filter-btn active compact" data-chart="skill" onclick="switchDataView('skill')">
-                                    <i class="fas fa-code"></i>Skill
+                        <div class="analytics-filters">
+                            <h6 class="text-xs text-muted mb-2">View by:</h6>
+                            <div class="btn-group-vertical d-grid gap-1" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs active" data-chart="team" onclick="switchDataView('team')">
+                                    <i class="fas fa-users me-1"></i>Team
                                 </button>
-                                <button type="button" class="filter-btn compact" data-chart="team" onclick="switchDataView('team')">
-                                    <i class="fas fa-users"></i>Team
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="location" onclick="switchDataView('location')">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Location
                                 </button>
-                                <button type="button" class="filter-btn compact" data-chart="location" onclick="switchDataView('location')">
-                                    <i class="fas fa-map-marker-alt"></i>Location
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="employment_type" onclick="switchDataView('employment_type')">
+                                    <i class="fas fa-briefcase me-1"></i>Employment
                                 </button>
-                                <button type="button" class="filter-btn compact" data-chart="employment_type" onclick="switchDataView('employment_type')">
-                                    <i class="fas fa-briefcase"></i>Employment
-                                </button>
-                                <button type="button" class="filter-btn compact" data-chart="billable_status" onclick="switchDataView('billable_status')">
-                                    <i class="fas fa-dollar-sign"></i>Billable
+                                <button type="button" class="btn btn-outline-primary btn-sm text-xs" data-chart="billable_status" onclick="switchDataView('billable_status')">
+                                    <i class="fas fa-dollar-sign me-1"></i>Billable
                                 </button>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Pie Chart -->
                     <div class="col-lg-6 col-md-5">
-                        <div class="chart-container compact">
-                            <canvas id="distributionChart" width="300" height="300"></canvas>
+                        <div class="chart-container text-center">
+                            <canvas id="distributionChart" width="250" height="250"></canvas>
                         </div>
                     </div>
-                    
-                    <!-- Legend -->
                     <div class="col-lg-4 col-md-4">
-                        <div class="legend-container compact">
-                            <h6 class="legend-title mb-2">Details</h6>
-                            <div id="chartLegend" class="chart-legend compact">
-                                <!-- Legend items will be populated by JavaScript -->
+                        <div class="legend-container">
+                            <h6 class="text-xs text-muted mb-2">Distribution Details</h6>
+                            <div id="chartLegend" class="chart-legend">
+                                <!-- Legend populated by JavaScript -->
                             </div>
                         </div>
                     </div>
@@ -244,81 +244,36 @@
 </div>
 {% endif %}
 
-<!-- Compact Quick Actions Section -->
-<div class="row mb-4">
+<!-- Compact Quick Actions -->
+<div class="row">
     <div class="col-12">
-        <div class="card professional-quick-actions">
-            <div class="card-header">
-                <h6 class="card-title mb-0">
-                    <span><i class="fas fa-rocket me-2"></i>Quick Actions</span>
-                    <small class="opacity-75">Streamline your workflow</small>
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="card-title text-sm mb-0">
+                    <i class="fas fa-rocket me-2"></i>Quick Actions
                 </h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-3">
                 <div class="row g-2">
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="quick-action-card">
-                            <a href="{{ url_for('add_employee') }}" class="quick-action-link">
-                                <div class="action-icon bg-primary">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="action-content">
-                                    <div class="action-title">Add Employee</div>
-                                    <div class="action-description">Register new team members</div>
-                                </div>
-                                <div class="action-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
-                        </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('add_employee') }}" class="btn btn-outline-primary w-100 text-start text-xs">
+                            <i class="fas fa-user-plus me-2"></i>Add Employee
+                        </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="quick-action-card">
-                            <a href="{{ url_for('employees') }}" class="quick-action-link">
-                                <div class="action-icon bg-info">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="action-content">
-                                    <div class="action-title">Employee Details</div>
-                                    <div class="action-description">View and manage team data</div>
-                                </div>
-                                <div class="action-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
-                        </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('employees') }}" class="btn btn-outline-info w-100 text-start text-xs">
+                            <i class="fas fa-users me-2"></i>View All Employees
+                        </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="quick-action-card">
-                            <a href="{{ url_for('import_excel') }}" class="quick-action-link">
-                                <div class="action-icon bg-success">
-                                    <i class="fas fa-file-import"></i>
-                                </div>
-                                <div class="action-content">
-                                    <div class="action-title">Import Data</div>
-                                    <div class="action-description">Bulk upload employee records</div>
-                                </div>
-                                <div class="action-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
-                        </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('import_excel') }}" class="btn btn-outline-success w-100 text-start text-xs">
+                            <i class="fas fa-file-import me-2"></i>Import Data
+                        </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="quick-action-card">
-                            <a href="{{ url_for('download_template') }}" class="quick-action-link">
-                                <div class="action-icon bg-warning">
-                                    <i class="fas fa-download"></i>
-                                </div>
-                                <div class="action-content">
-                                    <div class="action-title">Export Data</div>
-                                    <div class="action-description">Download employee reports</div>
-                                </div>
-                                <div class="action-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </a>
-                        </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('download_template') }}" class="btn btn-outline-warning w-100 text-start text-xs">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </a>
                     </div>
                 </div>
             </div>
@@ -326,41 +281,202 @@
     </div>
 </div>
 
-<!-- Pass analytics data to JavaScript -->
+<!-- Enhanced Search Results Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h6 class="modal-title">Employee Details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="employeeModalBody">
+                <!-- Employee details loaded here -->
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Data -->
 <script>
     window.analyticsData = {{ analytics|tojson }};
-    // Pass employee data by category for tooltips
     window.employeesByCategory = {
         employment_type: {{ employees_by_type|tojson if employees_by_type else '{}' }},
         billable_status: {{ employees_by_billable|tojson if employees_by_billable else '{}' }},
         team: {{ employees_by_team|tojson if employees_by_team else '{}' }},
         location: {{ employees_by_location|tojson if employees_by_location else '{}' }},
-        skills: {}  // Will be populated from skills data
+        skills: {}
     };
 </script>
 
-<!-- Team Data Distribution Chart Script -->
 <script src="{{ url_for('static', filename='js/modern-charts.js') }}?v={{ range(1000, 9999) | random }}"></script>
 
 <script>
-// Initialize the team pie chart when page loads
-window.addEventListener('load', function() {
-    console.log('Page loaded, initializing charts with data:', window.analyticsData);
+// Enhanced Employee Search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('employeeQuickSearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 300);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    }
+
+    function performSearch(query) {
+        // Mock search - replace with actual API call
+        const mockEmployees = [
+            {% for employee in current_user.get_direct_reports() if current_user.is_manager %}
+            {
+                id: {{ employee.id }},
+                name: '{{ employee.full_name or "Unknown" }}',
+                role: '{{ employee.role or "No role" }}',
+                team: '{{ employee.team or "No team" }}',
+                email: '{{ employee.emailid or "No email" }}',
+                status: '{{ employee.employee_status or "Unknown" }}'
+            },
+            {% endfor %}
+        ];
+
+        const filtered = mockEmployees.filter(emp => 
+            emp.name.toLowerCase().includes(query.toLowerCase()) ||
+            emp.role.toLowerCase().includes(query.toLowerCase()) ||
+            emp.team.toLowerCase().includes(query.toLowerCase())
+        );
+
+        displaySearchResults(filtered);
+    }
+
+    function displaySearchResults(employees) {
+        if (employees.length === 0) {
+            searchResults.innerHTML = '<div class="search-no-results p-2 text-center text-muted text-xs">No employees found</div>';
+        } else {
+            const html = employees.map(emp => `
+                <div class="search-result-item p-2 border-bottom" onclick="showEmployeeDetails(${emp.id})" style="cursor: pointer;">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm me-2">${emp.name[0].toUpperCase()}</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-sm">${emp.name}</div>
+                            <div class="text-muted text-xs">${emp.role} • ${emp.team}</div>
+                        </div>
+                        <span class="badge bg-light text-dark text-xs">${emp.status}</span>
+                    </div>
+                </div>
+            `).join('');
+            searchResults.innerHTML = html;
+        }
+        
+        searchResults.style.display = 'block';
+        searchResults.className = 'search-results position-absolute w-100 bg-white border rounded shadow-sm';
+    }
+
+    // Initialize charts
     if (window.analyticsData) {
         initializeDashboardCharts(window.analyticsData);
-    } else {
-        console.error('Analytics data not found');
     }
 });
 
-// Backup initialization after DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (window.analyticsData && !window.teamPieChart) {
-            console.log('Backup initialization triggered');
-            initializeDashboardCharts(window.analyticsData);
-        }
-    }, 1000);
-});
+function showEmployeeDetails(employeeId) {
+    // Hide search results
+    document.getElementById('searchResults').style.display = 'none';
+    
+    // Redirect to employee details page
+    window.location.href = `/employee/${employeeId}`;
+}
 </script>
+
+<style>
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background: white;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-no-results {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.metric-card {
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.analytics-filters .btn {
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+.chart-legend {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+/* Professional text sizes */
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+
+/* Compact spacing */
+.card-body.p-3 { padding: 1rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+</style>
 {% endblock %}
