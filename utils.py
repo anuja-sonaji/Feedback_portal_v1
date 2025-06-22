@@ -38,41 +38,58 @@ def process_excel_file(file, manager_id):
         # Normalize column names (remove extra spaces, handle case variations)
         df.columns = df.columns.str.strip()
 
-        # Expected columns matching the database schema
+        # Expected columns matching the database schema - handles various Excel formats
         expected_columns = {
             'Employment_Type': 'employment_type',
-            'Billable_Status': 'billable_status', 
+            'Employment Type': 'employment_type',
+            'Billable_Status': 'billable_status',
+            'Billable Status': 'billable_status', 
             'Employee_Status': 'employee_status',
+            'Employee Status': 'employee_status',
             'System_ID': 'system_id',
+            'System ID': 'system_id',
             'Bensl_ID': 'bensl_id',
+            'Bensl ID': 'bensl_id',
+            'BENSL_ID': 'bensl_id',
             'Full_Name': 'full_name',
+            'Full Name': 'full_name',
+            'Name': 'full_name',
+            'Employee Name': 'full_name',
             'Role ': 'role',  # Note the space in Excel column
             'Role': 'role',   # Handle both cases
-            'Skill': 'skill',
-            'Team': 'team',
-            'Manager Name': 'manager_name',  # Note the space in Excel column
-            'Manager_Name': 'manager_name',  # Handle both cases
-            'Manager ID': 'manager_bensl_id',  # Map to manager_bensl_id field
-            'Manager_ID': 'manager_bensl_id',  # Handle both cases
-            'Critical': 'critical',
-            'DOJ Allianz': 'doj_allianz',  # Note the space in Excel column
-            'DOJ_Allianz': 'doj_allianz',  # Handle both cases
-            'DOL Allianz': 'dol_allianz',  # Note the space in Excel column
-            'DOL_Allianz': 'dol_allianz',  # Handle both cases
-            'Grade': 'grade',
             'Designation': 'designation',
-            'DOJ Project': 'doj_project',  # Note the space in Excel column
-            'DOJ_Project': 'doj_project',  # Handle both cases
-            'DOL Project': 'dol_project',  # Note the space in Excel column
-            'DOL_Project': 'dol_project',  # Handle both cases
+            'Team': 'team',
+            'Skill': 'skill',
+            'Skills': 'skill',
+            'Manager': 'manager_name',
+            'Manager Name': 'manager_name',
+            'Manager_Name': 'manager_name',
+            'Location': 'location',
+            'Grade': 'grade',
             'Gender': 'gender',
             'Company': 'company',
-            'Emailid': 'emailid',
-            'Location': 'location',
-            'BillingRate': 'billing_rate',  # Note no underscore in Excel column
-            'Billing_Rate': 'billing_rate',  # Handle both cases
+            'Email': 'emailid',
+            'Email ID': 'emailid',
+            'EmailID': 'emailid',
+            'Billing Rate': 'billing_rate',
+            'Billing_Rate': 'billing_rate',
+            'BillingRate': 'billing_rate',
+            'Rate Card': 'rate_card',
             'Rate_Card': 'rate_card',
-            'Remarks': 'remarks'
+            'Critical': 'critical',
+            'Remarks': 'remarks',
+            'DOJ_Allianz': 'doj_allianz',
+            'DOJ Allianz': 'doj_allianz',
+            'Date of Joining': 'doj_allianz',
+            'DOL_Allianz': 'dol_allianz',
+            'DOL Allianz': 'dol_allianz',
+            'Date of Leaving': 'dol_allianz',
+            'DOJ_Project': 'doj_project',
+            'DOJ Project': 'doj_project',
+            'Project Start Date': 'doj_project',
+            'DOL_Project': 'dol_project',
+            'DOL Project': 'dol_project',
+            'Project End Date': 'dol_project'
         }
 
         # Validate that we have at least one recognizable column
@@ -191,12 +208,14 @@ def process_excel_file(file, manager_id):
                 if not employee.employee_status:
                     employee.employee_status = 'ACTIVE'
 
-                # Set manager relationship if manager_id is provided
-                if manager_id:
-                    employee.manager_id = manager_id
-                    manager = Employee.query.get(manager_id)
-                    if manager:
-                        employee.manager_name = manager.full_name
+                # Set manager relationship - imported employees are always assigned to the importing manager
+                employee.manager_id = manager_id
+                manager = Employee.query.get(manager_id)
+                if manager:
+                    employee.manager_name = manager.full_name
+                else:
+                    # Fallback - this shouldn't happen but ensures data integrity
+                    employee.manager_name = 'Unknown Manager'
 
                 # Set default password
                 employee.set_password('password123')

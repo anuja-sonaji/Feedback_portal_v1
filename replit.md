@@ -105,8 +105,10 @@ The Employee Feedback Portal is a comprehensive web application built with Flask
 - June 22, 2025: Successfully migrated from Replit Agent to standard Replit environment
 - June 22, 2025: Set up PostgreSQL database with proper connection and authentication
 - June 22, 2025: Fixed login authentication system with password hashing
-- June 22, 2025: Redesigned login page with modern, professional UI using gradients and animations
-- June 22, 2025: Enhanced overall visual design with improved spacing, typography, and user experience
+- June 22, 2025: Redesigned login page with clean, professional UI design
+- June 22, 2025: Fixed employee import functionality with proper manager-subordinate relationships
+- June 22, 2025: Enhanced Excel import to support multiple column name formats
+- June 22, 2025: Implemented permanent solution for manager hierarchy data integrity
 
 ## Changelog
 

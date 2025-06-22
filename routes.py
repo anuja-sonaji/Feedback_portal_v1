@@ -647,22 +647,20 @@ def import_excel():
                 result = process_excel_file(file, current_user.id)
 
                 if result['success']:
-                    success_msg = f'Successfully imported {result["count"]} employees'
+                    success_msg = f'Successfully imported {result["count"]} employees as your direct reports'
                     if result['skipped'] > 0:
                         success_msg += f' (skipped {result["skipped"]} duplicates)'
 
                     flash(success_msg, 'success')
+                    
+                    # Add a note about manager assignment
+                    flash(f'All imported employees have been assigned to you ({current_user.full_name}) as their manager.', 'info')
 
                     # Show errors if any
                     if result['errors']:
-                        error_summary = f"Import completed with {len(result['errors'])} warnings/errors. "
-                        error_summary += "Check the details below."
+                        error_summary = f"Import completed with {len(result['errors'])} warnings. "
+                        error_summary += "Check the employee list for details."
                         flash(error_summary, 'warning')
-
-                        # Store detailed errors in session for display
-                        session = request.environ.get('werkzeug.session') 
-                        if session:
-                            session['import_errors'] = result['errors'][:20]  # Limit to 20 errors
 
                     return redirect(url_for('employees'))
                 else:
