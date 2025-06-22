@@ -7,8 +7,7 @@
 <!-- Compact Professional Header -->
 <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
     <div class="page-title">
-        <h4 class="mb-1"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h4>
-        <small class="text-muted">Employee Management Overview</small>
+        <h4 class="mb-1"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Employee Feedback Management Overview</h4>
     </div>
     <div class="user-welcome">
         <span class="welcome-text text-sm">Welcome back, <strong>{{ current_user.full_name }}</strong></span>
@@ -22,14 +21,14 @@
 <div class="row g-3 mb-4">
     <div class="col-lg-3 col-md-6">
         <div class="card metric-card h-100">
-            <div class="card-body p-3">
+            <div class="card-body p-2">
                 <div class="d-flex align-items-center">
-                    <div class="metric-icon bg-primary bg-opacity-10 text-primary me-3">
+                    <div class="metric-icon bg-primary bg-opacity-10 text-primary me-2">
                         <i class="fas fa-users"></i>
                     </div>
                     <div>
-                        <div class="metric-value h5 mb-0">{{ analytics.total_employees }}</div>
-                        <div class="metric-label text-xs text-muted">Total Employees</div>
+                        <div class="metric-value h4 mb-0">{{ analytics.total_employees }}</div>
+                        <div class="metric-label text-sm text-muted">Total Employees</div>
                     </div>
                 </div>
             </div>
@@ -39,21 +38,37 @@
     {% if current_user.is_manager %}
     <div class="col-lg-3 col-md-6">
         <div class="card metric-card h-100">
-            <div class="card-body p-3">
+            <div class="card-body p-2">
                 <div class="d-flex align-items-center">
-                    <div class="metric-icon bg-success bg-opacity-10 text-success me-3">
+                    <div class="metric-icon bg-success bg-opacity-10 text-success me-2">
                         <i class="fas fa-user-friends"></i>
                     </div>
                     <div>
-                        <div class="metric-value h5 mb-0">{{ current_user.get_direct_reports()|length }}</div>
-                        <div class="metric-label text-xs text-muted">Direct Reports</div>
+                        <div class="metric-value h4 mb-0">{{ current_user.get_direct_reports()|length }}</div>
+                        <div class="metric-label text-sm text-muted">Direct Reports</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-6 col-md-12">
+    <div class="col-lg-3 col-md-6">
+        <div class="card metric-card h-100">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-warning bg-opacity-10 text-warning me-2">
+                        <i class="fas fa-calendar-quarter"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value h4 mb-0">Q4</div>
+                        <div class="metric-label text-sm text-muted">Current Quarter</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-12">
         <div class="card h-100">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center">
@@ -73,21 +88,6 @@
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="col-lg-9 col-md-6">
-        <div class="card h-100">
-            <div class="card-body p-3 d-flex align-items-center">
-                <div class="metric-icon bg-warning bg-opacity-10 text-warning me-3">
-                    <i class="fas fa-calendar-quarter"></i>
-                </div>
-                <div>
-                    <div class="metric-value h5 mb-0">Q4 2024</div>
-                    <div class="metric-label text-xs text-muted">Current Quarter</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 </div>
 
 {% if current_user.is_manager %}
