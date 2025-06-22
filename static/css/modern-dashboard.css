@@ -219,7 +219,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 400px;
+    height: 320px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 12px;
     border: 1px solid #e2e8f0;
@@ -228,7 +228,7 @@
 }
 
 .chart-container.compact {
-    height: 280px;
+    height: 260px;
     border-radius: 8px;
 }
 
@@ -245,37 +245,38 @@
 .legend-container {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 0.75rem;
     border: 1px solid #e2e8f0;
     height: fit-content;
-    max-height: 400px;
-    overflow-y: auto;
+    max-height: 320px;
+    overflow-y: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .legend-container.compact {
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
-    max-height: 280px;
+    max-height: 260px;
+    overflow-y: hidden;
 }
 
 .legend-title {
     color: #374151;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .chart-legend {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.4rem;
 }
 
 .chart-legend.compact {
-    gap: 0.5rem;
+    gap: 0.3rem;
 }
 
 /* Team Overview Container */
@@ -363,8 +364,8 @@
 .legend-item {
     display: flex;
     align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    padding: 0.3rem 0.5rem;
     background: white;
     border-radius: 4px;
     border: 1px solid #e2e8f0;
@@ -373,17 +374,17 @@
 
 .legend-item:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .legend-color {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
     flex-shrink: 0;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .legend-content {
@@ -391,29 +392,30 @@
 }
 
 .legend-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.1rem;
+    line-height: 1.2;
 }
 
 .legend-stats {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .legend-count {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #6b7280;
     font-weight: 500;
     background: #f3f4f6;
-    padding: 0.1rem 0.4rem;
-    border-radius: 3px;
+    padding: 0.05rem 0.3rem;
+    border-radius: 2px;
 }
 
 .legend-percentage {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #9ca3af;
 }
 
