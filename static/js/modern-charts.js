@@ -52,9 +52,9 @@ function createTeamPieChart(data, title) {
                 data: values,
                 backgroundColor: colors,
                 borderColor: '#ffffff',
-                borderWidth: 3,
-                hoverOffset: 8,
-                hoverBorderWidth: 4
+                borderWidth: 2,
+                hoverOffset: 6,
+                hoverBorderWidth: 3
             }]
         },
         options: {
