@@ -310,48 +310,72 @@
     padding: 1rem 1.25rem;
 }
 
-/* Team Mini Chart */
-.team-mini-chart {
+/* Compact Team Stats */
+.team-stats-compact .stat-box {
+    padding: 0.75rem 0.5rem;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.team-stats-compact .stat-box i {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.team-stats-compact .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #374151;
+    line-height: 1;
+}
+
+.team-stats-compact .stat-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Compact Chart */
+.team-chart-compact {
     background: #f8fafc;
     border-radius: 8px;
     padding: 1rem;
     border: 1px solid #e2e8f0;
-    height: fit-content;
 }
 
-.mini-chart-container {
+.compact-chart-container {
     position: relative;
-    height: 180px;
+    height: 200px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 0.75rem;
 }
 
-.mini-chart-container canvas {
-    max-width: 160px !important;
-    max-height: 160px !important;
+.compact-chart-container canvas {
+    max-width: 180px !important;
+    max-height: 180px !important;
 }
 
-.mini-legend {
-    max-height: 120px;
+.compact-legend {
+    max-height: 200px;
     overflow-y: auto;
+    padding-left: 1rem;
 }
 
-.mini-legend .legend-item {
-    margin-bottom: 0.4rem;
+.compact-legend .legend-item {
+    margin-bottom: 0.5rem;
     padding: 0.4rem 0.6rem;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+}
+
+.chart-controls .btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
-}
-
-.mini-legend .legend-label {
-    font-size: 0.7rem;
-}
-
-.mini-legend .legend-count {
-    font-size: 0.65rem;
-    padding: 0.1rem 0.3rem;
 }
 
 .team-card .card-title {

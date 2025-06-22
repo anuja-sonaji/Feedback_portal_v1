@@ -77,72 +77,7 @@
     </div>
 </div>
 
-<!-- Team Data Distribution Section - Exact layout from reference -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-body" style="padding: 1.5rem;">
-                <h5 class="text-center mb-3" style="font-weight: 600; color: #2c3e50; font-size: 1.1rem;">Team Data Distribution</h5>
-                <div class="row">
-                    <!-- Left Side - Team Overview -->
-                    <div class="col-md-4">
-                        <div class="team-overview-container">
-                            <h6 class="mb-3" style="color: #374151; font-weight: 600;">Team Overview</h6>
-                            <div class="overview-stats mb-3">
-                                <div class="stat-item">
-                                    <i class="fas fa-users text-primary me-2"></i>
-                                    <span class="stat-label">Total Members:</span>
-                                    <span class="stat-value">{{ analytics.total_employees }}</span>
-                                </div>
-                                {% if current_user.is_manager %}
-                                <div class="stat-item">
-                                    <i class="fas fa-user-friends text-success me-2"></i>
-                                    <span class="stat-label">Direct Reports:</span>
-                                    <span class="stat-value">{{ current_user.get_direct_reports()|length }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="chart-filters">
-                                <h6 class="mb-2" style="color: #374151; font-size: 0.9rem;">View by:</h6>
-                                <button type="button" class="filter-btn active" data-chart="skill" onclick="switchChartView('skill')">
-                                    <i class="fas fa-cogs me-2"></i>Skill
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="billable" onclick="switchChartView('billable')">
-                                    <i class="fas fa-dollar-sign me-2"></i>Billable
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="employment" onclick="switchChartView('employment')">
-                                    <i class="fas fa-briefcase me-2"></i>Employment Type
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="team" onclick="switchChartView('team')">
-                                    <i class="fas fa-users me-2"></i>Team
-                                </button>
-                                <button type="button" class="filter-btn" data-chart="location" onclick="switchChartView('location')">
-                                    <i class="fas fa-map-marker-alt me-2"></i>Location
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Side - Pie Chart and Legend -->
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="pie-chart-container">
-                                    <canvas id="teamPieChart" width="280" height="280"></canvas>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="chart-legend-container" id="pieChartLegend">
-                                    <!-- Dynamic legend content -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Quick Actions Section -->
 <div class="row mb-4">
@@ -206,10 +141,60 @@
             <div class="card-body">
                 {% set direct_reports = current_user.get_direct_reports() %}
                 {% if direct_reports %}
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <div class="table-responsive">
-                            <table class="table team-table">
+                <!-- Team Overview Stats -->
+                <div class="team-stats-compact mb-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <i class="fas fa-users text-primary"></i>
+                                <div class="stat-number">{{ direct_reports|length }}</div>
+                                <div class="stat-label">Team Members</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <i class="fas fa-chart-pie text-success"></i>
+                                <div class="stat-number">{{ analytics.team.keys()|length }}</div>
+                                <div class="stat-label">Teams</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <i class="fas fa-star text-warning"></i>
+                                <div class="stat-number">0</div>
+                                <div class="stat-label">Avg Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Composition Chart -->
+                <div class="team-chart-compact mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-controls mb-2">
+                                <h6 class="mb-2">Team Distribution</h6>
+                                <div class="btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary active btn-sm" data-chart="team" onclick="switchChartView('team')">Team</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-chart="skill" onclick="switchChartView('skill')">Skill</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-chart="location" onclick="switchChartView('location')">Location</button>
+                                </div>
+                            </div>
+                            <div class="compact-chart-container">
+                                <canvas id="teamCompactChart" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="compact-legend" id="compactChartLegend">
+                                <!-- Legend content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employee Table -->
+                <div class="table-responsive">
+                    <table class="table team-table">
                         <thead>
                             <tr>
                                 <th>Employee</th>
@@ -264,19 +249,6 @@
                             {% endif %}
                         </tbody>
                     </table>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-mini-chart">
-                            <h6 class="mb-2">Team Composition</h6>
-                            <div class="mini-chart-container">
-                                <canvas id="teamMiniChart" width="200" height="200"></canvas>
-                            </div>
-                            <div class="mini-legend" id="teamMiniLegend">
-                                <!-- Mini legend content -->
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 {% else %}
                 <div class="no-data-state">

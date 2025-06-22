@@ -147,31 +147,44 @@ function switchChartView(dataType) {
         return;
     }
 
-    currentDataType = dataType;
+    currentCompactDataType = dataType;
 
-    // Update button states
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    // Update button states for compact chart
+    document.querySelectorAll('.btn-group-sm .btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector(`[data-chart="${dataType}"]`).classList.add('active');
+    const activeBtn = document.querySelector(`[data-chart="${dataType}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
 
-    // Create chart with new data
-    createTeamPieChart(window.analyticsData[config.field], config.title);
+    // Create compact chart with new data
+    createCompactChart(dataType);
 }
 
-function createTeamMiniChart() {
-    const canvas = document.getElementById('teamMiniChart');
+let compactChart = null;
+let currentCompactDataType = 'team';
+
+function createCompactChart(dataType = 'team') {
+    const canvas = document.getElementById('teamCompactChart');
     if (!canvas || !window.analyticsData) return;
 
-    // Use team data for mini chart
-    const teamData = window.analyticsData.team || {};
-    if (Object.keys(teamData).length === 0) return;
+    const config = dataConfigs[dataType];
+    if (!config || !window.analyticsData[config.field]) return;
 
-    const labels = Object.keys(teamData);
-    const values = Object.values(teamData);
+    const data = window.analyticsData[config.field];
+    if (Object.keys(data).length === 0) return;
+
+    // Destroy existing chart
+    if (compactChart) {
+        compactChart.destroy();
+    }
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
     const colors = referenceColors.slice(0, labels.length);
 
-    new Chart(canvas, {
+    compactChart = new Chart(canvas, {
         type: 'doughnut',
         data: {
             labels: labels,
@@ -180,7 +193,7 @@ function createTeamMiniChart() {
                 backgroundColor: colors,
                 borderColor: '#ffffff',
                 borderWidth: 2,
-                hoverOffset: 4
+                hoverOffset: 6
             }]
         },
         options: {
@@ -212,8 +225,8 @@ function createTeamMiniChart() {
         }
     });
 
-    // Update mini legend
-    const legendContainer = document.getElementById('teamMiniLegend');
+    // Update compact legend
+    const legendContainer = document.getElementById('compactChartLegend');
     if (legendContainer) {
         legendContainer.innerHTML = labels.map((label, index) => `
             <div class="legend-item">
@@ -225,10 +238,12 @@ function createTeamMiniChart() {
             </div>
         `).join('');
     }
+
+    currentCompactDataType = dataType;
 }
 
 function initializeDashboardCharts(analyticsData) {
-    console.log('Initializing team data distribution chart:', analyticsData);
+    console.log('Initializing compact team chart:', analyticsData);
     
     if (!analyticsData) {
         console.error('No analytics data available');
@@ -238,22 +253,9 @@ function initializeDashboardCharts(analyticsData) {
     // Store data globally for chart switching
     window.analyticsData = analyticsData;
 
-    // Find the first available data set
-    let initialDataType = 'skill';
-    for (const [key, config] of Object.entries(dataConfigs)) {
-        if (analyticsData[config.field] && Object.keys(analyticsData[config.field] || {}).length > 0) {
-            initialDataType = key;
-            break;
-        }
-    }
-
-    console.log('Initializing with data type:', initialDataType);
-    
-    // Initialize main chart
+    // Initialize with team data
     setTimeout(() => {
-        switchChartView(initialDataType);
-        // Also initialize mini chart
-        createTeamMiniChart();
+        createCompactChart('team');
     }, 100);
 }
 
