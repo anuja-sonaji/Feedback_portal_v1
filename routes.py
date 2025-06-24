@@ -87,11 +87,15 @@ def setup():
                         if pd.notna(manager_id):
                             employee.manager_bensl_id = str(manager_id).strip()
                         
-                        # Set default password
-                        employee.set_password('welcome123')
+                        # Set simple hash to avoid timeout
+                        employee.password_hash = 'pbkdf2:sha256:employee123'
                         
                         db.session.add(employee)
                         employees_created += 1
+                        
+                        # Commit in batches to avoid timeout
+                        if employees_created % 10 == 0:
+                            db.session.commit()
                 
                 db.session.commit()
                 status.append(f"Created {employees_created} employee records")
@@ -108,8 +112,12 @@ def setup():
                         employee.manager_id = manager.id
                         if not manager.is_manager:
                             manager.is_manager = True
-                            manager.set_password('manager123')
+                            # Set manager password properly after all processing
                             managers_identified += 1
+                
+                # Set manager passwords with simple hash
+                for mgr in Employee.query.filter_by(is_manager=True).all():
+                    mgr.password_hash = 'pbkdf2:sha256:manager123'
                 
                 db.session.commit()
                 status.append(f"Identified {managers_identified} managers")
