@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Setup - Employee Feedback Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .setup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .setup-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        .step.active {
+            background: #28a745;
+            color: white;
+        }
+        .step.completed {
+            background: #007bff;
+            color: white;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        .status-card {
+            border-left: 4px solid #28a745;
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        .error-card {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <div class="text-center mb-4">
+                <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
+                <h2>Employee Feedback Portal Setup</h2>
+                <p class="text-muted">One-time system initialization</p>
+            </div>
+
+            <div class="step-indicator">
+                <div class="step completed">1</div>
+                <div class="step active">2</div>
+                <div class="step">3</div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <h5><i class="fas fa-file-excel me-2"></i>Employee Data Import</h5>
+                    <p class="text-muted">Upload your Excel file with employee details to set up the system</p>
+                    
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Select Employee Excel File</label>
+                        <input type="file" class="form-control" id="excel_file" name="excel_file" 
+                               accept=".xlsx,.xls" required>
+                        <div class="form-text">
+                            Supported formats: .xlsx, .xls<br>
+                            Required columns: Full_Name, Emailid, Manager ID, Team, Designation
+                        </div>
+                    </div>
+                </div>
+
+                {% if status %}
+                <div class="status-card">
+                    <h6><i class="fas fa-info-circle me-2"></i>Setup Status</h6>
+                    {% for message in status %}
+                        <div class="mb-2">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if errors %}
+                <div class="error-card">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Setup Errors</h6>
+                    {% for error in errors %}
+                        <div class="mb-2">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if managers %}
+                <div class="status-card">
+                    <h6><i class="fas fa-users me-2"></i>Manager Credentials</h6>
+                    <p class="mb-2">Share these credentials with respective managers:</p>
+                    {% for manager in managers %}
+                    <div class="mb-2">
+                        <strong>{{ manager.name }}</strong> ({{ manager.team }})<br>
+                        Email: {{ manager.email }}<br>
+                        Password: <code>manager123</code><br>
+                        Reports: {{ manager.reports }} employees
+                        <hr class="my-2">
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('login') }}" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Go to Login Page
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-upload me-2"></i>Import Employee Data
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+
+            <div class="mt-4 text-center">
+                <small class="text-muted">
+                    This setup only needs to be run once. After completion, 
+                    managers can login with their credentials.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

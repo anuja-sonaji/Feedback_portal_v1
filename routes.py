@@ -13,10 +13,122 @@ from utils import process_excel_file, get_dashboard_analytics, allowed_file
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
+    
+    # Check if system needs setup
+    manager_count = Employee.query.filter_by(is_manager=True).count()
+    if manager_count == 0:
+        return redirect(url_for('setup'))
+    
     return redirect(url_for('login'))
+
+@app.route('/setup', methods=['GET', 'POST'])
+def setup():
+    # Check if setup is already complete
+    manager_count = Employee.query.filter_by(is_manager=True).count()
+    if manager_count > 0 and request.method == 'GET':
+        return redirect(url_for('login'))
+    
+    status = []
+    errors = []
+    managers = []
+    
+    if request.method == 'POST':
+        excel_file = request.files.get('excel_file')
+        
+        if excel_file and allowed_file(excel_file.filename):
+            try:
+                # Clear existing data
+                Employee.query.delete()
+                db.session.commit()
+                status.append("Cleared existing employee data")
+                
+                # Read Excel file
+                df = pd.read_excel(excel_file)
+                status.append(f"Processing {len(df)} employee records from Excel")
+                
+                # Import employees
+                employees_created = 0
+                for index, row in df.iterrows():
+                    if pd.notna(row.get('Full_Name')):
+                        employee = Employee()
+                        
+                        # Core data
+                        employee.full_name = str(row.get('Full_Name')).strip()
+                        employee.bensl_id = str(row.get('Bensl_ID', f'EMP{index+1:03d}')).strip()
+                        employee.system_id = str(row.get('System_ID', employee.bensl_id)).strip()
+                        
+                        # Email handling
+                        email = row.get('Emailid')
+                        if pd.notna(email) and email.strip():
+                            employee.emailid = str(email).strip().lower()
+                        else:
+                            name_parts = employee.full_name.lower().replace(' ', '.')
+                            employee.emailid = f"{name_parts}@company.com"
+                        
+                        # Job details
+                        employee.designation = str(row.get('Designation', 'Employee')).strip()
+                        employee.team = str(row.get('Team', 'General')).strip()
+                        employee.location = str(row.get('Location', 'Office')).strip()
+                        employee.employment_type = str(row.get('Employment_Type', 'Permanent')).strip()
+                        employee.billable_status = str(row.get('Billable_Status', 'Billable')).strip()
+                        employee.employee_status = str(row.get('Employee_Status', 'Active')).strip()
+                        
+                        # Manager relationship data
+                        manager_id = row.get('Manager ID')
+                        if pd.notna(manager_id):
+                            employee.manager_bensl_id = str(manager_id).strip()
+                        
+                        # Set default password
+                        employee.set_password('welcome123')
+                        
+                        db.session.add(employee)
+                        employees_created += 1
+                
+                db.session.commit()
+                status.append(f"Created {employees_created} employee records")
+                
+                # Establish manager relationships
+                managers_identified = 0
+                for employee in Employee.query.filter(Employee.manager_bensl_id.isnot(None)).all():
+                    if employee.manager_bensl_id:
+                        manager = Employee.query.filter_by(bensl_id=employee.manager_bensl_id).first()
+                        if manager:
+                            employee.manager_id = manager.id
+                            if not manager.is_manager:
+                                manager.is_manager = True
+                                manager.set_password('manager123')
+                                managers_identified += 1
+                
+                db.session.commit()
+                status.append(f"Identified {managers_identified} managers")
+                
+                # Prepare manager credentials
+                manager_list = Employee.query.filter_by(is_manager=True).all()
+                for mgr in manager_list:
+                    report_count = Employee.query.filter_by(manager_id=mgr.id).count()
+                    managers.append({
+                        'name': mgr.full_name,
+                        'email': mgr.emailid,
+                        'team': mgr.team,
+                        'reports': report_count
+                    })
+                
+                status.append("Setup completed successfully!")
+                
+            except Exception as e:
+                errors.append(f"Import failed: {str(e)}")
+        else:
+            errors.append("Please select a valid Excel file (.xlsx or .xls)")
+    
+    return render_template('setup.html', status=status, errors=errors, managers=managers)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Check if system needs setup first
+    manager_count = Employee.query.filter_by(is_manager=True).count()
+    if manager_count == 0:
+        return redirect(url_for('setup'))
+    
     if request.method == 'POST':
         emailid = request.form.get('email', '').strip()
         password = request.form.get('password', '')
