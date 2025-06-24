@@ -53,6 +53,8 @@ class Employee(UserMixin, db.Model):
         # Simple password check for demo
         if self.password_hash == f'simple_hash_{password}':
             return True
+        if self.password_hash == f'hash_{password}':
+            return True
         return check_password_hash(self.password_hash, password)
     
     # Relationships

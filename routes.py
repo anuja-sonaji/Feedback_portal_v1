@@ -93,9 +93,7 @@ def setup():
                         db.session.add(employee)
                         employees_created += 1
                         
-                        # Commit in batches to avoid timeout
-                        if employees_created % 10 == 0:
-                            db.session.commit()
+                        # Skip batch commits to avoid issues
                 
                 db.session.commit()
                 status.append(f"Created {employees_created} employee records")
