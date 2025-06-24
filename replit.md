@@ -111,6 +111,8 @@ The Employee Feedback Portal is a comprehensive web application built with Flask
 - June 24, 2025: Created comprehensive pre-login setup system with Excel import functionality
 - June 24, 2025: Implemented automatic manager identification and credential generation
 - June 24, 2025: Added professional setup interface with copy/print functionality for credentials
+- June 24, 2025: Resolved console timeout errors and completed Excel import with real line manager identification
+- June 24, 2025: System now identifies actual line managers from Excel data and creates login credentials only for them
 
 ## Changelog
 
