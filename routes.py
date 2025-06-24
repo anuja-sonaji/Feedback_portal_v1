@@ -24,10 +24,9 @@ def index():
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
-    # Check if setup is already complete
+    # Allow setup access but show warning if already complete
     manager_count = Employee.query.filter_by(is_manager=True).count()
-    if manager_count > 0 and request.method == 'GET':
-        return redirect(url_for('login'))
+    setup_complete = manager_count > 0
     
     status = []
     errors = []
@@ -123,7 +122,7 @@ def setup():
         else:
             errors.append("Please select a valid Excel file (.xlsx or .xls)")
     
-    return render_template('setup.html', status=status, errors=errors, managers=managers)
+    return render_template('setup.html', status=status, errors=errors, managers=managers, setup_complete=setup_complete)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
