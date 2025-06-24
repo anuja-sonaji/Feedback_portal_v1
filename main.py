@@ -18,12 +18,12 @@ from app import app
 def main():
     """Main application entry point with error handling"""
     try:
-        print("🚀 Starting Employee Feedback Portal...")
-        print(f"📁 Project directory: {os.getcwd()}")
-        print(f"🐍 Python version: {sys.version}")
-        print("🌐 Application will be available at: http://localhost:5000")
-        print("📧 Default login: sooraj@company.com / password123")
-        print("─" * 60)
+        print("Starting Employee Feedback Portal...")
+        print(f"Project directory: {os.getcwd()}")
+        print(f"Python version: {sys.version}")
+        print("Application will be available at: http://localhost:5000")
+        print("Use the setup page to configure manager credentials")
+        print("-" * 60)
         
         # Run the Flask application
         app.run(

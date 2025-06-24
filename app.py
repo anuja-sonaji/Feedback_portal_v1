@@ -57,7 +57,7 @@ with app.app_context():
     import models
     db.create_all()
 
-    # Create sample data if no users exist
+    # Tables are ready for setup process
     from utils import create_sample_data
     create_sample_data()
 
