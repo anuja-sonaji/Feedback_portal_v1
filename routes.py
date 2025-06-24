@@ -113,24 +113,25 @@ def setup():
                             # Set manager password properly after all processing
                             managers_identified += 1
                 
-                # Set manager passwords with simple hash
-                for mgr in Employee.query.filter_by(is_manager=True).all():
-                    mgr.password_hash = 'simple_hash_manager123'
+                # Set manager passwords with simple hash and prepare display data
+                manager_list = []
+                for employee in Employee.query.all():
+                    if employee.is_manager:
+                        employee.password_hash = 'simple_hash_manager123'
+                        report_count = Employee.query.filter_by(manager_id=employee.id).count()
+                        manager_list.append({
+                            'name': employee.full_name,
+                            'email': employee.emailid,
+                            'team': employee.team,
+                            'reports': report_count,
+                            'password': 'manager123'
+                        })
                 
                 db.session.commit()
                 status.append(f"Identified {managers_identified} managers")
                 
-                # Prepare manager credentials for display
-                manager_list = Employee.query.filter_by(is_manager=True).all()
-                for mgr in manager_list:
-                    report_count = Employee.query.filter_by(manager_id=mgr.id).count()
-                    managers.append({
-                        'name': mgr.full_name,
-                        'email': mgr.emailid,
-                        'team': mgr.team,
-                        'reports': report_count,
-                        'password': 'manager123'
-                    })
+                # Use the prepared manager list
+                managers = manager_list
                 
                 status.append("Setup completed successfully!")
                 status.append(f"Manager credentials generated for {len(managers)} managers")

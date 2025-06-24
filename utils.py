@@ -24,9 +24,11 @@ def process_excel_file(file, manager_id):
     }
 
     try:
-        # Read Excel file with multiple sheet support
+        # Read Excel file with multiple sheet support and encoding handling
         try:
-            df = pd.read_excel(file, sheet_name=0)  # Read first sheet
+            # Reset file pointer to beginning
+            file.seek(0)
+            df = pd.read_excel(file, sheet_name=0, engine='openpyxl')  # Read first sheet
         except Exception as e:
             result['error'] = f"Failed to read Excel file: {str(e)}"
             return result
@@ -186,54 +188,58 @@ def process_excel_file(file, manager_id):
                 result['errors'].append(f"Row {index + 2}: Error processing row - {str(e)}")
                 continue
 
-        # Second pass: Create employees in database
-        for emp_data in temp_employees:
+        # Second pass: Create employees in database with batch processing
+        batch_size = 50  # Process in smaller batches to avoid timeouts
+        for i in range(0, len(temp_employees), batch_size):
+            batch = temp_employees[i:i + batch_size]
+            
+            for emp_data in batch:
+                try:
+                    employee = Employee()
+
+                    # Map all the fields from employee_data to Employee model
+                    for field, value in emp_data.items():
+                        if hasattr(employee, field) and value is not None:
+                            setattr(employee, field, value)
+
+                    # Generate email if not provided
+                    if not employee.emailid and employee.full_name:
+                        employee.emailid = employee.full_name.lower().replace(' ', '.') + '@allianz.com'
+
+                    # Set default values for required fields if not provided
+                    if not employee.employment_type:
+                        employee.employment_type = 'Permanent'
+                    if not employee.billable_status:
+                        employee.billable_status = 'Billable'
+                    if not employee.employee_status:
+                        employee.employee_status = 'ACTIVE'
+
+                    # Set manager relationship - imported employees are always assigned to the importing manager
+                    employee.manager_id = manager_id
+                    manager = Employee.query.get(manager_id)
+                    if manager:
+                        employee.manager_name = manager.full_name
+                    else:
+                        # Fallback - this shouldn't happen but ensures data integrity
+                        employee.manager_name = 'Unknown Manager'
+
+                    # Set default password
+                    employee.set_password('password123')
+
+                    db.session.add(employee)
+                    result['count'] += 1
+
+                except Exception as e:
+                    result['errors'].append(f"Failed to create employee: {str(e)}")
+                    continue
+            
+            # Commit each batch
             try:
-                employee = Employee()
-
-                # Map all the fields from employee_data to Employee model
-                for field, value in emp_data.items():
-                    if hasattr(employee, field) and value is not None:
-                        setattr(employee, field, value)
-
-                # Generate email if not provided
-                if not employee.emailid and employee.full_name:
-                    employee.emailid = employee.full_name.lower().replace(' ', '.') + '@allianz.com'
-
-                # Set default values for required fields if not provided
-                if not employee.employment_type:
-                    employee.employment_type = 'Permanent'
-                if not employee.billable_status:
-                    employee.billable_status = 'Billable'
-                if not employee.employee_status:
-                    employee.employee_status = 'ACTIVE'
-
-                # Set manager relationship - imported employees are always assigned to the importing manager
-                employee.manager_id = manager_id
-                manager = Employee.query.get(manager_id)
-                if manager:
-                    employee.manager_name = manager.full_name
-                else:
-                    # Fallback - this shouldn't happen but ensures data integrity
-                    employee.manager_name = 'Unknown Manager'
-
-                # Set default password
-                employee.set_password('password123')
-
-                db.session.add(employee)
-                result['count'] += 1
-
+                db.session.commit()
             except Exception as e:
-                result['errors'].append(f"Failed to create employee: {str(e)}")
+                db.session.rollback()
+                result['errors'].append(f"Failed to save batch {i//batch_size + 1}: {str(e)}")
                 continue
-
-        # Commit all employees first
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            result['error'] = f"Failed to save employees: {str(e)}"
-            return result
 
         # Third pass: Establish manager relationships
         all_employees = Employee.query.all()
