@@ -17,15 +17,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 10px;
         }
         .setup-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            max-width: 700px;
             width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
         }
         .step-indicator {
             display: flex;
@@ -65,26 +68,35 @@
         .status-card {
             border-left: 4px solid #28a745;
             background: #f8f9fa;
-            padding: 1rem;
-            margin: 1rem 0;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
             border-radius: 5px;
         }
         .error-card {
             border-left: 4px solid #dc3545;
             background: #f8d7da;
-            padding: 1rem;
-            margin: 1rem 0;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
             border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .compact-form {
+            margin-bottom: 1rem;
+        }
+        .compact-form .form-text {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
         }
     </style>
 </head>
 <body>
     <div class="setup-container">
         <div class="setup-card">
-            <div class="text-center mb-4">
-                <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
-                <h2>Employee Feedback Portal Setup</h2>
-                <p class="text-muted">One-time system initialization</p>
+            <div class="text-center mb-3">
+                <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
+                <h4>Employee Feedback Portal Setup</h4>
+                <p class="text-muted mb-2">One-time system initialization</p>
             </div>
 
             <div class="step-indicator">
@@ -94,17 +106,16 @@
             </div>
 
             <form method="POST" enctype="multipart/form-data">
-                <div class="mb-4">
-                    <h5><i class="fas fa-file-excel me-2"></i>Employee Data Import</h5>
-                    <p class="text-muted">Upload your Excel file with employee details to set up the system</p>
+                <div class="compact-form">
+                    <h6><i class="fas fa-file-excel me-2"></i>Employee Data Import</h6>
+                    <p class="text-muted mb-2">Upload your Excel file with employee details to set up the system</p>
                     
                     <div class="mb-3">
                         <label for="excel_file" class="form-label">Select Employee Excel File</label>
                         <input type="file" class="form-control" id="excel_file" name="excel_file" 
                                accept=".xlsx,.xls" required>
                         <div class="form-text">
-                            Supported formats: .xlsx, .xls<br>
-                            Required columns: Full_Name, Emailid, Manager ID, Team, Designation
+                            Formats: .xlsx, .xls | Required: Full_Name, Emailid, Manager ID, Team, Designation
                         </div>
                     </div>
                 </div>
@@ -153,22 +164,19 @@
                     </div>
                     
                     {% for manager in managers %}
-                    <div class="mb-3 p-3 bg-white rounded border">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h6 class="mb-1">{{ manager.name }}</h6>
-                                <span class="badge bg-primary me-2">{{ manager.team }}</span>
+                    <div class="mb-2 p-2 bg-white rounded border">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <strong class="d-block">{{ manager.name }}</strong>
+                                <span class="badge bg-primary me-1">{{ manager.team }}</span>
                                 <span class="badge bg-info">{{ manager.reports }} reports</span>
-                                <br>
-                                <small class="text-muted mt-1 d-block">{{ manager.email }}</small>
+                                <small class="text-muted d-block">{{ manager.email }}</small>
                             </div>
-                            <div class="col-md-4 text-end">
-                                <div class="credential-box p-2 bg-light rounded">
-                                    <small class="text-muted">Login Password:</small><br>
-                                    <code class="fs-6">{{ manager.password }}</code>
-                                    <br>
-                                    <button class="btn btn-sm btn-outline-secondary mt-1" onclick="copyToClipboard('{{ manager.password }}')">
-                                        <i class="fas fa-copy"></i> Copy
+                            <div class="col-md-5 text-end">
+                                <div class="d-flex align-items-center justify-content-end">
+                                    <code class="me-2">{{ manager.password }}</code>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('{{ manager.password }}')">
+                                        <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
@@ -176,22 +184,30 @@
                     </div>
                     {% endfor %}
                     
-                    <div class="alert alert-success mt-3">
+                    <div class="alert alert-success mt-2">
                         <h6><i class="fas fa-check-circle me-2"></i>Setup Summary</h6>
-                        <ul class="mb-0">
-                            <li>{{ managers|length }} managers configured with login access</li>
-                            <li>All managers can view and manage their direct reports only</li>
-                            <li>Standard password: <code>manager123</code> (recommend changing after first login)</li>
-                            <li>System ready for production use</li>
-                        </ul>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small>
+                                    • {{ managers|length }} managers configured<br>
+                                    • Role-based access control enabled
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <small>
+                                    • Standard password: <code>manager123</code><br>
+                                    • System ready for production
+                                </small>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('login') }}" class="btn btn-success">
                             <i class="fas fa-sign-in-alt me-2"></i>Go to Login Page
                         </a>
-                        <button class="btn btn-outline-primary btn-lg ms-2" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>Print Credentials
+                        <button class="btn btn-outline-primary ms-2" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print
                         </button>
                     </div>
                 </div>

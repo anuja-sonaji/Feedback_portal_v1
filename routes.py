@@ -54,7 +54,16 @@ def setup():
                         
                         # Core data
                         employee.full_name = str(row.get('Full_Name')).strip()
-                        employee.bensl_id = str(row.get('Bensl_ID', f'EMP{index+1:03d}')).strip()
+                        
+                        # Handle Bensl_ID with uniqueness check
+                        base_bensl_id = str(row.get('Bensl_ID', f'EMP{index+1:03d}')).strip()
+                        bensl_id = base_bensl_id
+                        counter = 1
+                        while Employee.query.filter_by(bensl_id=bensl_id).first():
+                            bensl_id = f"{base_bensl_id}_{counter}"
+                            counter += 1
+                        employee.bensl_id = bensl_id
+                        
                         employee.system_id = str(row.get('System_ID', employee.bensl_id)).strip()
                         
                         # Email handling
