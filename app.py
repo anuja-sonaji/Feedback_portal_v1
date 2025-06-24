@@ -57,9 +57,7 @@ with app.app_context():
     import models
     db.create_all()
 
-    # Tables are ready for setup process
-    from utils import create_sample_data
-    create_sample_data()
+    # Tables ready - no sample data needed
 
     # Import routes
     import routes

@@ -87,8 +87,8 @@ def setup():
                         if pd.notna(manager_id):
                             employee.manager_bensl_id = str(manager_id).strip()
                         
-                        # Set simple hash to avoid timeout
-                        employee.password_hash = 'pbkdf2:sha256:employee123'
+                        # Set basic password without hashing to avoid timeout
+                        employee.password_hash = 'simple_hash_welcome123'
                         
                         db.session.add(employee)
                         employees_created += 1
@@ -117,7 +117,7 @@ def setup():
                 
                 # Set manager passwords with simple hash
                 for mgr in Employee.query.filter_by(is_manager=True).all():
-                    mgr.password_hash = 'pbkdf2:sha256:manager123'
+                    mgr.password_hash = 'simple_hash_manager123'
                 
                 db.session.commit()
                 status.append(f"Identified {managers_identified} managers")

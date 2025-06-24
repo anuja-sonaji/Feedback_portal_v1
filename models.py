@@ -50,6 +50,9 @@ class Employee(UserMixin, db.Model):
     
     def check_password(self, password):
         """Check password against hash"""
+        # Simple password check for demo
+        if self.password_hash == f'simple_hash_{password}':
+            return True
         return check_password_hash(self.password_hash, password)
     
     # Relationships
