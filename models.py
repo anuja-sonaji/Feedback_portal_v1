@@ -60,10 +60,17 @@ class Employee(UserMixin, db.Model):
     
     def check_password(self, password):
         """Check password against hash"""
-        # Simple password check for demo
+        # Simple password check for demo - handle various hash formats
         if self.password_hash == f'simple_hash_{password}':
             return True
         if self.password_hash == f'hash_{password}':
+            return True
+        # Handle setup passwords
+        if password == 'welcome123' and self.password_hash == 'simple_hash_welcome123':
+            return True
+        if password == 'manager123' and self.password_hash == 'simple_hash_manager123':
+            return True
+        if password == 'password123' and self.password_hash == 'simple_hash_password123':
             return True
         return check_password_hash(self.password_hash, password)
     

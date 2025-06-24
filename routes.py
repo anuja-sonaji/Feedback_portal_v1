@@ -37,106 +37,158 @@ def setup():
         
         if excel_file and allowed_file(excel_file.filename):
             try:
-                # Clear existing data
-                Employee.query.delete()
-                db.session.commit()
+                # Clear existing data in batches to avoid timeout
+                status.append("Clearing existing employee data...")
+                batch_size = 100
+                while True:
+                    batch = Employee.query.limit(batch_size).all()
+                    if not batch:
+                        break
+                    for emp in batch:
+                        db.session.delete(emp)
+                    db.session.commit()
                 status.append("Cleared existing employee data")
                 
-                # Read Excel file
-                df = pd.read_excel(excel_file)
+                # Read Excel file with error handling
+                try:
+                    excel_file.seek(0)  # Reset file pointer
+                    df = pd.read_excel(excel_file, engine='openpyxl')
+                except Exception as e:
+                    errors.append(f"Failed to read Excel file: {str(e)}")
+                    return render_template('setup.html', status=status, errors=errors, managers=managers, setup_complete=setup_complete)
+                
+                # Clean and validate data
+                df = df.dropna(subset=['Full_Name'])  # Remove rows without names
+                df = df.fillna('')  # Fill NaN values with empty strings
+                
                 status.append(f"Processing {len(df)} employee records from Excel")
                 
-                # Import employees
+                # Process employees in smaller batches
+                batch_size = 50
                 employees_created = 0
-                for index, row in df.iterrows():
-                    if pd.notna(row.get('Full_Name')):
-                        employee = Employee()
-                        
-                        # Core data
-                        employee.full_name = str(row.get('Full_Name')).strip()
-                        
-                        # Handle Bensl_ID with uniqueness check
-                        base_bensl_id = str(row.get('Bensl_ID', f'EMP{index+1:03d}')).strip()
-                        bensl_id = base_bensl_id
-                        counter = 1
-                        while Employee.query.filter_by(bensl_id=bensl_id).first():
-                            bensl_id = f"{base_bensl_id}_{counter}"
-                            counter += 1
-                        employee.bensl_id = bensl_id
-                        
-                        employee.system_id = str(row.get('System_ID', employee.bensl_id)).strip()
-                        
-                        # Email handling
-                        email = row.get('Emailid')
-                        if pd.notna(email) and email.strip():
-                            employee.emailid = str(email).strip().lower()
-                        else:
-                            name_parts = employee.full_name.lower().replace(' ', '.')
-                            employee.emailid = f"{name_parts}@company.com"
-                        
-                        # Job details
-                        employee.designation = str(row.get('Designation', 'Employee')).strip()
-                        employee.team = str(row.get('Team', 'General')).strip()
-                        employee.location = str(row.get('Location', 'Office')).strip()
-                        employee.employment_type = str(row.get('Employment_Type', 'Permanent')).strip()
-                        employee.billable_status = str(row.get('Billable_Status', 'Billable')).strip()
-                        employee.employee_status = str(row.get('Employee_Status', 'Active')).strip()
-                        
-                        # Manager relationship data
-                        manager_id = row.get('Manager ID')
-                        if pd.notna(manager_id):
-                            employee.manager_bensl_id = str(manager_id).strip()
-                        
-                        # Set basic password without hashing to avoid timeout
-                        employee.password_hash = 'simple_hash_welcome123'
-                        
-                        db.session.add(employee)
-                        employees_created += 1
-                        
-                        # Skip batch commits to avoid issues
                 
-                db.session.commit()
+                for start_idx in range(0, len(df), batch_size):
+                    end_idx = min(start_idx + batch_size, len(df))
+                    batch_df = df.iloc[start_idx:end_idx]
+                    
+                    batch_employees = []
+                    for index, row in batch_df.iterrows():
+                        try:
+                            employee = Employee()
+                            
+                            # Core data with safe string conversion
+                            employee.full_name = str(row.get('Full_Name', '')).strip()
+                            if not employee.full_name:
+                                continue
+                            
+                            # Handle Bensl_ID safely
+                            bensl_val = row.get('Bensl_ID', '')
+                            if pd.notna(bensl_val) and str(bensl_val).strip():
+                                employee.bensl_id = str(bensl_val).strip()
+                            else:
+                                employee.bensl_id = f"EMP_{index}_{employees_created}"
+                            
+                            # System ID
+                            sys_id = row.get('System_ID', '')
+                            employee.system_id = str(sys_id).strip() if pd.notna(sys_id) else employee.bensl_id
+                            
+                            # Email handling
+                            email = row.get('Emailid', '')
+                            if pd.notna(email) and str(email).strip():
+                                employee.emailid = str(email).strip().lower()
+                            else:
+                                name_safe = employee.full_name.lower().replace(' ', '.').replace("'", "")
+                                employee.emailid = f"{name_safe}@company.com"
+                            
+                            # Job details with safe conversion
+                            employee.designation = str(row.get('Designation', 'Employee')).strip()
+                            employee.team = str(row.get('Team', 'General')).strip()
+                            employee.location = str(row.get('Location', 'Office')).strip()
+                            employee.employment_type = str(row.get('Employment_Type', 'Permanent')).strip()
+                            employee.billable_status = str(row.get('Billable_Status', 'Billable')).strip()
+                            employee.employee_status = str(row.get('Employee_Status', 'Active')).strip()
+                            
+                            # Manager relationship data
+                            manager_id_val = row.get('Manager ID', '')
+                            if pd.notna(manager_id_val) and str(manager_id_val).strip():
+                                employee.manager_bensl_id = str(manager_id_val).strip()
+                            
+                            # Additional fields
+                            employee.role = str(row.get('Role', '')).strip() if pd.notna(row.get('Role')) else None
+                            employee.skill = str(row.get('Skill', '')).strip() if pd.notna(row.get('Skill')) else None
+                            employee.grade = str(row.get('Grade', '')).strip() if pd.notna(row.get('Grade')) else None
+                            employee.gender = str(row.get('Gender', '')).strip() if pd.notna(row.get('Gender')) else None
+                            employee.company = str(row.get('Company', 'Company')).strip()
+                            
+                            # Set simple password hash
+                            employee.password_hash = 'simple_hash_welcome123'
+                            
+                            batch_employees.append(employee)
+                            employees_created += 1
+                            
+                        except Exception as e:
+                            errors.append(f"Error processing row {index}: {str(e)}")
+                            continue
+                    
+                    # Add batch to session and commit
+                    for emp in batch_employees:
+                        db.session.add(emp)
+                    
+                    try:
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        errors.append(f"Error saving batch: {str(e)}")
+                        continue
+                
                 status.append(f"Created {employees_created} employee records")
                 
-                # Establish manager relationships
+                # Establish manager relationships efficiently
+                status.append("Establishing manager relationships...")
+                
+                # Get all employees at once and create lookup
+                all_employees = Employee.query.all()
+                bensl_to_employee = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
+                
                 managers_identified = 0
+                relationship_updates = []
                 
-                # Create a mapping of bensl_id to employee for faster lookup
-                employee_map = {emp.bensl_id: emp for emp in Employee.query.all()}
+                for employee in all_employees:
+                    if employee.manager_bensl_id and employee.manager_bensl_id in bensl_to_employee:
+                        manager = bensl_to_employee[employee.manager_bensl_id]
+                        if manager.id != employee.id:  # Prevent self-management
+                            employee.manager_id = manager.id
+                            employee.manager_name = manager.full_name
+                            
+                            if not manager.is_manager:
+                                manager.is_manager = True
+                                manager.password_hash = 'simple_hash_manager123'
+                                managers_identified += 1
                 
-                for employee in Employee.query.all():
-                    if employee.manager_bensl_id and employee.manager_bensl_id in employee_map:
-                        manager = employee_map[employee.manager_bensl_id]
-                        employee.manager_id = manager.id
-                        if not manager.is_manager:
-                            manager.is_manager = True
-                            # Set manager password properly after all processing
-                            managers_identified += 1
+                # Commit relationship changes
+                db.session.commit()
+                status.append(f"Identified {managers_identified} managers")
                 
-                # Set manager passwords with simple hash and prepare display data
+                # Prepare manager display data
                 manager_list = []
-                for employee in Employee.query.all():
+                for employee in all_employees:
                     if employee.is_manager:
-                        employee.password_hash = 'simple_hash_manager123'
-                        report_count = Employee.query.filter_by(manager_id=employee.id).count()
+                        report_count = len([e for e in all_employees if e.manager_id == employee.id])
                         manager_list.append({
                             'name': employee.full_name,
                             'email': employee.emailid,
                             'team': employee.team,
+                            'bensl_id': employee.bensl_id,
                             'reports': report_count,
                             'password': 'manager123'
                         })
                 
-                db.session.commit()
-                status.append(f"Identified {managers_identified} managers")
-                
-                # Use the prepared manager list
                 managers = manager_list
-                
                 status.append("Setup completed successfully!")
                 status.append(f"Manager credentials generated for {len(managers)} managers")
                 
             except Exception as e:
+                db.session.rollback()
                 errors.append(f"Import failed: {str(e)}")
         else:
             errors.append("Please select a valid Excel file (.xlsx or .xls)")

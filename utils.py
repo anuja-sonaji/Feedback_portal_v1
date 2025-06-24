@@ -37,6 +37,10 @@ def process_excel_file(file, manager_id):
             result['error'] = "Excel file is empty"
             return result
 
+        # Clean data first
+        df = df.dropna(how='all')  # Remove completely empty rows
+        df = df.fillna('')  # Replace NaN with empty strings
+        
         # Normalize column names (remove extra spaces, handle case variations)
         df.columns = df.columns.str.strip()
 
@@ -188,11 +192,12 @@ def process_excel_file(file, manager_id):
                 result['errors'].append(f"Row {index + 2}: Error processing row - {str(e)}")
                 continue
 
-        # Second pass: Create employees in database with batch processing
-        batch_size = 50  # Process in smaller batches to avoid timeouts
+        # Second pass: Create employees in database with optimized batch processing
+        batch_size = 25  # Smaller batches to avoid timeouts
         for i in range(0, len(temp_employees), batch_size):
             batch = temp_employees[i:i + batch_size]
             
+            batch_employees = []
             for emp_data in batch:
                 try:
                     employee = Employee()
@@ -204,7 +209,8 @@ def process_excel_file(file, manager_id):
 
                     # Generate email if not provided
                     if not employee.emailid and employee.full_name:
-                        employee.emailid = employee.full_name.lower().replace(' ', '.') + '@allianz.com'
+                        name_safe = employee.full_name.lower().replace(' ', '.').replace("'", "")
+                        employee.emailid = f"{name_safe}@allianz.com"
 
                     # Set default values for required fields if not provided
                     if not employee.employment_type:
@@ -223,17 +229,20 @@ def process_excel_file(file, manager_id):
                         # Fallback - this shouldn't happen but ensures data integrity
                         employee.manager_name = 'Unknown Manager'
 
-                    # Set default password
-                    employee.set_password('password123')
+                    # Set default password with simple hash to avoid bcrypt timeout
+                    employee.password_hash = 'simple_hash_password123'
 
-                    db.session.add(employee)
+                    batch_employees.append(employee)
                     result['count'] += 1
 
                 except Exception as e:
                     result['errors'].append(f"Failed to create employee: {str(e)}")
                     continue
             
-            # Commit each batch
+            # Add all employees in batch and commit
+            for emp in batch_employees:
+                db.session.add(emp)
+            
             try:
                 db.session.commit()
             except Exception as e:
@@ -241,19 +250,31 @@ def process_excel_file(file, manager_id):
                 result['errors'].append(f"Failed to save batch {i//batch_size + 1}: {str(e)}")
                 continue
 
-        # Third pass: Establish manager relationships
-        all_employees = Employee.query.all()
-        employee_lookup = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
-        
-        for employee in all_employees:
-            if employee.manager_bensl_id and employee.manager_bensl_id in employee_lookup:
-                manager = employee_lookup[employee.manager_bensl_id]
-                employee.manager_id = manager.id
-                manager.is_manager = True
-        
-        # Final commit for relationships
+        # Third pass: Establish manager relationships based on Bensl_ID
         try:
+            # Get all employees and create efficient lookup
+            all_employees = Employee.query.all()
+            bensl_to_employee = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
+            
+            # Track updates to avoid repeated queries
+            manager_updates = []
+            employee_updates = []
+            
+            for employee in all_employees:
+                if employee.manager_bensl_id and employee.manager_bensl_id in bensl_to_employee:
+                    manager = bensl_to_employee[employee.manager_bensl_id]
+                    if manager.id != employee.id:  # Prevent self-management
+                        employee.manager_id = manager.id
+                        employee.manager_name = manager.full_name
+                        employee_updates.append(employee)
+                        
+                        if not manager.is_manager:
+                            manager.is_manager = True
+                            manager_updates.append(manager)
+            
+            # Commit relationship changes
             db.session.commit()
+            
         except Exception as e:
             result['errors'].append(f"Warning: Failed to establish some manager relationships: {str(e)}")
 
