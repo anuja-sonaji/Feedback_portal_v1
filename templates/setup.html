@@ -129,60 +129,69 @@
 
                 {% if managers %}
                 <div class="status-card">
-                    <h6><i class="fas fa-users me-2"></i>Manager Setup Complete</h6>
-                    <p class="mb-3">{{ managers|length }} managers have been identified and configured:</p>
+                    <h6><i class="fas fa-users me-2"></i>Manager Credentials Generated</h6>
+                    <p class="mb-3">{{ managers|length }} managers identified. Share these credentials with respective line managers:</p>
+                    
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> Please share these credentials securely with your managers via your organization's preferred communication method.
+                    </div>
                     
                     {% for manager in managers %}
                     <div class="mb-3 p-3 bg-white rounded border">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>{{ manager.name }}</strong> 
-                                <span class="badge bg-primary ms-2">{{ manager.team }}</span><br>
-                                <small class="text-muted">{{ manager.email }}</small><br>
-                                <small>{{ manager.reports }} direct reports</small>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="mb-1">{{ manager.name }}</h6>
+                                <span class="badge bg-primary me-2">{{ manager.team }}</span>
+                                <span class="badge bg-info">{{ manager.reports }} reports</span>
+                                <br>
+                                <small class="text-muted mt-1 d-block">{{ manager.email }}</small>
                             </div>
-                            <div class="text-end">
-                                {% if manager.email_sent %}
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check me-1"></i>Email Sent
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-warning">
-                                        <i class="fas fa-exclamation-triangle me-1"></i>Email Failed
-                                    </span>
-                                {% endif %}
+                            <div class="col-md-4 text-end">
+                                <div class="credential-box p-2 bg-light rounded">
+                                    <small class="text-muted">Login Password:</small><br>
+                                    <code class="fs-6">{{ manager.password }}</code>
+                                    <br>
+                                    <button class="btn btn-sm btn-outline-secondary mt-1" onclick="copyToClipboard('{{ manager.password }}')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        
-                        {% if not manager.email_sent %}
-                        <div class="mt-2 alert alert-warning py-2">
-                            <small>
-                                <strong>Manual Credentials:</strong><br>
-                                Email: {{ manager.email }}<br>
-                                Password: <code>manager123</code>
-                            </small>
-                        </div>
-                        {% endif %}
                     </div>
                     {% endfor %}
                     
-                    {% if email_summary %}
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-envelope me-2"></i>
-                        <strong>Email Summary:</strong>
-                        {{ email_summary.successful }} of {{ email_summary.total }} managers notified successfully
-                        {% if email_summary.failed > 0 %}
-                        <br><small class="text-warning">{{ email_summary.failed }} emails failed - share credentials manually</small>
-                        {% endif %}
+                    <div class="alert alert-success mt-3">
+                        <h6><i class="fas fa-check-circle me-2"></i>Setup Summary</h6>
+                        <ul class="mb-0">
+                            <li>{{ managers|length }} managers configured with login access</li>
+                            <li>All managers can view and manage their direct reports only</li>
+                            <li>Standard password: <code>manager123</code> (recommend changing after first login)</li>
+                            <li>System ready for production use</li>
+                        </ul>
                     </div>
-                    {% endif %}
                     
                     <div class="text-center mt-4">
                         <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">
                             <i class="fas fa-sign-in-alt me-2"></i>Go to Login Page
                         </a>
+                        <button class="btn btn-outline-primary btn-lg ms-2" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Credentials
+                        </button>
                     </div>
                 </div>
+                
+                <script>
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        // Simple feedback
+                        event.target.innerHTML = '<i class="fas fa-check"></i> Copied';
+                        setTimeout(function() {
+                            event.target.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        }, 2000);
+                    });
+                }
+                </script>
                 {% else %}
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary btn-lg">
