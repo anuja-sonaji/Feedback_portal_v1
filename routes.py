@@ -96,17 +96,25 @@ def setup():
                 db.session.commit()
                 status.append(f"Created {employees_created} employee records")
                 
-                # Establish manager relationships
+                # Establish manager relationships - commit after all employees are added
+                db.session.commit()
+                
                 managers_identified = 0
-                for employee in Employee.query.filter(Employee.manager_bensl_id.isnot(None)).all():
+                employees_with_managers = Employee.query.filter(Employee.manager_bensl_id.isnot(None)).all()
+                
+                for employee in employees_with_managers:
                     if employee.manager_bensl_id:
-                        manager = Employee.query.filter_by(bensl_id=employee.manager_bensl_id).first()
-                        if manager:
-                            employee.manager_id = manager.id
-                            if not manager.is_manager:
-                                manager.is_manager = True
-                                manager.set_password('manager123')
-                                managers_identified += 1
+                        try:
+                            manager = Employee.query.filter_by(bensl_id=employee.manager_bensl_id).first()
+                            if manager:
+                                employee.manager_id = manager.id
+                                if not manager.is_manager:
+                                    manager.is_manager = True
+                                    manager.set_password('manager123')
+                                    managers_identified += 1
+                        except Exception as e:
+                            print(f"Error setting manager relationship: {e}")
+                            continue
                 
                 db.session.commit()
                 status.append(f"Identified {managers_identified} managers")

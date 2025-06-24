@@ -11,6 +11,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
+            font-size: 14px;
         }
         .setup-container {
             min-height: 100vh;
@@ -94,9 +95,9 @@
     <div class="setup-container">
         <div class="setup-card">
             <div class="text-center mb-3">
-                <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
-                <h4>Employee Feedback Portal Setup</h4>
-                <p class="text-muted mb-2">One-time system initialization</p>
+                <i class="fas fa-cogs fa-lg text-primary mb-2"></i>
+                <h5>Employee Feedback Portal Setup</h5>
+                <p class="text-muted mb-2" style="font-size: 13px;">One-time system initialization</p>
             </div>
 
             <div class="step-indicator">
@@ -107,14 +108,14 @@
 
             <form method="POST" enctype="multipart/form-data">
                 <div class="compact-form">
-                    <h6><i class="fas fa-file-excel me-2"></i>Employee Data Import</h6>
-                    <p class="text-muted mb-2">Upload your Excel file with employee details to set up the system</p>
+                    <h6 style="font-size: 15px;"><i class="fas fa-file-excel me-2"></i>Employee Data Import</h6>
+                    <p class="text-muted mb-2" style="font-size: 13px;">Upload your Excel file with employee details to set up the system</p>
                     
                     <div class="mb-3">
                         <label for="excel_file" class="form-label">Select Employee Excel File</label>
                         <input type="file" class="form-control" id="excel_file" name="excel_file" 
                                accept=".xlsx,.xls" required>
-                        <div class="form-text">
+                        <div class="form-text" style="font-size: 11px;">
                             Formats: .xlsx, .xls | Required: Full_Name, Emailid, Manager ID, Team, Designation
                         </div>
                     </div>
@@ -131,13 +132,13 @@
 
                 {% if setup_complete and not managers %}
                 <div class="status-card">
-                    <h6><i class="fas fa-info-circle me-2"></i>System Already Configured</h6>
-                    <p>The system has already been set up with manager accounts. You can proceed to the login page or re-run setup to reconfigure.</p>
+                    <h6 style="font-size: 14px;"><i class="fas fa-info-circle me-2"></i>System Already Configured</h6>
+                    <p style="font-size: 13px;">The system has already been set up with manager accounts. You can proceed to the login page or re-run setup to reconfigure.</p>
                     <div class="text-center mt-3">
-                        <a href="{{ url_for('login') }}" class="btn btn-primary me-2">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary me-2" style="font-size: 13px;">
                             <i class="fas fa-sign-in-alt me-2"></i>Go to Login
                         </a>
-                        <button class="btn btn-outline-warning" onclick="document.getElementById('excel_file').scrollIntoView()">
+                        <button class="btn btn-outline-warning" onclick="document.getElementById('excel_file').scrollIntoView()" style="font-size: 13px;">
                             <i class="fas fa-redo me-2"></i>Reconfigure System
                         </button>
                     </div>
