@@ -29,6 +29,14 @@ def process_excel_file(file, manager_id):
             # Reset file pointer to beginning
             file.seek(0)
             df = pd.read_excel(file, sheet_name=0, engine='openpyxl')  # Read first sheet
+            
+            # Clean any problematic characters from all string columns
+            for col in df.columns:
+                if df[col].dtype == 'object':  # String columns
+                    df[col] = df[col].astype(str).apply(
+                        lambda x: x.encode('ascii', 'ignore').decode('ascii') if x and x != 'nan' else ''
+                    )
+                    
         except Exception as e:
             result['error'] = f"Failed to read Excel file: {str(e)}"
             return result

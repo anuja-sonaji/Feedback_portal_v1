@@ -37,17 +37,17 @@ def setup():
         
         if excel_file and allowed_file(excel_file.filename):
             try:
-                # Clear existing data in batches to avoid timeout
+                # Clear existing data more efficiently
                 status.append("Clearing existing employee data...")
-                batch_size = 100
-                while True:
-                    batch = Employee.query.limit(batch_size).all()
-                    if not batch:
-                        break
-                    for emp in batch:
-                        db.session.delete(emp)
+                try:
+                    # Use bulk delete for better performance
+                    Employee.query.delete()
                     db.session.commit()
-                status.append("Cleared existing employee data")
+                    status.append("Cleared existing employee data")
+                except Exception as e:
+                    db.session.rollback()
+                    status.append(f"Warning: Could not clear existing data: {str(e)}")
+                    # Continue anyway for fresh setup
                 
                 # Read Excel file with error handling
                 try:
@@ -63,8 +63,8 @@ def setup():
                 
                 status.append(f"Processing {len(df)} employee records from Excel")
                 
-                # Process employees in smaller batches
-                batch_size = 50
+                # Process employees in smaller batches with better error handling
+                batch_size = 20  # Smaller batches to avoid timeouts
                 employees_created = 0
                 
                 for start_idx in range(0, len(df), batch_size):
@@ -76,49 +76,61 @@ def setup():
                         try:
                             employee = Employee()
                             
-                            # Core data with safe string conversion
-                            employee.full_name = str(row.get('Full_Name', '')).strip()
-                            if not employee.full_name:
+                            # Core data with safe string conversion and encoding handling
+                            full_name = str(row.get('Full_Name', '')).strip()
+                            if not full_name:
                                 continue
                             
-                            # Handle Bensl_ID safely
+                            # Clean any problematic characters
+                            employee.full_name = full_name.encode('ascii', 'ignore').decode('ascii') if full_name else f"Employee_{index}"
+                            
+                            # Handle Bensl_ID safely with encoding cleanup
                             bensl_val = row.get('Bensl_ID', '')
                             if pd.notna(bensl_val) and str(bensl_val).strip():
-                                employee.bensl_id = str(bensl_val).strip()
+                                employee.bensl_id = str(bensl_val).strip().encode('ascii', 'ignore').decode('ascii')
                             else:
                                 employee.bensl_id = f"EMP_{index}_{employees_created}"
                             
-                            # System ID
+                            # System ID with encoding cleanup
                             sys_id = row.get('System_ID', '')
-                            employee.system_id = str(sys_id).strip() if pd.notna(sys_id) else employee.bensl_id
+                            if pd.notna(sys_id) and str(sys_id).strip():
+                                employee.system_id = str(sys_id).strip().encode('ascii', 'ignore').decode('ascii')
+                            else:
+                                employee.system_id = employee.bensl_id
                             
-                            # Email handling
+                            # Email handling with encoding cleanup
                             email = row.get('Emailid', '')
                             if pd.notna(email) and str(email).strip():
-                                employee.emailid = str(email).strip().lower()
+                                email_clean = str(email).strip().lower().encode('ascii', 'ignore').decode('ascii')
+                                employee.emailid = email_clean
                             else:
-                                name_safe = employee.full_name.lower().replace(' ', '.').replace("'", "")
+                                name_safe = employee.full_name.lower().replace(' ', '.').replace("'", "").replace('"', "")
                                 employee.emailid = f"{name_safe}@company.com"
                             
-                            # Job details with safe conversion
-                            employee.designation = str(row.get('Designation', 'Employee')).strip()
-                            employee.team = str(row.get('Team', 'General')).strip()
-                            employee.location = str(row.get('Location', 'Office')).strip()
-                            employee.employment_type = str(row.get('Employment_Type', 'Permanent')).strip()
-                            employee.billable_status = str(row.get('Billable_Status', 'Billable')).strip()
-                            employee.employee_status = str(row.get('Employee_Status', 'Active')).strip()
+                            # Job details with safe conversion and encoding cleanup
+                            def clean_text(text, default=''):
+                                if pd.notna(text) and str(text).strip():
+                                    return str(text).strip().encode('ascii', 'ignore').decode('ascii')
+                                return default
                             
-                            # Manager relationship data
+                            employee.designation = clean_text(row.get('Designation'), 'Employee')
+                            employee.team = clean_text(row.get('Team'), 'General')
+                            employee.location = clean_text(row.get('Location'), 'Office')
+                            employee.employment_type = clean_text(row.get('Employment_Type'), 'Permanent')
+                            employee.billable_status = clean_text(row.get('Billable_Status'), 'Billable')
+                            employee.employee_status = clean_text(row.get('Employee_Status'), 'Active')
+                            
+                            # Manager relationship data with encoding cleanup
                             manager_id_val = row.get('Manager ID', '')
                             if pd.notna(manager_id_val) and str(manager_id_val).strip():
-                                employee.manager_bensl_id = str(manager_id_val).strip()
+                                employee.manager_bensl_id = str(manager_id_val).strip().encode('ascii', 'ignore').decode('ascii')
                             
-                            # Additional fields
-                            employee.role = str(row.get('Role', '')).strip() if pd.notna(row.get('Role')) else None
-                            employee.skill = str(row.get('Skill', '')).strip() if pd.notna(row.get('Skill')) else None
-                            employee.grade = str(row.get('Grade', '')).strip() if pd.notna(row.get('Grade')) else None
-                            employee.gender = str(row.get('Gender', '')).strip() if pd.notna(row.get('Gender')) else None
-                            employee.company = str(row.get('Company', 'Company')).strip()
+                            # Additional fields with encoding cleanup
+                            employee.role = clean_text(row.get('Role'))
+                            employee.skill = clean_text(row.get('Skill'))
+                            employee.grade = clean_text(row.get('Grade'))
+                            employee.gender = clean_text(row.get('Gender'))
+                            employee.company = clean_text(row.get('Company'), 'Company')
                             
                             # Set simple password hash
                             employee.password_hash = 'simple_hash_welcome123'
@@ -130,44 +142,62 @@ def setup():
                             errors.append(f"Error processing row {index}: {str(e)}")
                             continue
                     
-                    # Add batch to session and commit
-                    for emp in batch_employees:
-                        db.session.add(emp)
-                    
-                    try:
-                        db.session.commit()
-                    except Exception as e:
-                        db.session.rollback()
-                        errors.append(f"Error saving batch: {str(e)}")
-                        continue
+                    # Add batch to session and commit with better error handling
+                    if batch_employees:
+                        try:
+                            for emp in batch_employees:
+                                db.session.add(emp)
+                            db.session.flush()  # Check for issues before commit
+                            db.session.commit()
+                        except Exception as e:
+                            db.session.rollback()
+                            errors.append(f"Error saving batch {start_idx//batch_size + 1}: {str(e)}")
+                            # Try to save employees individually
+                            for emp in batch_employees:
+                                try:
+                                    db.session.add(emp)
+                                    db.session.commit()
+                                    result['count'] += 1
+                                except Exception as individual_error:
+                                    db.session.rollback()
+                                    errors.append(f"Failed to save {emp.full_name}: {str(individual_error)}")
+                            continue
                 
                 status.append(f"Created {employees_created} employee records")
                 
-                # Establish manager relationships efficiently
+                # Establish manager relationships with error handling
                 status.append("Establishing manager relationships...")
                 
-                # Get all employees at once and create lookup
-                all_employees = Employee.query.all()
-                bensl_to_employee = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
-                
-                managers_identified = 0
-                relationship_updates = []
-                
-                for employee in all_employees:
-                    if employee.manager_bensl_id and employee.manager_bensl_id in bensl_to_employee:
-                        manager = bensl_to_employee[employee.manager_bensl_id]
-                        if manager.id != employee.id:  # Prevent self-management
-                            employee.manager_id = manager.id
-                            employee.manager_name = manager.full_name
-                            
-                            if not manager.is_manager:
-                                manager.is_manager = True
-                                manager.password_hash = 'simple_hash_manager123'
-                                managers_identified += 1
-                
-                # Commit relationship changes
-                db.session.commit()
-                status.append(f"Identified {managers_identified} managers")
+                try:
+                    # Get all employees and create lookup
+                    all_employees = Employee.query.all()
+                    bensl_to_employee = {emp.bensl_id: emp for emp in all_employees if emp.bensl_id}
+                    
+                    managers_identified = 0
+                    relationships_established = 0
+                    
+                    for employee in all_employees:
+                        if employee.manager_bensl_id and employee.manager_bensl_id in bensl_to_employee:
+                            manager = bensl_to_employee[employee.manager_bensl_id]
+                            if manager.id != employee.id:  # Prevent self-management
+                                employee.manager_id = manager.id
+                                employee.manager_name = manager.full_name
+                                relationships_established += 1
+                                
+                                if not manager.is_manager:
+                                    manager.is_manager = True
+                                    manager.password_hash = 'simple_hash_manager123'
+                                    managers_identified += 1
+                    
+                    # Commit relationship changes
+                    db.session.commit()
+                    status.append(f"Established {relationships_established} manager relationships")
+                    status.append(f"Identified {managers_identified} managers")
+                    
+                except Exception as e:
+                    db.session.rollback()
+                    errors.append(f"Warning: Could not establish all manager relationships: {str(e)}")
+                    status.append("Manager relationships will need to be fixed manually")
                 
                 # Prepare manager display data
                 manager_list = []

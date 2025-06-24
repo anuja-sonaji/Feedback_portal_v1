@@ -26,31 +26,39 @@ def fix_manager_relationships():
             
             print(f"Created lookup for {len(bensl_lookup)} employees with Bensl_ID")
             
-            # Fix relationships
+            # Fix relationships in smaller batches
             relationships_fixed = 0
             managers_identified = 0
+            batch_size = 10
             
-            for employee in all_employees:
-                if employee.manager_bensl_id:
-                    # Find manager by their Bensl_ID
-                    manager = bensl_lookup.get(employee.manager_bensl_id)
-                    
-                    if manager and manager.id != employee.id:
-                        # Update relationship
-                        employee.manager_id = manager.id
-                        employee.manager_name = manager.full_name
-                        relationships_fixed += 1
+            for i in range(0, len(all_employees), batch_size):
+                batch = all_employees[i:i + batch_size]
+                
+                for employee in batch:
+                    if employee.manager_bensl_id:
+                        # Find manager by their Bensl_ID
+                        manager = bensl_lookup.get(employee.manager_bensl_id)
                         
-                        # Mark as manager if not already
-                        if not manager.is_manager:
-                            manager.is_manager = True
-                            managers_identified += 1
-                            print(f"Identified new manager: {manager.full_name} ({manager.bensl_id})")
-                    elif not manager:
-                        print(f"Warning: Manager with Bensl_ID '{employee.manager_bensl_id}' not found for {employee.full_name}")
-            
-            # Commit changes
-            db.session.commit()
+                        if manager and manager.id != employee.id:
+                            # Update relationship
+                            employee.manager_id = manager.id
+                            employee.manager_name = manager.full_name
+                            relationships_fixed += 1
+                            
+                            # Mark as manager if not already
+                            if not manager.is_manager:
+                                manager.is_manager = True
+                                managers_identified += 1
+                                print(f"Identified new manager: {manager.full_name} ({manager.bensl_id})")
+                        elif not manager:
+                            print(f"Warning: Manager with Bensl_ID '{employee.manager_bensl_id}' not found for {employee.full_name}")
+                
+                # Commit batch changes
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Error committing batch {i//batch_size + 1}: {str(e)}")
             
             print(f"\nRelationship fix completed:")
             print(f"- Fixed {relationships_fixed} employee-manager relationships")
