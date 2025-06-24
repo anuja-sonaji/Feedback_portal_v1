@@ -129,20 +129,56 @@
 
                 {% if managers %}
                 <div class="status-card">
-                    <h6><i class="fas fa-users me-2"></i>Manager Credentials</h6>
-                    <p class="mb-2">Share these credentials with respective managers:</p>
+                    <h6><i class="fas fa-users me-2"></i>Manager Setup Complete</h6>
+                    <p class="mb-3">{{ managers|length }} managers have been identified and configured:</p>
+                    
                     {% for manager in managers %}
-                    <div class="mb-2">
-                        <strong>{{ manager.name }}</strong> ({{ manager.team }})<br>
-                        Email: {{ manager.email }}<br>
-                        Password: <code>manager123</code><br>
-                        Reports: {{ manager.reports }} employees
-                        <hr class="my-2">
+                    <div class="mb-3 p-3 bg-white rounded border">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ manager.name }}</strong> 
+                                <span class="badge bg-primary ms-2">{{ manager.team }}</span><br>
+                                <small class="text-muted">{{ manager.email }}</small><br>
+                                <small>{{ manager.reports }} direct reports</small>
+                            </div>
+                            <div class="text-end">
+                                {% if manager.email_sent %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Email Sent
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Email Failed
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if not manager.email_sent %}
+                        <div class="mt-2 alert alert-warning py-2">
+                            <small>
+                                <strong>Manual Credentials:</strong><br>
+                                Email: {{ manager.email }}<br>
+                                Password: <code>manager123</code>
+                            </small>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                     
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('login') }}" class="btn btn-success">
+                    {% if email_summary %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-envelope me-2"></i>
+                        <strong>Email Summary:</strong>
+                        {{ email_summary.successful }} of {{ email_summary.total }} managers notified successfully
+                        {% if email_summary.failed > 0 %}
+                        <br><small class="text-warning">{{ email_summary.failed }} emails failed - share credentials manually</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">
                             <i class="fas fa-sign-in-alt me-2"></i>Go to Login Page
                         </a>
                     </div>

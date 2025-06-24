@@ -18,6 +18,11 @@
                             <i class="fas fa-building me-2"></i>Employee Portal
                         </h3>
                         <p>Welcome to the feedback management system</p>
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>For Managers Only:</strong> Only line managers can access this system.
+                            <br><small>If you need system setup, visit <a href="{{ url_for('setup') }}">Setup Page</a></small>
+                        </div>
                     </div>
                     <div class="login-body">
                     <form method="POST" id="loginForm">

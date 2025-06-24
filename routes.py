@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from app import app, db
 from models import Employee, Feedback, BillingDetail
 from utils import process_excel_file, get_dashboard_analytics, allowed_file
+from email_service import send_bulk_manager_notifications
 
 @app.route('/')
 def index():
@@ -102,25 +103,44 @@ def setup():
                 db.session.commit()
                 status.append(f"Identified {managers_identified} managers")
                 
-                # Prepare manager credentials
+                # Prepare manager credentials and send emails
                 manager_list = Employee.query.filter_by(is_manager=True).all()
+                manager_data = []
                 for mgr in manager_list:
                     report_count = Employee.query.filter_by(manager_id=mgr.id).count()
-                    managers.append({
+                    manager_data.append({
                         'name': mgr.full_name,
                         'email': mgr.emailid,
                         'team': mgr.team,
                         'reports': report_count
                     })
                 
+                # Send email notifications to managers
+                email_summary = send_bulk_manager_notifications(manager_data)
+                
+                # Prepare display data with email status
+                for i, mgr_data in enumerate(manager_data):
+                    managers.append({
+                        'name': mgr_data['name'],
+                        'email': mgr_data['email'],
+                        'team': mgr_data['team'],
+                        'reports': mgr_data['reports'],
+                        'email_sent': i < email_summary['successful']  # Simple assumption for demo
+                    })
+                
                 status.append("Setup completed successfully!")
+                status.append(f"Email notifications sent to {email_summary['successful']} managers")
+                
+                # Store email summary for template
+                request.email_summary = email_summary
                 
             except Exception as e:
                 errors.append(f"Import failed: {str(e)}")
         else:
             errors.append("Please select a valid Excel file (.xlsx or .xls)")
     
-    return render_template('setup.html', status=status, errors=errors, managers=managers)
+    email_summary = getattr(request, 'email_summary', None)
+    return render_template('setup.html', status=status, errors=errors, managers=managers, email_summary=email_summary)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
