@@ -682,11 +682,10 @@ def billing():
         flash('Access denied. Only managers can view billing details.', 'error')
         return redirect(url_for('dashboard'))
     
-    # Get employees under current manager for billing display
+    # Get employees under current manager for billing display (exclude manager themselves)
     subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
-    subordinate_ids.append(current_user.id)  # Include current manager
     
-    # Get employee data for billing table
+    # Get employee data for billing table (only subordinates, not the manager)
     employees = Employee.query.filter(Employee.id.in_(subordinate_ids)).all()
     
     # Create billing data with required columns
