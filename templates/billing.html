@@ -22,13 +22,13 @@
     </div>
 </div>
 
-<!-- Filter and Summary Cards -->
+<!-- Summary Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h4 class="text-primary mb-1">{{ billing_records|length }}</h4>
-                <p class="mb-0 text-muted">Total Records</p>
+                <h4 class="text-primary mb-1">{{ billing_data|length }}</h4>
+                <p class="mb-0 text-muted">Total Employees</p>
             </div>
         </div>
     </div>
@@ -36,29 +36,69 @@
         <div class="card text-center">
             <div class="card-body">
                 <h4 class="text-success mb-1">
-                    ${{ "%.2f"|format(billing_records|sum(attribute='total_amount')) }}
+                    ${{ "%.2f"|format(billing_data|sum(attribute='billing_rate')) }}
                 </h4>
-                <p class="mb-0 text-muted">Total Amount</p>
+                <p class="mb-0 text-muted">Total Billing Rate</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h4 class="text-info mb-1">
-                    {{ "%.1f"|format(billing_records|sum(attribute='billable_hours')) }}
-                </h4>
-                <p class="mb-0 text-muted">Total Hours</p>
+                <h4 class="text-info mb-1">L4</h4>
+                <p class="mb-0 text-muted">Rate Card</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h4 class="text-warning mb-1">
-                    {{ billing_records|selectattr('billing_status', 'equalto', 'Approved')|list|length }}
-                </h4>
-                <p class="mb-0 text-muted">Approved</p>
+                <h4 class="text-warning mb-1">2025</h4>
+                <p class="mb-0 text-muted">SWP Year</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-end">
+            <div class="col-md-3">
+                <label for="filterEmployee" class="form-label">Employee</label>
+                <select class="form-select" id="filterEmployee">
+                    <option value="">All Employees</option>
+                    {% for record in billing_data %}
+                    <option value="{{ record.full_name }}">{{ record.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterEmploymentType" class="form-label">Employment Type</label>
+                <select class="form-select" id="filterEmploymentType">
+                    <option value="">All Types</option>
+                    {% for record in billing_data %}
+                        {% if record.employment_type %}
+                        <option value="{{ record.employment_type }}">{{ record.employment_type }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="filterManager" class="form-label">Manager</label>
+                <select class="form-select" id="filterManager">
+                    <option value="">All Managers</option>
+                    {% for record in billing_data %}
+                        {% if record.manager_name %}
+                        <option value="{{ record.manager_name }}">{{ record.manager_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-secondary w-100" onclick="clearBillingFilters()">
+                    <i class="fas fa-times me-1"></i>Clear
+                </button>
             </div>
         </div>
     </div>
@@ -116,97 +156,58 @@
     </div>
 </div>
 
-{% if billing_records %}
+{% if billing_data %}
 <div class="card">
     <div class="card-header">
-        <h5 class="card-title mb-0">Billing Records</h5>
+        <h5 class="card-title mb-0">Billing Details</h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0" id="billingTable">
                 <thead class="table-dark">
                     <tr>
-                        <th>Employee</th>
-                        <th>Project</th>
-                        <th>Client</th>
-                        <th>Period</th>
-                        <th>Hours</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Full Name</th>
+                        <th>Employment Type</th>
+                        <th>Manager Name</th>
+                        <th>Manager ID</th>
+                        <th>Billing Rate</th>
+                        <th>Rate Card</th>
+                        <th>SWP 2025</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for record in billing_records %}
-                    <tr data-employee="{{ record.employee.name }}" 
-                        data-year="{{ record.billing_year }}" 
-                        data-month="{{ record.billing_month }}"
-                        data-status="{{ record.billing_status }}">
+                    {% for record in billing_data %}
+                    <tr data-employee="{{ record.full_name }}" 
+                        data-employment-type="{{ record.employment_type }}" 
+                        data-manager="{{ record.manager_name }}">
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
                                     <i class="fas fa-user text-white"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-semibold">{{ record.employee.name }}</div>
-                                    <small class="text-muted">{{ record.employee.employee_id }}</small>
+                                    <div class="fw-semibold">{{ record.full_name }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div>{{ record.project_name or '-' }}</div>
-                            {% if record.project_name %}
-                            <small class="text-muted">Project</small>
-                            {% endif %}
-                        </td>
-                        <td>{{ record.client_name or '-' }}</td>
-                        <td>
-                            <div class="fw-semibold">
-                                {{ ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][record.billing_month] }} {{ record.billing_year }}
-                            </div>
-                            <small class="text-muted">{{ record.billing_month }}/{{ record.billing_year }}</small>
+                            <span class="badge bg-info">{{ record.employment_type or '-' }}</span>
                         </td>
                         <td>
-                            <span class="fw-bold">{{ record.billable_hours }}</span>
-                            <small class="text-muted d-block">hours</small>
+                            <div class="fw-semibold">{{ record.manager_name or '-' }}</div>
                         </td>
                         <td>
-                            <span class="fw-bold">${{ record.billing_rate }}</span>
+                            <span class="text-muted">{{ record.manager_id or '-' }}</span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success">${{ "%.2f"|format(record.billing_rate) }}</span>
                             <small class="text-muted d-block">/hour</small>
                         </td>
                         <td>
-                            <span class="fw-bold text-success">${{ "%.2f"|format(record.total_amount) }}</span>
+                            <span class="badge bg-warning text-dark">{{ record.rate_card }}</span>
                         </td>
                         <td>
-                            {% if record.billing_status == 'Draft' %}
-                                <span class="badge bg-secondary">Draft</span>
-                            {% elif record.billing_status == 'Submitted' %}
-                                <span class="badge bg-primary">Submitted</span>
-                            {% elif record.billing_status == 'Approved' %}
-                                <span class="badge bg-success">Approved</span>
-                            {% elif record.billing_status == 'Paid' %}
-                                <span class="badge bg-info">Paid</span>
-                            {% else %}
-                                <span class="badge bg-light text-dark">{{ record.billing_status }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-outline-info" 
-                                        onclick="viewBillingDetails({{ record.id }})" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" 
-                                        onclick="editBilling({{ record.id }})" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-success" 
-                                        onclick="generateInvoice({{ record.id }})" title="Generate Invoice">
-                                    <i class="fas fa-file-invoice"></i>
-                                </button>
-                            </div>
+                            <span class="badge bg-primary">{{ record.swp_2025 }}</span>
                         </td>
                     </tr>
                     {% endfor %}
@@ -216,13 +217,13 @@
     </div>
 </div>
 
-<!-- Monthly Summary Chart -->
+<!-- Billing Summary Chart -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-line me-2"></i>Monthly Billing Trend
+                    <i class="fas fa-chart-bar me-2"></i>Billing Rate Distribution
                 </h5>
             </div>
             <div class="card-body">
@@ -237,11 +238,11 @@
     <div class="mb-4">
         <i class="fas fa-file-invoice-dollar fa-4x text-muted"></i>
     </div>
-    <h4 class="text-muted">No Billing Records</h4>
-    <p class="text-muted mb-4">No billing information is available for your team members yet.</p>
-    <button type="button" class="btn btn-primary" onclick="addBillingRecord()">
-        <i class="fas fa-plus me-1"></i>Add Billing Record
-    </button>
+    <h4 class="text-muted">No Employee Data</h4>
+    <p class="text-muted mb-4">No employee billing information is available. Please import employee data first.</p>
+    <a href="{{ url_for('import_excel') }}" class="btn btn-primary">
+        <i class="fas fa-upload me-1"></i>Import Employee Data
+    </a>
 </div>
 {% endif %}
 
@@ -273,66 +274,57 @@
 <script>
     // Filter functionality - add null checks
     const filterEmployee = document.getElementById('filterEmployee');
-    const filterYear = document.getElementById('filterYear');
-    const filterMonth = document.getElementById('filterMonth');
-    const filterStatus = document.getElementById('filterStatus');
+    const filterEmploymentType = document.getElementById('filterEmploymentType');
+    const filterManager = document.getElementById('filterManager');
     
     if (filterEmployee) filterEmployee.addEventListener('change', applyBillingFilters);
-    if (filterYear) filterYear.addEventListener('change', applyBillingFilters);
-    if (filterMonth) filterMonth.addEventListener('change', applyBillingFilters);
-    if (filterStatus) filterStatus.addEventListener('change', applyBillingFilters);
+    if (filterEmploymentType) filterEmploymentType.addEventListener('change', applyBillingFilters);
+    if (filterManager) filterManager.addEventListener('change', applyBillingFilters);
     
     function applyBillingFilters() {
         const employeeFilter = document.getElementById('filterEmployee').value.toLowerCase();
-        const yearFilter = document.getElementById('filterYear').value;
-        const monthFilter = document.getElementById('filterMonth').value;
-        const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
+        const employmentTypeFilter = document.getElementById('filterEmploymentType').value.toLowerCase();
+        const managerFilter = document.getElementById('filterManager').value.toLowerCase();
         
         const rows = document.querySelectorAll('#billingTable tbody tr');
         let visibleCount = 0;
-        let totalAmount = 0;
-        let totalHours = 0;
+        let totalBillingRate = 0;
         
         rows.forEach(row => {
             const employee = row.dataset.employee.toLowerCase();
-            const year = row.dataset.year;
-            const month = row.dataset.month;
-            const status = row.dataset.status.toLowerCase();
+            const employmentType = row.dataset.employmentType.toLowerCase();
+            const manager = row.dataset.manager.toLowerCase();
             
             const employeeMatch = !employeeFilter || employee.includes(employeeFilter);
-            const yearMatch = !yearFilter || year === yearFilter;
-            const monthMatch = !monthFilter || month === monthFilter;
-            const statusMatch = !statusFilter || status.includes(statusFilter);
+            const employmentTypeMatch = !employmentTypeFilter || employmentType.includes(employmentTypeFilter);
+            const managerMatch = !managerFilter || manager.includes(managerFilter);
             
-            if (employeeMatch && yearMatch && monthMatch && statusMatch) {
+            if (employeeMatch && employmentTypeMatch && managerMatch) {
                 row.style.display = '';
                 visibleCount++;
                 
                 // Update totals
-                const amountCell = row.cells[6].textContent.replace('$', '');
-                const hoursCell = row.cells[4].textContent.split(' ')[0];
-                totalAmount += parseFloat(amountCell);
-                totalHours += parseFloat(hoursCell);
+                const rateCell = row.cells[4].textContent.replace('$', '').split('\n')[0];
+                totalBillingRate += parseFloat(rateCell) || 0;
             } else {
                 row.style.display = 'none';
             }
         });
         
         // Update summary cards
-        updateSummaryCards(visibleCount, totalAmount, totalHours);
+        updateSummaryCards(visibleCount, totalBillingRate);
     }
     
     function clearBillingFilters() {
         document.getElementById('filterEmployee').value = '';
-        document.getElementById('filterYear').value = '';
-        document.getElementById('filterMonth').value = '';
-        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterEmploymentType').value = '';
+        document.getElementById('filterManager').value = '';
         applyBillingFilters();
     }
     
-    function updateSummaryCards(count, amount, hours) {
+    function updateSummaryCards(count, totalRate) {
         // This would update the summary cards with filtered data
-        console.log(`Filtered: ${count} records, $${amount.toFixed(2)}, ${hours.toFixed(1)} hours`);
+        console.log(`Filtered: ${count} employees, $${totalRate.toFixed(2)} total billing rate`);
     }
     
     function viewBillingDetails(billingId) {
@@ -416,17 +408,29 @@
     // Initialize billing chart
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('billingChart');
-        if (ctx) {
+        if (ctx && typeof Chart !== 'undefined') {
+            // Get billing rate data from the table
+            const rows = document.querySelectorAll('#billingTable tbody tr');
+            const employeeNames = [];
+            const billingRates = [];
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.trim();
+                const rate = parseFloat(row.cells[4].textContent.replace('$', '').split('\n')[0]) || 0;
+                employeeNames.push(name);
+                billingRates.push(rate);
+            });
+            
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: employeeNames,
                     datasets: [{
-                        label: 'Billing Amount ($)',
-                        data: [12000, 15000, 13000, 18000, 16000, 20000],
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                        tension: 0.1
+                        label: 'Billing Rate ($)',
+                        data: billingRates,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
                     }]
                 },
                 options: {

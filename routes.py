@@ -681,16 +681,28 @@ def billing():
     if not current_user.is_manager:
         flash('Access denied. Only managers can view billing details.', 'error')
         return redirect(url_for('dashboard'))
-
-    # Get billing details for employees under current manager
+    
+    # Get employees under current manager for billing display
     subordinate_ids = [emp.id for emp in current_user.get_all_subordinates()]
-    subordinate_ids.append(current_user.id)
-
-    billing_records = BillingDetail.query.filter(BillingDetail.employee_id.in_(subordinate_ids))\
-                                        .order_by(BillingDetail.billing_year.desc(), 
-                                                BillingDetail.billing_month.desc()).all()
-
-    return render_template('billing.html', billing_records=billing_records)
+    subordinate_ids.append(current_user.id)  # Include current manager
+    
+    # Get employee data for billing table
+    employees = Employee.query.filter(Employee.id.in_(subordinate_ids)).all()
+    
+    # Create billing data with required columns
+    billing_data = []
+    for employee in employees:
+        billing_data.append({
+            'full_name': employee.full_name or '',
+            'employment_type': employee.employment_type or '',
+            'manager_name': employee.manager_name or '',
+            'manager_id': employee.manager_bensl_id or employee.manager_id or '',
+            'billing_rate': employee.billing_rate or 0.0,
+            'rate_card': 'L4',  # Default L4 for all as requested
+            'swp_2025': '2025'  # Default 2025 for all as requested
+        })
+    
+    return render_template('billing.html', billing_data=billing_data)
 
 @app.route('/hierarchy')
 @login_required
