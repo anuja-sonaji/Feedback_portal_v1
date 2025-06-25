@@ -16,11 +16,11 @@
                 </h2>
                 <div class="btn-group">
                     {% if current_user.is_manager %}
-                    <a href="{{ url_for('import_excel') }}" class="btn" 
+                    <a href="{{ url_for('export_employees') }}" class="btn" 
                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                               border: none; color: white; font-weight: 600; padding: 10px 20px; 
                               border-radius: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-                        <i class="fas fa-file-excel me-1"></i>Import Data
+                        <i class="fas fa-file-export me-1"></i>Export Data
                     </a>
                     {% endif %}
                 </div>

@@ -983,6 +983,157 @@ def api_employee_details(id):
             return jsonify({'error': 'Access denied'}), 403
 
     return jsonify(employee.to_dict())
+
+@app.route('/export_employees')
+@login_required
+def export_employees():
+    # Get employees based on user role
+    if current_user.is_manager:
+        # Get all subordinates for managers
+        employees = current_user.get_all_subordinates()
+        # Also include the manager themselves if they want to export their own data
+        employees.append(current_user)
+    else:
+        # Regular employees can only export their own data
+        employees = [current_user]
+    
+    return render_template('export_employees.html', employees=employees)
+
+@app.route('/export_employee/<int:employee_id>')
+@login_required
+def export_employee(employee_id):
+    try:
+        employee = Employee.query.get_or_404(employee_id)
+        
+        # Check permissions - managers can export their subordinates, employees can export only themselves
+        if not current_user.is_manager and employee.id != current_user.id:
+            flash('You can only export your own data', 'error')
+            return redirect(url_for('export_employees'))
+        
+        if current_user.is_manager and not current_user.can_manage(employee) and employee.id != current_user.id:
+            flash('You can only export data for your team members', 'error')
+            return redirect(url_for('export_employees'))
+        
+        # Prepare employee data
+        employee_data = {
+            'Employee Information': {
+                'Full Name': employee.full_name or '',
+                'Employee ID': employee.system_id or '',
+                'Bensl ID': employee.bensl_id or '',
+                'Email': employee.emailid or '',
+                'Employment Type': employee.employment_type or '',
+                'Employee Status': employee.employee_status or '',
+                'Billable Status': employee.billable_status or '',
+                'Role': employee.role or '',
+                'Designation': employee.designation or '',
+                'Grade': employee.grade or '',
+                'Team': employee.team or '',
+                'Location': employee.location or '',
+                'Company': employee.company or '',
+                'Gender': employee.gender or '',
+                'Skills': employee.skill or '',
+                'Manager Name': employee.manager_name or '',
+                'Manager Bensl ID': employee.manager_bensl_id or '',
+                'Critical': employee.critical or '',
+                'DOJ Allianz': employee.doj_allianz.strftime('%Y-%m-%d') if employee.doj_allianz else '',
+                'DOL Allianz': employee.dol_allianz.strftime('%Y-%m-%d') if employee.dol_allianz else '',
+                'DOJ Project': employee.doj_project.strftime('%Y-%m-%d') if employee.doj_project else '',
+                'DOL Project': employee.dol_project.strftime('%Y-%m-%d') if employee.dol_project else '',
+                'Billing Rate': employee.billing_rate or 0,
+                'Rate Card': employee.rate_card or '',
+                'SWP 2025': employee.swp_2025 or '',
+                'Remarks': employee.remarks or '',
+                'Created At': employee.created_at.strftime('%Y-%m-%d %H:%M:%S') if employee.created_at else '',
+                'Updated At': employee.updated_at.strftime('%Y-%m-%d %H:%M:%S') if employee.updated_at else ''
+            }
+        }
+        
+        # Get billing details
+        billing_records = employee.billing_records
+        billing_data = []
+        for billing in billing_records:
+            billing_data.append({
+                'Billing Month': billing.billing_month,
+                'Billing Year': billing.billing_year,
+                'Billing Rate': billing.billing_rate or 0,
+                'Currency': billing.currency or 'USD',
+                'Project Name': billing.project_name or '',
+                'Client Name': billing.client_name or '',
+                'Billable Hours': billing.billable_hours or 0,
+                'Total Amount': billing.total_amount or 0,
+                'Billing Status': billing.billing_status or '',
+                'Created At': billing.created_at.strftime('%Y-%m-%d %H:%M:%S') if billing.created_at else ''
+            })
+        
+        # Get feedback records
+        feedback_received = employee.feedback_received
+        feedback_data = []
+        for feedback in feedback_received:
+            manager = Employee.query.get(feedback.manager_id)
+            feedback_data.append({
+                'Feedback Type': feedback.feedback_type or '',
+                'Period Year': feedback.period_year or '',
+                'Period Month': feedback.period_month or '',
+                'Period Quarter': feedback.period_quarter or '',
+                'Performance Rating': feedback.performance_rating or '',
+                'Goals Achieved': feedback.goals_achieved or '',
+                'Areas of Improvement': feedback.areas_of_improvement or '',
+                'Strengths': feedback.strengths or '',
+                'Comments': feedback.comments or '',
+                'Manager Name': manager.full_name if manager else '',
+                'Feedback Date': feedback.created_at.strftime('%Y-%m-%d %H:%M:%S') if feedback.created_at else ''
+            })
+        
+        # Create Excel file
+        from io import BytesIO
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            # Employee Information Sheet
+            emp_df = pd.DataFrame([employee_data['Employee Information']])
+            emp_df.to_excel(writer, sheet_name='Employee_Details', index=False)
+            
+            # Billing Details Sheet
+            if billing_data:
+                billing_df = pd.DataFrame(billing_data)
+                billing_df.to_excel(writer, sheet_name='Billing_Details', index=False)
+            else:
+                # Create empty sheet with headers
+                empty_billing = pd.DataFrame(columns=[
+                    'Billing Month', 'Billing Year', 'Billing Rate', 'Currency',
+                    'Project Name', 'Client Name', 'Billable Hours', 'Total Amount',
+                    'Billing Status', 'Created At'
+                ])
+                empty_billing.to_excel(writer, sheet_name='Billing_Details', index=False)
+            
+            # Feedback Details Sheet
+            if feedback_data:
+                feedback_df = pd.DataFrame(feedback_data)
+                feedback_df.to_excel(writer, sheet_name='Feedback_Details', index=False)
+            else:
+                # Create empty sheet with headers
+                empty_feedback = pd.DataFrame(columns=[
+                    'Feedback Type', 'Period Year', 'Period Month', 'Period Quarter',
+                    'Performance Rating', 'Goals Achieved', 'Areas of Improvement',
+                    'Strengths', 'Comments', 'Manager Name', 'Feedback Date'
+                ])
+                empty_feedback.to_excel(writer, sheet_name='Feedback_Details', index=False)
+        
+        output.seek(0)
+        
+        # Generate filename
+        safe_name = "".join(c for c in employee.full_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        filename = f"{safe_name}_Employee_Export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        flash(f'Error exporting employee data: {str(e)}', 'error')
+        return redirect(url_for('export_employees'))
 @app.route('/download_template')
 @login_required
 def download_template():

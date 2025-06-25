@@ -322,15 +322,13 @@
                 </a>
             </div>
 
-            {% if current_user.is_manager %}
             <div class="nav-item">
-                <a href="{{ url_for('import_excel') }}" 
-                   class="nav-link {% if request.endpoint == 'import_excel' %}active{% endif %}">
-                    <i class="fas fa-file-excel"></i>
-                    Import Excel
+                <a href="{{ url_for('export_employees') }}" 
+                   class="nav-link {% if request.endpoint == 'export_employees' %}active{% endif %}">
+                    <i class="fas fa-file-export"></i>
+                    Export Employees
                 </a>
             </div>
-            {% endif %}
         </nav>
 
         <div class="sidebar-footer">

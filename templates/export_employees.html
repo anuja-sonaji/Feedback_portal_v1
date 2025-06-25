@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Export Employee Details - Employee Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-file-export me-2"></i>Export Employee Details
+        </h2>
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>Employee List
+                        {% if current_user.is_manager %}
+                            <span class="badge bg-primary ms-2">{{ employees|length }} Team Members</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if employees %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Employee Name</th>
+                                        <th>Employee ID</th>
+                                        <th>Role</th>
+                                        <th>Team</th>
+                                        <th>Location</th>
+                                        <th>Employment Type</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for employee in employees %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle me-2">
+                                                    {{ employee.full_name[:2].upper() if employee.full_name else 'UN' }}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ employee.full_name or 'Unknown' }}</strong>
+                                                    {% if employee.is_manager %}
+                                                        <span class="badge bg-warning text-dark ms-1">Manager</span>
+                                                    {% endif %}
+                                                    {% if employee.id == current_user.id %}
+                                                        <span class="badge bg-info ms-1">You</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ employee.system_id or employee.bensl_id or 'N/A' }}</span>
+                                        </td>
+                                        <td>{{ employee.role or 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ employee.team or 'No Team' }}</span>
+                                        </td>
+                                        <td>{{ employee.location or 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if employee.employment_type == 'Permanent' else 'secondary' }}">
+                                                {{ employee.employment_type or 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if employee.employee_status == 'Active' else 'danger' }}">
+                                                {{ employee.employee_status or 'Active' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-success" 
+                                                    onclick="exportEmployee({{ employee.id }}, '{{ employee.full_name }}')"
+                                                    title="Export {{ employee.full_name }}'s complete data">
+                                                <i class="fas fa-file-excel me-1"></i>Export
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Employees Found</h4>
+                            <p class="text-muted">
+                                {% if current_user.is_manager %}
+                                    You don't have any team members to export.
+                                {% else %}
+                                    No employee data available for export.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Information Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Export Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-file-alt text-primary me-2"></i>Employee Details</h6>
+                            <ul class="list-unstyled text-muted">
+                                <li>• Personal information</li>
+                                <li>• Employment details</li>
+                                <li>• Role and team information</li>
+                                <li>• Contact details</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-dollar-sign text-success me-2"></i>Billing Information</h6>
+                            <ul class="list-unstyled text-muted">
+                                <li>• Billing rates and rate cards</li>
+                                <li>• Project assignments</li>
+                                <li>• Monthly billing records</li>
+                                <li>• SWP 2025 data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-comments text-info me-2"></i>Feedback Records</h6>
+                            <ul class="list-unstyled text-muted">
+                                <li>• Performance ratings</li>
+                                <li>• Goals and achievements</li>
+                                <li>• Areas of improvement</li>
+                                <li>• Manager comments</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Note:</strong> Each export creates a comprehensive Excel file with separate sheets for Employee Details, Billing Information, and Feedback Records.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.btn-outline-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+</style>
+
+<script>
+function exportEmployee(employeeId, employeeName) {
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Exporting...';
+    button.disabled = true;
+    
+    // Create a temporary link to download the file
+    const link = document.createElement('a');
+    link.href = `/export_employee/${employeeId}`;
+    link.download = `${employeeName}_export.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Reset button after a delay
+    setTimeout(() => {
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    }, 2000);
+    
+    // Show success message
+    setTimeout(() => {
+        showNotification(`Successfully exported ${employeeName}'s data`, 'success');
+    }, 500);
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

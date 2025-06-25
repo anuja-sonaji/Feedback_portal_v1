@@ -18,6 +18,13 @@ A comprehensive Flask web application for managing employee information, feedbac
 - Billing and rate management
 
 ## Recent Changes
+- **2025-01-25**: Changed Import Excel to Export Employee Details functionality
+  - Converted import functionality to individual employee export system
+  - Managers can export complete data for all team members
+  - Employees can export their own comprehensive data only
+  - Each export includes employee details, billing information, and feedback records
+  - Excel files generated with separate sheets for different data types
+  - Added export button for each employee with download functionality
 - **2025-01-25**: Comprehensive documentation update
   - Created detailed README.md with full feature documentation
   - Added installation guide for Visual Studio Code development
