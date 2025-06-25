@@ -23,6 +23,10 @@ A comprehensive Flask web application for managing employee information, feedbac
   - Installed all Python dependencies via package manager
   - Initialized database tables
   - Verified application functionality
+  - Updated billing page with custom columns: Full_Name, Employment_Type, Manager_Name, Manager_ID, BillingRate, Rate_Card, SWP_2025
+  - Configured billing data to pull from imported Excel sheet
+  - Set Rate_Card to default "L4" and SWP_2025 to "2025" for all employees
+  - Fixed billing view to show only reportees' data, excluding manager's own billing details
   - Updated billing page with custom columns as requested:
     * Full_Name, Employment_Type, Manager_Name, Manager_ID from Excel data
     * BillingRate from Excel data
