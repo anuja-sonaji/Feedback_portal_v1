@@ -18,6 +18,12 @@ A comprehensive Flask web application for managing employee information, feedbac
 - Billing and rate management
 
 ## Recent Changes
+- **2025-01-25**: Comprehensive documentation update
+  - Created detailed README.md with full feature documentation
+  - Added installation guide for Visual Studio Code development
+  - Included database schema documentation and setup instructions
+  - Added troubleshooting guide and VS Code configuration
+  - Created requirements.txt and environment configuration files
 - **2025-01-25**: Migrated from Replit Agent to Replit environment
   - Created PostgreSQL database with environment variables
   - Installed all Python dependencies via package manager
