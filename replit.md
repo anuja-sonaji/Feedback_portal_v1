@@ -27,6 +27,10 @@ A comprehensive Flask web application for managing employee information, feedbac
   - Configured billing data to pull from imported Excel sheet
   - Set Rate_Card to default "L4" and SWP_2025 to "2025" for all employees
   - Fixed billing view to show only reportees' data, excluding manager's own billing details
+  - Added edit functionality for managers to update billing rates, rate cards, and SWP values
+  - Redesigned organization hierarchy with modern card-based layout and connecting lines
+  - Enhanced hierarchy with employee avatars, detailed information cards, and manager statistics
+  - Implemented smooth animations and responsive design for better user experience
   - Updated billing page with custom columns as requested:
     * Full_Name, Employment_Type, Manager_Name, Manager_ID from Excel data
     * BillingRate from Excel data
