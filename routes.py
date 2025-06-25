@@ -697,11 +697,46 @@ def billing():
             'manager_name': employee.manager_name or '',
             'manager_id': employee.manager_bensl_id or employee.manager_id or '',
             'billing_rate': employee.billing_rate or 0.0,
-            'rate_card': 'L4',  # Default L4 for all as requested
-            'swp_2025': '2025'  # Default 2025 for all as requested
+            'rate_card': employee.rate_card or 'L4',  # Default L4 for all as requested
+            'swp_2025': employee.swp_2025 or '2025'  # Default 2025 for all as requested
         })
     
     return render_template('billing.html', billing_data=billing_data)
+
+@app.route('/update_billing', methods=['POST'])
+@login_required
+def update_billing():
+    if not current_user.is_manager:
+        return jsonify({'success': False, 'error': 'Access denied. Only managers can update billing details.'})
+    
+    try:
+        data = request.get_json()
+        employee_name = data.get('employee_name')
+        billing_rate = data.get('billing_rate')
+        rate_card = data.get('rate_card')
+        swp_2025 = data.get('swp_2025')
+        
+        # Find the employee
+        employee = Employee.query.filter_by(full_name=employee_name).first()
+        if not employee:
+            return jsonify({'success': False, 'error': 'Employee not found'})
+        
+        # Check if current user can manage this employee
+        if not current_user.can_manage(employee):
+            return jsonify({'success': False, 'error': 'Access denied. You can only update employees under your management.'})
+        
+        # Update billing details
+        employee.billing_rate = billing_rate
+        employee.rate_card = rate_card
+        employee.swp_2025 = swp_2025
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Billing details updated successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/hierarchy')
 @login_required

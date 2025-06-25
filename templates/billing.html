@@ -173,13 +173,15 @@
                         <th>Billing Rate</th>
                         <th>Rate Card</th>
                         <th>SWP 2025</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for record in billing_data %}
                     <tr data-employee="{{ record.full_name }}" 
                         data-employment-type="{{ record.employment_type }}" 
-                        data-manager="{{ record.manager_name }}">
+                        data-manager="{{ record.manager_name }}"
+                        id="row-{{ loop.index }}">
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
@@ -199,15 +201,42 @@
                         <td>
                             <span class="text-muted">{{ record.manager_id or '-' }}</span>
                         </td>
-                        <td>
-                            <span class="fw-bold text-success">${{ "%.2f"|format(record.billing_rate) }}</span>
+                        <td class="billing-rate-cell">
+                            <span class="fw-bold text-success billing-rate-display">${{ "%.2f"|format(record.billing_rate) }}</span>
                             <small class="text-muted d-block">/hour</small>
+                            <input type="number" class="form-control form-control-sm billing-rate-input d-none" 
+                                   value="{{ record.billing_rate }}" step="0.01" min="0">
+                        </td>
+                        <td class="rate-card-cell">
+                            <span class="badge bg-warning text-dark rate-card-display">{{ record.rate_card }}</span>
+                            <select class="form-select form-select-sm rate-card-input d-none">
+                                <option value="L1" {{ 'selected' if record.rate_card == 'L1' else '' }}>L1</option>
+                                <option value="L2" {{ 'selected' if record.rate_card == 'L2' else '' }}>L2</option>
+                                <option value="L3" {{ 'selected' if record.rate_card == 'L3' else '' }}>L3</option>
+                                <option value="L4" {{ 'selected' if record.rate_card == 'L4' else '' }}>L4</option>
+                                <option value="L5" {{ 'selected' if record.rate_card == 'L5' else '' }}>L5</option>
+                            </select>
+                        </td>
+                        <td class="swp-cell">
+                            <span class="badge bg-primary swp-display">{{ record.swp_2025 }}</span>
+                            <input type="text" class="form-control form-control-sm swp-input d-none" 
+                                   value="{{ record.swp_2025 }}">
                         </td>
                         <td>
-                            <span class="badge bg-warning text-dark">{{ record.rate_card }}</span>
-                        </td>
-                        <td>
-                            <span class="badge bg-primary">{{ record.swp_2025 }}</span>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                                        onclick="editBilling({{ loop.index }})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success save-btn d-none" 
+                                        onclick="saveBilling({{ loop.index }}, '{{ record.full_name }}')" title="Save">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary cancel-btn d-none" 
+                                        onclick="cancelEdit({{ loop.index }})" title="Cancel">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -327,6 +356,116 @@
         console.log(`Filtered: ${count} employees, $${totalRate.toFixed(2)} total billing rate`);
     }
     
+    function editBilling(rowIndex) {
+        const row = document.getElementById(`row-${rowIndex}`);
+        
+        // Hide display elements and show input elements
+        row.querySelector('.billing-rate-display').classList.add('d-none');
+        row.querySelector('.billing-rate-input').classList.remove('d-none');
+        
+        row.querySelector('.rate-card-display').classList.add('d-none');
+        row.querySelector('.rate-card-input').classList.remove('d-none');
+        
+        row.querySelector('.swp-display').classList.add('d-none');
+        row.querySelector('.swp-input').classList.remove('d-none');
+        
+        // Toggle buttons
+        row.querySelector('.edit-btn').classList.add('d-none');
+        row.querySelector('.save-btn').classList.remove('d-none');
+        row.querySelector('.cancel-btn').classList.remove('d-none');
+    }
+    
+    function cancelEdit(rowIndex) {
+        const row = document.getElementById(`row-${rowIndex}`);
+        
+        // Show display elements and hide input elements
+        row.querySelector('.billing-rate-display').classList.remove('d-none');
+        row.querySelector('.billing-rate-input').classList.add('d-none');
+        
+        row.querySelector('.rate-card-display').classList.remove('d-none');
+        row.querySelector('.rate-card-input').classList.add('d-none');
+        
+        row.querySelector('.swp-display').classList.remove('d-none');
+        row.querySelector('.swp-input').classList.add('d-none');
+        
+        // Toggle buttons
+        row.querySelector('.edit-btn').classList.remove('d-none');
+        row.querySelector('.save-btn').classList.add('d-none');
+        row.querySelector('.cancel-btn').classList.add('d-none');
+        
+        // Reset input values to original
+        const billingRateDisplay = row.querySelector('.billing-rate-display').textContent.replace('$', '');
+        const rateCardDisplay = row.querySelector('.rate-card-display').textContent;
+        const swpDisplay = row.querySelector('.swp-display').textContent;
+        
+        row.querySelector('.billing-rate-input').value = billingRateDisplay;
+        row.querySelector('.rate-card-input').value = rateCardDisplay;
+        row.querySelector('.swp-input').value = swpDisplay;
+    }
+    
+    function saveBilling(rowIndex, employeeName) {
+        const row = document.getElementById(`row-${rowIndex}`);
+        
+        const billingRate = row.querySelector('.billing-rate-input').value;
+        const rateCard = row.querySelector('.rate-card-input').value;
+        const swp2025 = row.querySelector('.swp-input').value;
+        
+        // Validate inputs
+        if (!billingRate || billingRate < 0) {
+            alert('Please enter a valid billing rate');
+            return;
+        }
+        
+        if (!rateCard) {
+            alert('Please select a rate card');
+            return;
+        }
+        
+        if (!swp2025) {
+            alert('Please enter SWP 2025 value');
+            return;
+        }
+        
+        // Send update request to server
+        fetch('/update_billing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                employee_name: employeeName,
+                billing_rate: parseFloat(billingRate),
+                rate_card: rateCard,
+                swp_2025: swp2025
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update display values
+                row.querySelector('.billing-rate-display').innerHTML = `$${parseFloat(billingRate).toFixed(2)}<small class="text-muted d-block">/hour</small>`;
+                row.querySelector('.rate-card-display').textContent = rateCard;
+                row.querySelector('.swp-display').textContent = swp2025;
+                
+                // Update badge colors
+                row.querySelector('.rate-card-display').className = 'badge bg-warning text-dark rate-card-display';
+                row.querySelector('.swp-display').className = 'badge bg-primary swp-display';
+                
+                // Hide inputs and show displays
+                cancelEdit(rowIndex);
+                
+                // Show success message
+                alert('Billing details updated successfully!');
+            } else {
+                alert('Error updating billing details: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating billing details. Please try again.');
+        });
+    }
+
     function viewBillingDetails(billingId) {
         // Show billing details in modal
         const modal = new bootstrap.Modal(document.getElementById('billingModal'));

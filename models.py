@@ -38,6 +38,7 @@ class Employee(UserMixin, db.Model):
     location = db.Column(db.String(100))
     billing_rate = db.Column(db.Float)
     rate_card = db.Column(db.String(100))
+    swp_2025 = db.Column(db.String(20), default='2025')
     remarks = db.Column(db.Text)
     
     # Authentication (keeping minimal for login functionality)
